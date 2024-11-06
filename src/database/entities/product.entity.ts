@@ -1,4 +1,4 @@
-import { Column, Entity, Index, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import Category from './category.entity';
 import Provider from './provider.entity';
 import { InventoryEntry } from './inventory-entry.entity';
@@ -27,6 +27,17 @@ export default class Product{
   category: Category;
 
   @ManyToMany(() => Provider, (provider) => provider.products)
+  @JoinTable({
+    name: 'product_providers',
+    joinColumn: {
+      name: 'product_id',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'provider_id',
+      referencedColumnName: 'id',
+    },
+  })
   providers: Provider[];
 
   @OneToMany(() => InventoryEntry, (entry) => entry.product)

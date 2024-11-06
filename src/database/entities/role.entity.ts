@@ -1,9 +1,9 @@
-import { Column, Entity, Index, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import Permission from './permission.entity';
 import User from './user.entity';
 
 @Entity({ name: 'roles' })
-export default class Role{
+export default class  Role{
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -21,5 +21,16 @@ export default class Role{
   isActive: boolean;
 
   @ManyToMany(() => Permission, (permission) => permission.roles)
+  @JoinTable({
+    name: 'role_permissions',
+    joinColumn: {
+      name: 'role_id',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'permission_id',
+      referencedColumnName: 'id',
+    },
+  })
   permissions: Permission[];
 }

@@ -1,4 +1,4 @@
-import { Column, Entity, Index, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import Province from './province.entity';
 import Municipality from './municipality.entity';
 import { InventoryEntry } from './inventory-entry.entity';
@@ -18,9 +18,31 @@ export default class Zone{
   description?: string
 
   @ManyToMany(() => Province, (province) => province.zones)
+  @JoinTable({
+    name: 'zone_provinces',
+    joinColumn: {
+      name: 'zone_id',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'province_id',
+      referencedColumnName: 'id',
+    },
+  })
   provinces: Province[];
 
   @ManyToMany(() => Municipality, (municipality) => municipality.zones)
+  @JoinTable({
+    name: 'zone_municipalities',
+    joinColumn: {
+      name: 'zone_id',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'municipality_id',
+      referencedColumnName: 'id',
+    },
+  })
   municipalities: Municipality[];
 
   @OneToMany(() => InventoryEntry, (entry) => entry.zone)

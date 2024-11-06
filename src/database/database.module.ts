@@ -31,6 +31,7 @@ import ProductComboItem from './entities/product-combo-item.entity';
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_DATABASE'),
         synchronize: true,
+        logging: true,
         entities: [
           User,
           RefreshToken,

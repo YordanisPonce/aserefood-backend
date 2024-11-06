@@ -1,4 +1,4 @@
-import { Column, Entity, Index, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import Municipality from './municipality.entity';
 import Zone from './zone.entity';
 
