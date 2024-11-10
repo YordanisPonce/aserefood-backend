@@ -15,6 +15,11 @@ import ConfirmationToken from '../entities/confirmation-token.entity';
 import { InventoryEntry } from '../entities/inventory-entry.entity';
 import ProductCombo from '../entities/product_combo.entity';
 import ProductComboItem from '../entities/product-combo-item.entity';
+import Department from '../entities/department.entity';
+import { DeliveryMethod } from '../entities/delivery-method.entity';
+import Promotion from '../entities/promotion.entity';
+import Currency from '../entities/currency.entity';
+import Language from '../entities/language.entity';
 
 @Injectable()
 export default class PgService {
@@ -34,6 +39,11 @@ export default class PgService {
     @InjectRepository(InventoryEntry) public readonly inventoryEntries: Repository<InventoryEntry>,
     @InjectRepository(ProductCombo) public readonly productCombos: Repository<ProductCombo>,
     @InjectRepository(ProductComboItem) public readonly productComboItems: Repository<ProductComboItem>,
+    @InjectRepository(Department) public readonly departments: Repository<Department>,
+    @InjectRepository(DeliveryMethod) public readonly deliveryMethods: Repository<DeliveryMethod>,
+    @InjectRepository(Promotion) public readonly promotions: Repository<Promotion>,
+    @InjectRepository(Currency) public readonly currencies: Repository<Currency>,
+    @InjectRepository(Language) public readonly languages: Repository<Language>,
   ) {
   }
 }

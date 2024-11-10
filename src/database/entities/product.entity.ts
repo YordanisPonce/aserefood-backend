@@ -4,6 +4,8 @@ import Provider from './provider.entity';
 import { InventoryEntry } from './inventory-entry.entity';
 import ProductCombo from './product_combo.entity';
 import ProductComboItem from './product-combo-item.entity';
+import Promotion from './promotion.entity';
+import Role from './role.entity';
 
 @Entity({ name: 'products' })
 export default class Product{
@@ -46,4 +48,6 @@ export default class Product{
   @OneToMany(() => ProductComboItem, (productComboItem) => productComboItem.product)
   productComboItems: ProductComboItem[];
 
+  @ManyToMany(() => Promotion, (promotion) => promotion.products)
+  promotions: Promotion[];
 }

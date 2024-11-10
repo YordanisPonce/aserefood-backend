@@ -1,7 +1,8 @@
-import { Column, Entity, Index, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import Zone from './zone.entity';
 import Product from './product.entity';
 import ProductComboItem from './product-combo-item.entity';
+import Promotion from './promotion.entity';
 
 @Entity({ name: 'product_combos' })
 export default class ProductCombo {
@@ -28,11 +29,14 @@ export default class ProductCombo {
   referencePrice: number;
 
   @Column('boolean')
-  active: boolean;
+  isActive: boolean;
 
   @ManyToOne(() => Zone, (zone) => zone.productCombos, { onDelete: 'CASCADE' })
   zone: Zone;
 
   @OneToMany(() => ProductComboItem, (productComboItem) => productComboItem.productCombo)
   productComboItems: ProductComboItem[];
+
+  @ManyToMany(() => Promotion, (promotion) => promotion.productCombos)
+  promotions: Promotion[];
 }

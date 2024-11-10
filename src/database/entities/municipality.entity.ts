@@ -16,4 +16,5 @@ export default class Municipality {
 
   @ManyToMany(() => Zone, (zone) => zone.municipalities)
   zones: Zone[]
+
 }

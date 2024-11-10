@@ -17,6 +17,11 @@ import { MunicipalityModule } from './municipality/municipality.module';
 import { ProviderModule } from './providers/provider.module';
 import MailModule from './mail/mail.module';
 import { InventoryEntriesModule } from './inventory-entries/product-inventories.module';
+import { DepartmentsModule } from './departments/departments.module';
+import { DeliveryMethodsModule } from './delivery-methods/delivery-methods.module';
+import { PromotionsModule } from './promotions/promotions.module';
+import { CurrenciesModule } from './currencies/currencies.module';
+import { LanguagesModule } from './languages/languages.module';
 
 @Module({
   imports: [
@@ -45,6 +50,11 @@ import { InventoryEntriesModule } from './inventory-entries/product-inventories.
     MunicipalityModule,
     ProviderModule,
     MailModule,
+    DepartmentsModule,
+    DeliveryMethodsModule,
+    PromotionsModule,
+    CurrenciesModule,
+    LanguagesModule,
   ],
   controllers: [],
   providers: [],

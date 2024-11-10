@@ -1,5 +1,6 @@
-import { Column, Entity, Index, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import Product from './product.entity';
+import Department from './department.entity';
 
 @Entity({ name: 'categories' })
 export default class Category{
@@ -15,4 +16,7 @@ export default class Category{
 
   @OneToMany(() => Product, (product) => product.category)
   products: Product[];
+
+  @ManyToMany(() => Department, (department) => department.categories)
+  departments: Department[];
 }

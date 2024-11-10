@@ -7,12 +7,12 @@ export default class ProductComboItem{
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => ProductCombo, productCombo => productCombo.productComboItems)
+  @ManyToOne(() => ProductCombo, productCombo => productCombo.productComboItems, {onDelete: 'CASCADE'})
   productCombo: ProductCombo;
 
   @Column('int')
   amount: number;
 
-  @ManyToOne(() => Product, (product) => product.productComboItems)
+  @ManyToOne(() => Product, (product) => product.productComboItems, {onDelete: 'CASCADE'})
   product: Product;
 }

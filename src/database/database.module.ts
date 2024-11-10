@@ -17,6 +17,11 @@ import ConfirmationToken from './entities/confirmation-token.entity';
 import { InventoryEntry } from './entities/inventory-entry.entity';
 import ProductCombo from './entities/product_combo.entity';
 import ProductComboItem from './entities/product-combo-item.entity';
+import Department from './entities/department.entity';
+import { DeliveryMethod } from './entities/delivery-method.entity';
+import Promotion from './entities/promotion.entity';
+import Currency from './entities/currency.entity';
+import Language from './entities/language.entity';
 
 @Module({
   imports: [
@@ -47,6 +52,11 @@ import ProductComboItem from './entities/product-combo-item.entity';
           InventoryEntry,
           ProductCombo,
           ProductComboItem,
+          Department,
+          DeliveryMethod,
+          Promotion,
+          Currency,
+          Language,
         ]
       })
     }),
@@ -65,6 +75,11 @@ import ProductComboItem from './entities/product-combo-item.entity';
       InventoryEntry,
       ProductCombo,
       ProductComboItem,
+      Department,
+      DeliveryMethod,
+      Promotion,
+      Currency,
+      Language,
     ])
   ],
   exports: [PgService],
