@@ -35,10 +35,10 @@ export default class Promotion {
   isActive: boolean;
 
   @Column({ type: 'timestamp' })
-  startDate?: Date;
+  startDate: Date;
 
   @Column({ type: 'timestamp' })
-  endDate?: Date;
+  endDate: Date;
 
   @ManyToMany(() => Product, (product) => product.promotions)
   @JoinTable({

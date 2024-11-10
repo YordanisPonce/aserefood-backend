@@ -20,6 +20,11 @@ import { DeliveryMethod } from '../entities/delivery-method.entity';
 import Promotion from '../entities/promotion.entity';
 import Currency from '../entities/currency.entity';
 import Language from '../entities/language.entity';
+import ContactInfo from '../entities/contact-info.entity';
+import ShoppingCart from '../entities/shopping-cart.entity';
+import TransferPayment from '../entities/transferPayment.entity';
+import OnlinePayment from '../entities/online-payment.entity';
+import Order from '../entities/order.entity';
 
 @Injectable()
 export default class PgService {
@@ -44,6 +49,11 @@ export default class PgService {
     @InjectRepository(Promotion) public readonly promotions: Repository<Promotion>,
     @InjectRepository(Currency) public readonly currencies: Repository<Currency>,
     @InjectRepository(Language) public readonly languages: Repository<Language>,
+    @InjectRepository(ContactInfo) public readonly contactInfos: Repository<ContactInfo>,
+    @InjectRepository(ShoppingCart) public readonly shoppingCarts: Repository<ShoppingCart>,
+    @InjectRepository(TransferPayment) public readonly transferPayments: Repository<TransferPayment>,
+    @InjectRepository(OnlinePayment) public readonly onlinePayments: Repository<OnlinePayment>,
+    @InjectRepository(Order) public readonly orders: Repository<Order>,
   ) {
   }
 }

@@ -2,11 +2,15 @@ import {
   BeforeInsert,
   BeforeUpdate,
   Column,
-  Entity, Index, ManyToOne,
+  Entity, Index, JoinColumn, ManyToOne, OneToMany, OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import Role from './role.entity';
+import ContactInfo from './contact-info.entity';
+import ShoppingCart from './shopping-cart.entity';
+import ConfirmationToken from './confirmation-token.entity';
+import Order from './order.entity';
 
 @Entity({ name: 'users' })
 export default class User {
@@ -29,6 +33,9 @@ export default class User {
   @Column('character varying', { length: 255 })
   phoneNumber: string;
 
+  @Column('character varying', { length: 255, nullable: true })
+  address?: string;
+
   @Column()
   password: string;
 
@@ -40,6 +47,18 @@ export default class User {
 
   @Column('boolean')
   isConfirmed: boolean;
+
+  @OneToMany(() => ContactInfo, (contactInfo) => contactInfo.municipality)
+  contactInfos: ContactInfo[];
+
+  @OneToOne(() => ShoppingCart, shoppingCart => shoppingCart.user, { nullable: true, onDelete: 'SET NULL' })
+  shoppingCart?: ShoppingCart;
+
+  @OneToOne(() => ConfirmationToken, confirmationToken => confirmationToken.user, { nullable: true, onDelete: 'SET NULL' })
+  confirmationToken?: ConfirmationToken;
+
+  @OneToMany(() => Order, (order) => order.user)
+  orders: Order[];
 
   @BeforeInsert()
   @BeforeUpdate()

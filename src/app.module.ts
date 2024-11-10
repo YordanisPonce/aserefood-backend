@@ -22,6 +22,10 @@ import { DeliveryMethodsModule } from './delivery-methods/delivery-methods.modul
 import { PromotionsModule } from './promotions/promotions.module';
 import { CurrenciesModule } from './currencies/currencies.module';
 import { LanguagesModule } from './languages/languages.module';
+import { ContactInfosModule } from './contact-infos/contact-infos.module';
+import { ShoppingCartsModule } from './shopping-carts/shopping-carts.module';
+import { OrdersModule } from './orders/orders.module';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -55,6 +59,10 @@ import { LanguagesModule } from './languages/languages.module';
     PromotionsModule,
     CurrenciesModule,
     LanguagesModule,
+    ContactInfosModule,
+    ShoppingCartsModule,
+    OrdersModule,
+    PaymentsModule,
   ],
   controllers: [],
   providers: [],

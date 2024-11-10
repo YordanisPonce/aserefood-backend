@@ -3,7 +3,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import User from './entities/user.entity';
 import PgService from './services/pg.service';
-import RefreshTokens from './entities/refresh-token.entity';
 import RefreshToken from './entities/refresh-token.entity';
 import Permission from './entities/permission.entity';
 import Role from './entities/role.entity';
@@ -22,6 +21,12 @@ import { DeliveryMethod } from './entities/delivery-method.entity';
 import Promotion from './entities/promotion.entity';
 import Currency from './entities/currency.entity';
 import Language from './entities/language.entity';
+import ContactInfo from './entities/contact-info.entity';
+import ShoppingCart from './entities/shopping-cart.entity';
+import ShoppingCartItem from './entities/shopping-cart-item.entity';
+import OnlinePayment from './entities/online-payment.entity';
+import TransferPayment from './entities/transferPayment.entity';
+import Order from './entities/order.entity';
 
 @Module({
   imports: [
@@ -57,6 +62,12 @@ import Language from './entities/language.entity';
           Promotion,
           Currency,
           Language,
+          ContactInfo,
+          ShoppingCart,
+          ShoppingCartItem,
+          OnlinePayment,
+          TransferPayment,
+          Order,
         ]
       })
     }),
@@ -80,6 +91,12 @@ import Language from './entities/language.entity';
       Promotion,
       Currency,
       Language,
+      ContactInfo,
+      ShoppingCart,
+      ShoppingCartItem,
+      OnlinePayment,
+      TransferPayment,
+      Order,
     ])
   ],
   exports: [PgService],
