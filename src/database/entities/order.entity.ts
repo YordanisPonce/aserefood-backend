@@ -1,9 +1,11 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import TransferPayment from './transferPayment.entity';
 import OnlinePayment from './online-payment.entity';
 import User from './user.entity';
 import ContactInfo from './contact-info.entity';
 import { OrderStatus } from './constants';
+import ShoppingCartItem from './shopping-cart-item.entity';
+import OrderItem from './order-item.entity';
 
 @Entity({ name: 'orders' })
 export default class Order{
@@ -32,4 +34,7 @@ export default class Order{
 
   @Column({ type: 'timestamp' })
   createdDate: Date;
+
+  @OneToMany(() => OrderItem, (orderItem) => orderItem.order)
+  orderItems: OrderItem[];
 }

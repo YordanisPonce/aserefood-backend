@@ -3,7 +3,7 @@ import Province from './province.entity';
 import Municipality from './municipality.entity';
 import { InventoryEntry } from './inventory-entry.entity';
 import Provider from './provider.entity';
-import ProductCombo from './product_combo.entity';
+import ProductCombo from './product-combo.entity';
 
 @Entity({ name: 'zones' })
 export default class Zone{

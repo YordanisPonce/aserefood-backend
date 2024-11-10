@@ -13,7 +13,7 @@ import Category from '../entities/category.entity';
 import Product from '../entities/product.entity';
 import ConfirmationToken from '../entities/confirmation-token.entity';
 import { InventoryEntry } from '../entities/inventory-entry.entity';
-import ProductCombo from '../entities/product_combo.entity';
+import ProductCombo from '../entities/product-combo.entity';
 import ProductComboItem from '../entities/product-combo-item.entity';
 import Department from '../entities/department.entity';
 import { DeliveryMethod } from '../entities/delivery-method.entity';

@@ -1,7 +1,7 @@
 import { Column, Entity, Index, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { DiscountOption } from './constants';
 import Product from './product.entity';
-import ProductCombo from './product_combo.entity';
+import ProductCombo from './product-combo.entity';
 import Provider from './provider.entity';
 
 @Entity({ name: 'promotions' })

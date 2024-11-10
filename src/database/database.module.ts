@@ -14,7 +14,7 @@ import Category from './entities/category.entity';
 import Product from './entities/product.entity';
 import ConfirmationToken from './entities/confirmation-token.entity';
 import { InventoryEntry } from './entities/inventory-entry.entity';
-import ProductCombo from './entities/product_combo.entity';
+import ProductCombo from './entities/product-combo.entity';
 import ProductComboItem from './entities/product-combo-item.entity';
 import Department from './entities/department.entity';
 import { DeliveryMethod } from './entities/delivery-method.entity';
@@ -27,6 +27,7 @@ import ShoppingCartItem from './entities/shopping-cart-item.entity';
 import OnlinePayment from './entities/online-payment.entity';
 import TransferPayment from './entities/transferPayment.entity';
 import Order from './entities/order.entity';
+import OrderItem from './entities/order-item.entity';
 
 @Module({
   imports: [
@@ -68,6 +69,7 @@ import Order from './entities/order.entity';
           OnlinePayment,
           TransferPayment,
           Order,
+          OrderItem,
         ]
       })
     }),
@@ -97,6 +99,7 @@ import Order from './entities/order.entity';
       OnlinePayment,
       TransferPayment,
       Order,
+      OrderItem,
     ])
   ],
   exports: [PgService],

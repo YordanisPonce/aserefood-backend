@@ -1,5 +1,5 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import ProductCombo from './product_combo.entity';
+import ProductCombo from './product-combo.entity';
 import Product from './product.entity';
 
 @Entity({ name: 'product_combo_items' })
