@@ -1,10 +1,10 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import ShoppingCart from './shopping-cart.entity';
+import CartProduct from './cart-product.entity';
 import Product from './product.entity';
 import Order from './order.entity';
 
-@Entity({ name: 'order_items' })
-export default class OrderItem{
+@Entity({ name: 'order_products' })
+export default class OrderProducts {
   @PrimaryGeneratedColumn()
   id: number;
 

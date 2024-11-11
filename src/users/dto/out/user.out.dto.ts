@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Role } from '../../../auth/decorators/roles.decorator';
 
 export default class UserOutDto{
   @ApiProperty()
@@ -14,7 +15,7 @@ export default class UserOutDto{
   name: string;
 
   @ApiProperty()
-  role: string;
+  role: Role;
 
   @ApiProperty()
   isActive: boolean;

@@ -7,17 +7,14 @@ import AuthModule from './auth/auth.module';
 import DatabaseModule from './database/database.module';
 import UsersModule from './users/users.module';
 import { CategoriesModule } from './categories/categories.module';
-import { PermissionsModule } from './permissions/permissions.module';
 import { ProductCombosModule } from './product-combos/product-combos.module';
 import { ProductModule } from './products/product.module';
-import { RolesModule } from './roles/roles.module';
 import { ZonesModule } from './zones/zones.module';
 import { ProvinceModule } from './province/province.module';
 import { MunicipalityModule } from './municipality/municipality.module';
 import { ProviderModule } from './providers/provider.module';
 import MailModule from './mail/mail.module';
 import { InventoryEntriesModule } from './inventory-entries/product-inventories.module';
-import { DepartmentsModule } from './departments/departments.module';
 import { DeliveryMethodsModule } from './delivery-methods/delivery-methods.module';
 import { PromotionsModule } from './promotions/promotions.module';
 import { CurrenciesModule } from './currencies/currencies.module';
@@ -43,18 +40,15 @@ import { PaymentsModule } from './payments/payments.module';
     AuthModule,
     CategoriesModule,
     DatabaseModule,
-    PermissionsModule,
     ProductCombosModule,
     InventoryEntriesModule,
     ProductModule,
-    RolesModule,
     UsersModule,
     ZonesModule,
     ProvinceModule,
     MunicipalityModule,
     ProviderModule,
     MailModule,
-    DepartmentsModule,
     DeliveryMethodsModule,
     PromotionsModule,
     CurrenciesModule,

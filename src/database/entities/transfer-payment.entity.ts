@@ -6,9 +6,6 @@ export default class TransferPayment {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column('decimal', { precision: 10, scale: 2, nullable: true })
-  totalAmount?: number;
-
   @Column('character varying', { length: 255, nullable: true })
   referencePayment?: string;
 

@@ -13,7 +13,6 @@ import UserUpdateInDto from '../dto/in/user-update.in.dto';
 import UserSearchInDto from '../dto/in/user.search.in.dto';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
 import { ConfigService } from '@nestjs/config';
-import Role from '../../database/entities/role.entity';
 
 @Injectable()
 export default class UsersService {
@@ -109,7 +108,7 @@ export default class UsersService {
       username: dto.username,
       email: dto.email,
       password: dto.password,
-      role: new Role(),
+      role: dto.role,
       name: dto.name,
       isActive: true,
       isConfirmed: true,
@@ -182,7 +181,7 @@ export default class UsersService {
       username: user.username,
       email: user.email,
       name: user.name,
-      role: user.role.name,
+      role: user.role,
       isActive: user.isActive,
     };
   }

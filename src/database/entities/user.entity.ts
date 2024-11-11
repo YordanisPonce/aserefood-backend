@@ -6,11 +6,11 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import Role from './role.entity';
 import ContactInfo from './contact-info.entity';
-import ShoppingCart from './shopping-cart.entity';
+import CartProduct from './cart-product.entity';
 import ConfirmationToken from './confirmation-token.entity';
 import Order from './order.entity';
+import { Role } from '../../auth/decorators/roles.decorator';
 
 @Entity({ name: 'users' })
 export default class User {
@@ -33,13 +33,13 @@ export default class User {
   @Column('character varying', { length: 255 })
   phoneNumber: string;
 
-  @Column('character varying', { length: 255, nullable: true })
-  address?: string;
-
   @Column()
   password: string;
 
-  @ManyToOne(() => Role, (role) => role.users, {onDelete: 'CASCADE' })
+  @Column({
+    type: 'enum',
+    enum: Role,
+  })
   role: Role;
 
   @Column('boolean')
@@ -51,8 +51,8 @@ export default class User {
   @OneToMany(() => ContactInfo, (contactInfo) => contactInfo.municipality)
   contactInfos: ContactInfo[];
 
-  @OneToOne(() => ShoppingCart, shoppingCart => shoppingCart.user, { nullable: true, onDelete: 'SET NULL' })
-  shoppingCart?: ShoppingCart;
+  @OneToMany(() => CartProduct, shoppingCart => shoppingCart.user)
+  shoppingCartItems: CartProduct;
 
   @OneToOne(() => ConfirmationToken, confirmationToken => confirmationToken.user, { nullable: true, onDelete: 'SET NULL' })
   confirmationToken?: ConfirmationToken;

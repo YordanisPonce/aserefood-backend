@@ -4,8 +4,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import User from './entities/user.entity';
 import PgService from './services/pg.service';
 import RefreshToken from './entities/refresh-token.entity';
-import Permission from './entities/permission.entity';
-import Role from './entities/role.entity';
 import Municipality from './entities/municipality.entity';
 import Zone from './entities/zone.entity';
 import Province from './entities/province.entity';
@@ -16,18 +14,16 @@ import ConfirmationToken from './entities/confirmation-token.entity';
 import { InventoryEntry } from './entities/inventory-entry.entity';
 import ProductCombo from './entities/product-combo.entity';
 import ProductComboItem from './entities/product-combo-item.entity';
-import Department from './entities/department.entity';
 import { DeliveryMethod } from './entities/delivery-method.entity';
 import Promotion from './entities/promotion.entity';
 import Currency from './entities/currency.entity';
 import Language from './entities/language.entity';
 import ContactInfo from './entities/contact-info.entity';
-import ShoppingCart from './entities/shopping-cart.entity';
-import ShoppingCartItem from './entities/shopping-cart-item.entity';
+import CartProduct from './entities/cart-product.entity';
 import OnlinePayment from './entities/online-payment.entity';
-import TransferPayment from './entities/transferPayment.entity';
+import TransferPayment from './entities/transfer-payment.entity';
 import Order from './entities/order.entity';
-import OrderItem from './entities/order-item.entity';
+import OrderProducts from './entities/order-product.entity';
 
 @Module({
   imports: [
@@ -46,8 +42,6 @@ import OrderItem from './entities/order-item.entity';
         entities: [
           User,
           RefreshToken,
-          Permission,
-          Role,
           Province,
           Municipality,
           Zone,
@@ -58,26 +52,22 @@ import OrderItem from './entities/order-item.entity';
           InventoryEntry,
           ProductCombo,
           ProductComboItem,
-          Department,
           DeliveryMethod,
           Promotion,
           Currency,
           Language,
           ContactInfo,
-          ShoppingCart,
-          ShoppingCartItem,
+          CartProduct,
           OnlinePayment,
           TransferPayment,
           Order,
-          OrderItem,
+          OrderProducts,
         ]
       })
     }),
     TypeOrmModule.forFeature([
       User,
       RefreshToken,
-      Permission,
-      Role,
       Province,
       Municipality,
       Zone,
@@ -88,18 +78,16 @@ import OrderItem from './entities/order-item.entity';
       InventoryEntry,
       ProductCombo,
       ProductComboItem,
-      Department,
       DeliveryMethod,
       Promotion,
       Currency,
       Language,
       ContactInfo,
-      ShoppingCart,
-      ShoppingCartItem,
+      CartProduct,
       OnlinePayment,
       TransferPayment,
       Order,
-      OrderItem,
+      OrderProducts,
     ])
   ],
   exports: [PgService],

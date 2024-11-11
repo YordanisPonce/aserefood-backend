@@ -96,7 +96,7 @@ export default class V1UsersController {
   }
 
   @Post('/me')
-  @Roles(Role.SuperAdmin, Role.User)
+  @Roles(Role.SuperAdmin, Role.Customer)
   @ApiCreatedResponse({description: "Current user", type: UserOutDto})
   @ApiNotFoundResponse({description: "Not Found"})
   @ApiBadRequestResponse({description: "Bad Request"})

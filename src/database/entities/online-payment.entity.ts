@@ -7,15 +7,6 @@ export default class OnlinePayment {
   id: number;
 
   @Column('character varying', { length: 255 })
-  cardNumber: string;
-
-  @Column('character varying', { length: 255 })
-  expirationDate: string;
-
-  @Column('character varying', { length: 255 })
-  cvv: string;
-
-  @Column('character varying', { length: 255 })
   firstName: string;
 
   @Column('character varying', { length: 255 })

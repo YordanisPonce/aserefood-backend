@@ -72,7 +72,7 @@ export default class AuthController {
   }
 
   @Post('change-password')
-  @Roles(Role.User)
+  @Roles(Role.Customer)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
   @ApiUnauthorizedResponse({ description: 'Invalid Credentials' })

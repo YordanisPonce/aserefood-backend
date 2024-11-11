@@ -2,12 +2,10 @@ import { Column, Entity, Index, JoinTable, ManyToMany, ManyToOne, OneToMany, Pri
 import Category from './category.entity';
 import Provider from './provider.entity';
 import { InventoryEntry } from './inventory-entry.entity';
-import ProductCombo from './product-combo.entity';
 import ProductComboItem from './product-combo-item.entity';
 import Promotion from './promotion.entity';
-import Role from './role.entity';
-import ShoppingCartItem from './shopping-cart-item.entity';
-import OrderItem from './order-item.entity';
+import OrderProducts from './order-product.entity';
+import CartProduct from './cart-product.entity';
 
 @Entity({ name: 'products' })
 export default class Product{
@@ -53,9 +51,9 @@ export default class Product{
   @ManyToMany(() => Promotion, (promotion) => promotion.products)
   promotions: Promotion[];
 
-  @OneToMany(() => ShoppingCartItem, (shoppingCartItem) => shoppingCartItem.product)
-  shoppingCartItems: ShoppingCartItem[];
+  @OneToMany(() => CartProduct, (shoppingCartItem) => shoppingCartItem.product)
+  shoppingCartItems: CartProduct[];
 
-  @OneToMany(() => OrderItem, (orderItem) => orderItem.product)
-  orderItems: OrderItem[];
+  @OneToMany(() => OrderProducts, (orderItem) => orderItem.product)
+  orderItems: OrderProducts[];
 }
