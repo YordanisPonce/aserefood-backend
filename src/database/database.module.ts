@@ -38,7 +38,6 @@ import OrderProducts from './entities/order-product.entity';
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_DATABASE'),
         synchronize: true,
-        logging: true,
         entities: [
           User,
           RefreshToken,

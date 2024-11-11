@@ -1,11 +1,18 @@
-import { IsEmail, IsNotEmpty, IsString, Matches, MinLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, Matches, MaxLength, MinLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export default class RegisterInDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
+  @MaxLength(50)
   name: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  @MaxLength(50)
+  lastnames: string;
 
   @ApiProperty()
   @IsNotEmpty()
@@ -20,9 +27,6 @@ export default class RegisterInDto {
   @Matches(/(?=.*[0-9])/, {
     message: 'password must contain at least one number.',
   })
-  @Matches(/(?=.*\W)/, {
-    message: 'password must contain at least one special character.',
-  })
   @Matches(/(?=.*[A-Z])/, {
     message: 'password must contain at least one uppercase letter.',
   })
@@ -31,5 +35,14 @@ export default class RegisterInDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
+  @MaxLength(30)
   username: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  @Matches(/^\d+$/, {
+    message: 'phoneNumber must contain only digits.',
+  })
+  phoneNumber: string;
 }

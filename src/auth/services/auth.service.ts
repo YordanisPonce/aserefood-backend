@@ -1,10 +1,19 @@
-import { BadRequestException, ConflictException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  Logger,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import PgService from '../../database/services/pg.service';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Role } from '../decorators/roles.decorator';
-import RegisterIn from '../dto/in/register.in.dto';
 import RegisterInDto from '../dto/in/register.in.dto';
+import ResetPasswordInDto from '../dto/in/reset-password.in.dto';
+import MailService from '../../mail/services/mail.service';
+import CustomerOutDto from '../dto/out/customer.out.dto';
 
 @Injectable()
 export default class AuthService {
@@ -14,11 +23,12 @@ export default class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly pgService: PgService,
+    private readonly mailService: MailService,
   ) {}
 
-  async login(username: string, password: string) {
-    const adminUsername = this.configService.get<string>(
-      'SUPER_ADMIN_USERNAME',
+  async login(email: string, password: string) {
+    const adminEmail = this.configService.get<string>(
+      'SUPER_ADMIN_EMAIL',
     );
     const adminPassword = this.configService.get<string>(
       'SUPER_ADMIN_PASSWORD',
@@ -27,12 +37,12 @@ export default class AuthService {
     let payload;
     let userId: number;
 
-    if (username === adminUsername && password === adminPassword) {
-      payload = { username, role: Role.SuperAdmin };
+    if (email === adminEmail && password === adminPassword) {
+      payload = { email, role: Role.SuperAdmin };
       userId = -1;
     } else {
       const user = await this.pgService.users.findOne({
-        where: { username },
+        where: { email, isActive: true, isConfirmed: true },
       });
 
       if (!user || !(await user.validatePassword(password))) {
@@ -49,8 +59,6 @@ export default class AuthService {
 
       userId = user.id;
     }
-
-
 
     const accessToken = this.jwtService.sign(payload);
     const refreshToken = this.jwtService.sign(
@@ -104,7 +112,7 @@ export default class AuthService {
         refreshToken: newRefreshToken,
       });
 
-      this.logger.log(`Refresh Token for User ${userId}`);
+      this.logger.log(`Created new refresh token for User ${userId}`);
 
       return { newAccessToken, newRefreshToken };
     } catch (error) {
@@ -126,8 +134,137 @@ export default class AuthService {
 
     user.password = newPassword;
 
-    await this.pgService.users.save(user)
+    await this.pgService.users.save(user);
 
     this.logger.log(`Updated user Password with ID ${user.id}`);
+  }
+
+  async confirmAccount(confirmationToken: string): Promise<void> {
+    try {
+      const payload = this.jwtService.verify(confirmationToken);
+      const userId = payload.sub;
+
+      const ct = await this.pgService.confirmationTokens.findOne({
+        where: { userId },
+      });
+
+      if (!ct) {
+        throw new Error();
+      }
+
+      await this.pgService.users.update(ct.userId, {
+        isConfirmed: true
+      });
+
+      await this.pgService.confirmationTokens.delete(ct.id);
+
+      this.logger.log(`Confirmed Account of User ${ct.userId}`);
+    } catch (error) {
+      throw new UnauthorizedException('Invalid confirmation token');
+    }
+  }
+
+  async forgotPassword(email: string): Promise<void> {
+    const user = await this.pgService.users.findOne({
+      where: { email: email, isConfirmed: true, isActive: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Account Not Found');
+    }
+
+    const resetPasswordToken = this.jwtService.sign(
+      { sub: user.id },
+      { expiresIn: '1d' },
+    );
+
+    await this.mailService.sendResetPasswordEmail(
+      email,
+      user.username,
+      resetPasswordToken,
+    );
+  }
+
+  async resetPassword(dto: ResetPasswordInDto): Promise<void> {
+    try {
+      const payload = this.jwtService.verify(dto.resetPasswordToken);
+      const userId = payload.sub;
+
+      await this.pgService.users.update(userId, {
+        password: dto.password,
+      });
+
+      this.logger.log(`Reset Password Successfully for User ${userId}`);
+    } catch (error) {
+      throw new UnauthorizedException('Invalid Reset Password Token');
+    }
+  }
+
+  async register(dto: RegisterInDto): Promise<CustomerOutDto> {
+    if (dto.username === this.configService.get('SUPER_ADMIN_EMAIL')) {
+      throw new ConflictException(
+        `User with username "${dto.username}" already exists`,
+      );
+    }
+
+    const existingUserUsername = await this.pgService.users.findOne({
+      where: { username: dto.username },
+    });
+    if (existingUserUsername) {
+      throw new ConflictException(
+        `User with username "${dto.username}" already exists`,
+      );
+    }
+
+    const existingUserEmail = await this.pgService.users.findOne({
+      where: { email: dto.email },
+    });
+    if (existingUserEmail) {
+      throw new ConflictException(
+        `User with email "${dto.email}" already exists`,
+      );
+    }
+
+    const newUser = this.pgService.users.create({
+      username: dto.username,
+      email: dto.email,
+      password: dto.password,
+      role: Role.Customer,
+      name: dto.name,
+      isActive: true,
+      isConfirmed: false,
+      lastnames: dto.lastnames,
+      phoneNumber: dto.phoneNumber,
+    });
+
+    await this.pgService.users.save(newUser);
+    this.logger.log(`Created new user with ID ${newUser.id}`);
+
+    const confirmationToken = this.jwtService.sign(
+      { sub: newUser.id },
+      { expiresIn: '300d' },
+    );
+
+    const newCt = this.pgService.confirmationTokens.create({
+      userId: newUser.id,
+      confirmationToken,
+    })
+
+    await this.pgService.confirmationTokens.save(newCt);
+    this.logger.log(`Created new confirmation token for User ${newUser.id}`);
+
+    await this.mailService.sendConfirmAccountEmail(newUser.email, newUser.username, confirmationToken);
+
+    return {
+      id: newUser.id,
+      username: newUser.username,
+      email: newUser.email,
+      name: newUser.name,
+      role: newUser.role,
+      isActive: newUser.isActive,
+      isConfirmed: newUser.isConfirmed,
+      phoneNumber: newUser.phoneNumber,
+      lastNames: newUser.lastnames,
+    }
   }
 }

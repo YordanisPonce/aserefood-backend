@@ -8,10 +8,9 @@ import {
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
-  ApiBearerAuth,
-  ApiConflictResponse,
+  ApiBearerAuth, ApiConflictResponse,
   ApiCreatedResponse,
-  ApiForbiddenResponse,
+  ApiForbiddenResponse, ApiNotFoundResponse,
   ApiOperation,
   ApiTags,
   ApiUnauthorizedResponse,
@@ -27,6 +26,10 @@ import ChangePasswordInDto from '../dto/in/change-password.in.dto';
 import RegisterInDto from '../dto/in/register.in.dto';
 import RefreshInDto from '../dto/in/refresh.in.dto';
 import { ConfigService } from '@nestjs/config';
+import ConfirmAccountInDto from '../dto/in/confirm-account.in.dto';
+import ForgotPasswordInDto from '../dto/in/forgot-password.in.dto';
+import ResetPasswordInDto from '../dto/in/reset-password.in.dto';
+import CustomerOutDto from '../dto/out/customer.out.dto';
 
 @Controller('v1/auth')
 @ApiTags('auth')
@@ -44,7 +47,7 @@ export default class AuthController {
   @ApiOperation({ summary: 'Authenticate into System' })
   async login(@Body() body: LoginInDto): Promise<AuthOutDto> {
     const { accessToken, refreshToken } = await this.authService.login(
-      body.username,
+      body.email,
       body.password,
     );
     return {
@@ -71,8 +74,55 @@ export default class AuthController {
     };
   }
 
+  @Post('confirm-account')
+  @ApiCreatedResponse({
+    description: 'Confirm Account Successful',
+  })
+  @ApiForbiddenResponse({ description: 'Invalid Confirmation Token' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiOperation({ summary: 'Confirm Account' })
+  async confirmAccount(@Body() dto: ConfirmAccountInDto): Promise<void> {
+    return this.authService.confirmAccount(dto.confirmationToken);
+  }
+
+  @Post('forgot-password')
+  @ApiCreatedResponse({
+    description: 'Sent Reset Password Successful',
+  })
+  @ApiNotFoundResponse({ description: 'Not Found User' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiOperation({ summary: 'Send Reset Password' })
+  async forgotPassword(@Body() dto: ForgotPasswordInDto): Promise<void> {
+    return this.authService.forgotPassword(dto.email);
+  }
+
+  @Post('reset-password')
+  @ApiCreatedResponse({
+    description: 'Reset Password Successful',
+  })
+  @ApiForbiddenResponse({ description: 'Invalid Reset Password Token' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiOperation({ summary: 'Reset Password' })
+  async resetPassword(@Body() dto: ResetPasswordInDto): Promise<void> {
+    return this.authService.resetPassword(dto);
+  }
+
+  @Post('register')
+  @ApiCreatedResponse({
+    description: 'Register Customer Successful',
+    type: CustomerOutDto,
+  })
+  @ApiConflictResponse({
+    description: 'Conflict with Username or Email'
+  })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiOperation({ summary: 'Register Customer' })
+  async register(@Body() dto: RegisterInDto): Promise<CustomerOutDto> {
+    return this.authService.register(dto);
+  }
+
   @Post('change-password')
-  @Roles(Role.Customer)
+  @Roles(Role.Customer, Role.Admin)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
   @ApiUnauthorizedResponse({ description: 'Invalid Credentials' })

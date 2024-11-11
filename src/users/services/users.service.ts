@@ -90,7 +90,7 @@ export default class UsersService {
   }
 
   public async post(dto: UserInDto): Promise<UserOutDto> {
-    if(dto.username === this.configService.get('SUPER_ADMIN_USERNAME')){
+    if(dto.username === this.configService.get('SUPER_ADMIN_EMAIL')){
       throw new ConflictException(
         `User with username "${dto.username}" already exists`,
       );
