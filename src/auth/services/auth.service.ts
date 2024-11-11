@@ -89,9 +89,9 @@ export default class AuthService {
     return { accessToken, refreshToken };
   }
 
-  async refresh(refreshToken: string) {
+  async refresh(oldRefreshToken: string) {
     try {
-      const payload = this.jwtService.verify(refreshToken);
+      const payload = this.jwtService.verify(oldRefreshToken);
       const userId = payload.sub;
 
       const rt = await this.pgService.refreshTokens.findOne({
@@ -102,20 +102,40 @@ export default class AuthService {
         throw new Error();
       }
 
-      const newAccessToken = this.jwtService.sign({ userId });
-      const newRefreshToken = this.jwtService.sign(
-        { sub: userId },
-        { expiresIn: '30d' },
+      const adminEmail = this.configService.get<string>(
+        'SUPER_ADMIN_EMAIL',
+      );
+      const adminPassword = this.configService.get<string>(
+        'SUPER_ADMIN_PASSWORD',
       );
 
-      await this.pgService.refreshTokens.update(rt.id, {
-        refreshToken: newRefreshToken,
-      });
+      let email;
+      let password;
 
-      this.logger.log(`Created new refresh token for User ${userId}`);
+      if(rt.userId === -1){
+        email = adminEmail;
+        password = adminPassword;
+      }
+      else{
+        const user = await this.pgService.users.findOne({
+          where: {id: rt.userId}
+        })
 
-      return { newAccessToken, newRefreshToken };
+        if(!user) {
+          throw new Error();
+        }
+
+        email = user.email;
+        password = user.password;
+      }
+
+      const {accessToken, refreshToken} = await this.login(email, password);
+
+      this.logger.log(`Created new refresh token for User ${rt.userId}`);
+
+      return { accessToken, refreshToken };
     } catch (error) {
+      console.log(error)
       throw new UnauthorizedException('Invalid refresh token');
     }
   }
@@ -190,9 +210,17 @@ export default class AuthService {
       const payload = this.jwtService.verify(dto.resetPasswordToken);
       const userId = payload.sub;
 
-      await this.pgService.users.update(userId, {
-        password: dto.password,
-      });
+      const user = await this.pgService.users.findOne({
+        where: { id: userId },
+      })
+
+      if(!user) {
+        throw new Error();
+      }
+
+      user.password = dto.password;
+
+      await this.pgService.users.save(user);
 
       this.logger.log(`Reset Password Successfully for User ${userId}`);
     } catch (error) {

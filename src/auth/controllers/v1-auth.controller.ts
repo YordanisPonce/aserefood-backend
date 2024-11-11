@@ -65,12 +65,12 @@ export default class AuthController {
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiOperation({ summary: 'Refresh Tokens' })
   async refresh(@Body() dto: RefreshInDto): Promise<AuthOutDto> {
-    const { newAccessToken, newRefreshToken } = await this.authService.refresh(
+    const { accessToken, refreshToken } = await this.authService.refresh(
       dto.refreshToken,
     );
     return {
-      accessToken: newAccessToken,
-      refreshToken: newRefreshToken,
+      accessToken: accessToken,
+      refreshToken: refreshToken,
     };
   }
 
