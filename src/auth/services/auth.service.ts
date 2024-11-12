@@ -7,7 +7,6 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import PgService from '../../database/services/pg.service';
-import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Role } from '../decorators/roles.decorator';
 import RegisterInDto from '../dto/in/register.in.dto';
@@ -21,70 +20,52 @@ export default class AuthService {
 
   constructor(
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
     private readonly pgService: PgService,
     private readonly mailService: MailService,
   ) {}
 
   async login(email: string, password: string) {
-    const adminEmail = this.configService.get<string>(
-      'SUPER_ADMIN_EMAIL',
-    );
-    const adminPassword = this.configService.get<string>(
-      'SUPER_ADMIN_PASSWORD',
-    );
+    const user = await this.pgService.users.findOne({
+      where: { email, isActive: true, isConfirmed: true },
+    });
 
-    let payload;
-    let userId: number;
-
-    if (email === adminEmail && password === adminPassword) {
-      payload = { email, role: Role.SuperAdmin };
-      userId = -1;
-    } else {
-      const user = await this.pgService.users.findOne({
-        where: { email, isActive: true, isConfirmed: true },
-      });
-
-      if (!user || !(await user.validatePassword(password))) {
-        throw new UnauthorizedException('Invalid credentials');
-      }
-
-      payload = {
-        username: user.username,
-        email: user.email,
-        name: user.name,
-        userId: user.id,
-        role: user.role,
-      };
-
-      userId = user.id;
+    if (!user || !(await user.validatePassword(password))) {
+      throw new UnauthorizedException('Invalid credentials');
     }
+
+    const payload = {
+      username: user.username,
+      email: user.email,
+      name: user.name,
+      userId: user.id,
+      role: user.role,
+    };
 
     const accessToken = this.jwtService.sign(payload);
     const refreshToken = this.jwtService.sign(
-      { sub: userId },
+      { sub: user.id },
       { expiresIn: '30d' },
     );
 
     const rt = await this.pgService.refreshTokens.findOne({
-      where: { userId: userId },
+      where: { userId: user.id },
     });
 
     if (!rt) {
       const newRT = this.pgService.refreshTokens.create({
-        userId: userId,
+        userId: user.id,
         refreshToken: refreshToken,
       });
 
       await this.pgService.refreshTokens.save(newRT);
-      this.logger.log(`Created new refresh token for User ${userId}`);
+      this.logger.log(`Created new refresh token for User ${user.id}`);
     } else {
       await this.pgService.refreshTokens.update(rt.id, {
         refreshToken: refreshToken,
       });
     }
 
-    this.logger.log(`Authenticated User ${userId}`);
+    this.logger.log(`Authenticated User ${user.id}`);
 
     return { accessToken, refreshToken };
   }
@@ -98,44 +79,50 @@ export default class AuthService {
         where: { userId },
       });
 
-      if (!rt) {
+      if (!rt || rt.refreshToken !== oldRefreshToken) {
         throw new Error();
       }
 
-      const adminEmail = this.configService.get<string>(
-        'SUPER_ADMIN_EMAIL',
-      );
-      const adminPassword = this.configService.get<string>(
-        'SUPER_ADMIN_PASSWORD',
-      );
+      const user = await this.pgService.users.findOne({
+        where: { id: rt.userId },
+      });
 
-      let email;
-      let password;
-
-      if(rt.userId === -1){
-        email = adminEmail;
-        password = adminPassword;
-      }
-      else{
-        const user = await this.pgService.users.findOne({
-          where: {id: rt.userId}
-        })
-
-        if(!user) {
-          throw new Error();
-        }
-
-        email = user.email;
-        password = user.password;
+      if (!user) {
+        throw new Error();
       }
 
-      const {accessToken, refreshToken} = await this.login(email, password);
+      const newPayload = {
+        username: user.username,
+        email: user.email,
+        name: user.name,
+        userId: user.id,
+        role: user.role,
+      };
+
+      const accessToken = this.jwtService.sign(newPayload);
+      const refreshToken = this.jwtService.sign(
+        { sub: user.id },
+        { expiresIn: '30d' },
+      );
+
+      if (!rt) {
+        const newRT = this.pgService.refreshTokens.create({
+          userId: user.id,
+          refreshToken: refreshToken,
+        });
+
+        await this.pgService.refreshTokens.save(newRT);
+        this.logger.log(`Created new refresh token for User ${user.id}`);
+      } else {
+        await this.pgService.refreshTokens.update(rt.id, {
+          refreshToken: refreshToken,
+        });
+      }
 
       this.logger.log(`Created new refresh token for User ${rt.userId}`);
 
       return { accessToken, refreshToken };
     } catch (error) {
-      console.log(error)
       throw new UnauthorizedException('Invalid refresh token');
     }
   }
@@ -173,7 +160,7 @@ export default class AuthService {
       }
 
       await this.pgService.users.update(ct.userId, {
-        isConfirmed: true
+        isConfirmed: true,
       });
 
       await this.pgService.confirmationTokens.delete(ct.id);
@@ -212,9 +199,9 @@ export default class AuthService {
 
       const user = await this.pgService.users.findOne({
         where: { id: userId },
-      })
+      });
 
-      if(!user) {
+      if (!user) {
         throw new Error();
       }
 
@@ -229,12 +216,6 @@ export default class AuthService {
   }
 
   async register(dto: RegisterInDto): Promise<CustomerOutDto> {
-    if (dto.username === this.configService.get('SUPER_ADMIN_EMAIL')) {
-      throw new ConflictException(
-        `User with username "${dto.username}" already exists`,
-      );
-    }
-
     const existingUserUsername = await this.pgService.users.findOne({
       where: { username: dto.username },
     });
@@ -276,12 +257,16 @@ export default class AuthService {
     const newCt = this.pgService.confirmationTokens.create({
       userId: newUser.id,
       confirmationToken,
-    })
+    });
 
     await this.pgService.confirmationTokens.save(newCt);
     this.logger.log(`Created new confirmation token for User ${newUser.id}`);
 
-    await this.mailService.sendConfirmAccountEmail(newUser.email, newUser.username, confirmationToken);
+    await this.mailService.sendConfirmAccountEmail(
+      newUser.email,
+      newUser.username,
+      confirmationToken,
+    );
 
     return {
       id: newUser.id,
@@ -293,6 +278,6 @@ export default class AuthService {
       isConfirmed: newUser.isConfirmed,
       phoneNumber: newUser.phoneNumber,
       lastNames: newUser.lastnames,
-    }
+    };
   }
 }

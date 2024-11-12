@@ -1,5 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, Matches, MinLength } from 'class-validator';
+import {
+  IsBoolean,
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Matches,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 import { Role } from '../../../auth/decorators/roles.decorator';
 
 export default class UserUpdateInDto {
@@ -7,6 +17,7 @@ export default class UserUpdateInDto {
   @IsOptional()
   @IsNotEmpty()
   @IsString()
+  @MaxLength(30)
   username?: string;
 
   @ApiProperty({required: false})
@@ -22,28 +33,33 @@ export default class UserUpdateInDto {
   @IsEnum(Role)
   role?: Role;
 
-  @ApiProperty({required: false})
-  @IsOptional()
-  @IsNotEmpty()
-  @IsString()
-  @MinLength(8)
-  @Matches(/(?=.*[0-9])/, {
-    message: 'password must contain at least one number.',
-  })
-  @Matches(/(?=.*[A-Z])/, {
-    message: 'password must contain at least one uppercase letter.',
-  })
-  password?: string;
 
   @ApiProperty({required: false})
   @IsOptional()
   @IsNotEmpty()
   @IsString()
+  @MaxLength(50)
   name?: string;
+
+  @ApiProperty({required: false})
+  @IsOptional()
+  @IsNotEmpty()
+  @IsString()
+  @MaxLength(50)
+  lastnames?: string;
 
   @ApiProperty({required: false})
   @IsOptional()
   @IsNotEmpty()
   @IsBoolean()
   isActive?: boolean;
+
+  @ApiProperty({required: false})
+  @IsOptional()
+  @IsNotEmpty()
+  @IsString()
+  @Matches(/^\d+$/, {
+    message: 'phoneNumber must contain only digits.',
+  })
+  phoneNumber?: string;
 }

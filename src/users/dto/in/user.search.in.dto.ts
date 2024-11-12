@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import PaginatedInDto from '../../../utils/dto/in/paginated.in.dto';
+import { Role } from '../../../auth/decorators/roles.decorator';
 
 export default class UserSearchInDto extends PaginatedInDto{
   @ApiProperty({required: false})
@@ -14,4 +15,10 @@ export default class UserSearchInDto extends PaginatedInDto{
   @IsNotEmpty()
   @IsBoolean()
   isActive?: boolean;
+
+  @ApiProperty({required: false})
+  @IsOptional()
+  @IsNotEmpty()
+  @IsEnum(Role)
+  role?: Role;
 }

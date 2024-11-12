@@ -15,8 +15,17 @@ export default class UserOutDto{
   name: string;
 
   @ApiProperty()
+  lastnames: string;
+
+  @ApiProperty()
   role: Role;
 
   @ApiProperty()
   isActive: boolean;
+
+  @ApiProperty()
+  isConfirmed: boolean;
+
+  @ApiProperty()
+  phoneNumber: string;
 }

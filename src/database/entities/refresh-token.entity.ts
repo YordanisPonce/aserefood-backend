@@ -1,4 +1,5 @@
-import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import User from './user.entity';
 
 @Entity({ name: 'refresh_tokens' })
 export default class RefreshToken {
@@ -8,6 +9,10 @@ export default class RefreshToken {
   @Column()
   @Index({unique: true})
   userId: number;
+
+  @OneToOne(() => User, user => user.refreshToken, { onDelete: 'CASCADE' })
+  @JoinColumn()
+  user: User;
 
   @Column()
   refreshToken: string;

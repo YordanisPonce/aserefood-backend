@@ -11,6 +11,7 @@ import CartProduct from './cart-product.entity';
 import ConfirmationToken from './confirmation-token.entity';
 import Order from './order.entity';
 import { Role } from '../../auth/decorators/roles.decorator';
+import RefreshToken from './refresh-token.entity';
 
 @Entity({ name: 'users' })
 export default class User {
@@ -56,6 +57,9 @@ export default class User {
 
   @OneToOne(() => ConfirmationToken, confirmationToken => confirmationToken.user, { nullable: true, onDelete: 'SET NULL' })
   confirmationToken?: ConfirmationToken;
+
+  @OneToOne(() => RefreshToken, refreshToken => refreshToken.user, { nullable: true, onDelete: 'SET NULL' })
+  refreshToken?: RefreshToken;
 
   @OneToMany(() => Order, (order) => order.user)
   orders: Order[];

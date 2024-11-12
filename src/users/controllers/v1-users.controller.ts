@@ -42,7 +42,7 @@ export default class V1UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get('')
-  @Roles(Role.SuperAdmin)
+  @Roles(Role.Admin)
   @ApiOkResponse({ description: 'Ok', type: PaginatedOutDto<UserOutDto> })
   @ApiOperation({ summary: 'Get Users with Filtering, Ordering and Pagination' })
   async get(@Query() dto: UserSearchInDto): Promise<PaginatedOutDto<UserOutDto>> {
@@ -50,7 +50,7 @@ export default class V1UsersController {
   }
 
   @Get('/:id')
-  @Roles(Role.SuperAdmin)
+  @Roles(Role.Admin)
   @ApiOkResponse({description: "Ok", type: UserOutDto})
   @ApiNotFoundResponse({description: "Not Found"})
   @ApiBadRequestResponse({description: "Bad Request"})
@@ -60,21 +60,21 @@ export default class V1UsersController {
   }
 
   @Post('')
-  @Roles(Role.SuperAdmin)
+  @Roles(Role.Admin)
   @ApiCreatedResponse({description: "Ok", type: UserOutDto})
   @ApiBadRequestResponse({description: "Bad Request"})
-  @ApiConflictResponse({description: 'Conflict (Other user with Username)'})
+  @ApiConflictResponse({description: 'Conflict (Other user with Username or Email)'})
   @ApiOperation({summary: 'Create a new User if does not exist'})
   async post(@Body() dto: UserInDto){
     return this.usersService.post(dto);
   }
 
   @Patch('/:id')
-  @Roles(Role.SuperAdmin)
+  @Roles(Role.Admin)
   @ApiOkResponse({description: "Ok"})
   @ApiNotFoundResponse({description: "Not Found"})
   @ApiBadRequestResponse({description: "Bad Request"})
-  @ApiConflictResponse({description: "Conflict (Other user with Username)"})
+  @ApiConflictResponse({description: "Conflict (Other user with Username or Email)"})
   @ApiOperation({summary: 'Update a User by its id'})
   async put(
     @Param('id', ParseIntPipe) id: number,
@@ -84,7 +84,7 @@ export default class V1UsersController {
   }
 
   @Delete('/:id')
-  @Roles(Role.SuperAdmin)
+  @Roles(Role.Admin)
   @ApiOkResponse({description: "Ok"})
   @ApiConflictResponse({description: "Conflict (Current user cannot be deleted)"})
   @ApiNotFoundResponse({description: "Not Found"})
@@ -96,11 +96,11 @@ export default class V1UsersController {
   }
 
   @Post('/me')
-  @Roles(Role.SuperAdmin, Role.Customer)
+  @Roles(Role.Admin, Role.Customer)
   @ApiCreatedResponse({description: "Current user", type: UserOutDto})
   @ApiNotFoundResponse({description: "Not Found"})
   @ApiBadRequestResponse({description: "Bad Request"})
-  @ApiOperation({summary: 'Get the current user by username fro JWT'})
+  @ApiOperation({summary: 'Get the current user by username from JWT'})
   async getMe(@Request() req): Promise<UserOutDto> {
     const username = req.user.username;
     return this.usersService.getByUsername(username);

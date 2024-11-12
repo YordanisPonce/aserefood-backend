@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   ConflictException,
   Injectable,
   Logger,
@@ -12,15 +11,19 @@ import UserInDto from '../dto/in/user.in.dto';
 import UserUpdateInDto from '../dto/in/user-update.in.dto';
 import UserSearchInDto from '../dto/in/user.search.in.dto';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
-import { ConfigService } from '@nestjs/config';
+import MailService from '../../mail/services/mail.service';
+import { JwtService } from '@nestjs/jwt';
+import createPatchFields from '../../utils/dto/patch-fields.util';
+import { OrderStatus } from '../../database/entities/constants';
 
 @Injectable()
 export default class UsersService {
   private readonly logger = new Logger(UsersService.name);
 
   constructor(
+    private readonly jwtService: JwtService,
     private readonly pgService: PgService,
-    private readonly configService: ConfigService,
+    private readonly mailService: MailService,
   ) {}
 
   public async search(
@@ -31,7 +34,7 @@ export default class UsersService {
     // Filtering
     if (dto.search) {
       queryBuilder.where(
-        'user.username ILIKE :search OR user.email ILIKE :search',
+        'user.username ILIKE :search OR user.email ILIKE :search OR user.lastnames ILIKE :search OR user.name ILIKE :search',
         {
           search: `%${dto.search}%`,
         },
@@ -41,6 +44,12 @@ export default class UsersService {
     if (dto.isActive !== undefined && dto.isActive !== null) {
       queryBuilder.andWhere('user.isActive = :isActive', {
         isActive: dto.isActive,
+      });
+    }
+
+    if (dto.role !== undefined && dto.role !== null) {
+      queryBuilder.andWhere('user.role = :role', {
+        role: dto.role,
       });
     }
 
@@ -89,18 +98,32 @@ export default class UsersService {
     return this.toOutDto(user);
   }
 
+  public async getByEmail(email: string): Promise<UserOutDto> {
+    const user = await this.pgService.users.findOne({
+      where: { email },
+    });
+    if (!user) {
+      throw new NotFoundException(`User with email ${email} not found`);
+    }
+    return this.toOutDto(user);
+  }
+
   public async post(dto: UserInDto): Promise<UserOutDto> {
-    if(dto.username === this.configService.get('SUPER_ADMIN_EMAIL')){
+    const existingUserByUsername = await this.pgService.users.findOne({
+      where: { username: dto.username },
+    });
+    if (existingUserByUsername) {
       throw new ConflictException(
         `User with username "${dto.username}" already exists`,
       );
     }
-    const existingUser = await this.pgService.users.findOne({
-      where: { username: dto.username },
+
+    const existingUserByEmail = await this.pgService.users.findOne({
+      where: { email: dto.email },
     });
-    if (existingUser) {
+    if (existingUserByEmail) {
       throw new ConflictException(
-        `User with username "${dto.username}" already exists`,
+        `User with email "${dto.email}" already exists`,
       );
     }
 
@@ -111,31 +134,58 @@ export default class UsersService {
       role: dto.role,
       name: dto.name,
       isActive: true,
-      isConfirmed: true,
-      lastnames: '',
-      phoneNumber: '',
+      isConfirmed: false,
+      lastnames: dto.lastnames,
+      phoneNumber: dto.phoneNumber,
     });
     await this.pgService.users.save(newUser);
 
     this.logger.log(`Created new user with ID ${newUser.id}`);
-    this.logger.log({ ...dto });
+
+    const confirmationToken = this.jwtService.sign(
+      { sub: newUser.id },
+      { expiresIn: '300d' },
+    );
+
+    const newCt = this.pgService.confirmationTokens.create({
+      userId: newUser.id,
+      confirmationToken,
+    });
+
+    await this.pgService.confirmationTokens.save(newCt);
+    this.logger.log(`Created new confirmation token for User ${newUser.id}`);
+
+    await this.mailService.sendConfirmAccountEmail(
+      newUser.email,
+      newUser.username,
+      confirmationToken,
+    );
+
     return this.toOutDto(newUser);
   }
 
   public async patch(id: number, dto: UserUpdateInDto): Promise<void> {
     if (dto.username) {
-      if(dto.username === this.configService.get('SUPER_ADMIN_USERNAME')){
-        throw new ConflictException(
-          `User with username "${dto.username}" already exists`,
-        );
-      }
-
       const user = await this.pgService.users.findOne({
         where: { username: dto.username },
       });
 
       if (user && user.id !== id) {
-        throw new ConflictException(`User with username "${dto.username}" already exists`);
+        throw new ConflictException(
+          `User with username "${dto.username}" already exists`,
+        );
+      }
+    }
+
+    if (dto.email) {
+      const user = await this.pgService.users.findOne({
+        where: { email: dto.email },
+      });
+
+      if (user && user.id !== id) {
+        throw new ConflictException(
+          `User with email "${dto.email}" already exists`,
+        );
       }
     }
 
@@ -146,14 +196,7 @@ export default class UsersService {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
-    let patchDto = {};
-
-    if (dto.username) patchDto = { ...patchDto, username: dto.username };
-    if (dto.role) patchDto = { ...patchDto, role: dto.role };
-    if (dto.email) patchDto = { ...patchDto, email: dto.email };
-    if (dto.name) patchDto = { ...patchDto, name: dto.name };
-    if (dto.password) patchDto = { ...patchDto, password: dto.password };
-    if (dto.isActive) patchDto = { ...patchDto, isActive: dto.isActive };
+    let patchDto = createPatchFields(dto);
 
     await this.pgService.users.update(id, patchDto);
     this.logger.log(`Updated user with ID ${id}`);
@@ -166,6 +209,23 @@ export default class UsersService {
       throw new ConflictException(
         `Current User with ID ${id} cannot be deleted`,
       );
+    }
+
+    const userToDelete = await this.pgService.users.findOne({
+      where: { id },
+      relations: ['orders'],
+    });
+
+    if (
+      userToDelete &&
+      userToDelete.orders &&
+      userToDelete.orders.some(
+        (x) =>
+          x.status === OrderStatus.PAYMENT_PENDING ||
+          x.status === OrderStatus.PROCESSING_PAYMENT,
+      )
+    ) {
+      throw new ConflictException(`User with ID ${id} has Pending Orders`);
     }
 
     const result = await this.pgService.users.delete(id);
@@ -183,6 +243,9 @@ export default class UsersService {
       name: user.name,
       role: user.role,
       isActive: user.isActive,
+      isConfirmed: user.isConfirmed,
+      lastnames: user.lastnames,
+      phoneNumber: user.phoneNumber,
     };
   }
 }
