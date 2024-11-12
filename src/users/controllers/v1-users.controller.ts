@@ -27,7 +27,7 @@ import UsersService from '../services/users.service';
 import { Role, Roles } from '../../auth/decorators/roles.decorator';
 import UserOutDto from '../dto/out/user.out.dto';
 import UserInDto from '../dto/in/user.in.dto';
-import UserUpdateInDto from '../dto/in/user-update.in.dto';
+import UserUpdateInDto from '../dto/in/user.update.in.dto';
 import UserSearchInDto from '../dto/in/user.search.in.dto';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
 
@@ -86,7 +86,7 @@ export default class V1UsersController {
   @Delete('/:id')
   @Roles(Role.Admin)
   @ApiOkResponse({description: "Ok"})
-  @ApiConflictResponse({description: "Conflict (Current user cannot be deleted)"})
+  @ApiConflictResponse({description: "Conflict (Current user cannot be deleted or User with Pending Orders)"})
   @ApiNotFoundResponse({description: "Not Found"})
   @ApiBadRequestResponse({description: "Bad Request"})
   @ApiOperation({summary: 'Delete PERMANENTLY a User by its id. For better integrity change isActive in PATCH'})

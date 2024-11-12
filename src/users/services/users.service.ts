@@ -8,7 +8,7 @@ import PgService from '../../database/services/pg.service';
 import UserOutDto from '../dto/out/user.out.dto';
 import User from '../../database/entities/user.entity';
 import UserInDto from '../dto/in/user.in.dto';
-import UserUpdateInDto from '../dto/in/user-update.in.dto';
+import UserUpdateInDto from '../dto/in/user.update.in.dto';
 import UserSearchInDto from '../dto/in/user.search.in.dto';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
 import MailService from '../../mail/services/mail.service';

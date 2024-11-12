@@ -1,4 +1,14 @@
-import { Column, Entity, Index, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import Product from './product.entity';
 
 @Entity({ name: 'categories' })
@@ -16,20 +26,13 @@ export default class Category{
   @OneToMany(() => Product, (product) => product.category)
   products: Product[];
 
-  @ManyToMany(() => Category, (category) => category.parents)
-  children: Category[];
+  @Column({ name: 'parentId', nullable: true })
+  parentId?: number;
 
-  @ManyToMany(() => Category, (category) => category.children, { cascade: true })
-  @JoinTable({
-    name: 'category_parents',
-    joinColumn: {
-      name: 'child_id',
-      referencedColumnName: 'id',
-    },
-    inverseJoinColumn: {
-      name: 'parent_id',
-      referencedColumnName: 'id',
-    },
-  })
-  parents: Category[];
+  @ManyToOne(() => Category, (category) => category.children, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'parentId' })
+  parent?: Category;
+
+  @OneToMany(() => Category, (category) => category.parent)
+  children: Category[];
 }
