@@ -1,6 +1,5 @@
 import { Column, Entity, Index, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import Municipality from './municipality.entity';
-import Zone from './zone.entity';
 
 @Entity({ name: 'provinces' })
 export default class Province {
@@ -13,7 +12,4 @@ export default class Province {
 
   @OneToMany(() => Municipality, (municipality) => municipality.province)
   municipalities: Municipality[];
-
-  @ManyToMany(() => Zone, (zone) => zone.provinces)
-  zones: Zone[]
 }
