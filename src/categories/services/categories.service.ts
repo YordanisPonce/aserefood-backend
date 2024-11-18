@@ -3,7 +3,6 @@ import {
   Injectable,
   Logger,
   NotFoundException,
-  NotImplementedException,
 } from '@nestjs/common';
 import PgService from '../../database/services/pg.service';
 import CategorySearchInDto from '../dto/in/category.search.in.dto';
@@ -12,7 +11,6 @@ import CategoryOutDto from '../dto/out/category.out.dto';
 import CategoryInDto from '../dto/in/category.in.dto';
 import Category from '../../database/entities/category.entity';
 import createPatchFields from '../../utils/dto/patch-fields.util';
-import { type } from 'node:os';
 
 @Injectable()
 export default class CategoriesService {

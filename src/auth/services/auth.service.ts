@@ -26,11 +26,15 @@ export default class AuthService {
 
   async login(email: string, password: string) {
     const user = await this.pgService.users.findOne({
-      where: { email, isActive: true, isConfirmed: true },
+      where: { email, isActive: true },
     });
 
     if (!user || !(await user.validatePassword(password))) {
       throw new UnauthorizedException('Invalid credentials');
+    }
+
+    if(!user.isConfirmed){
+      throw new UnauthorizedException('Non confirmed account');
     }
 
     const payload = {
