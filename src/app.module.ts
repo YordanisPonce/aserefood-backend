@@ -10,8 +10,8 @@ import { CategoriesModule } from './categories/categories.module';
 import { ProductCombosModule } from './product-combos/product-combos.module';
 import { ProductModule } from './products/product.module';
 import { ZonesModule } from './zones/zones.module';
-import { ProvinceModule } from './province/province.module';
-import { MunicipalityModule } from './municipality/municipality.module';
+import { ProvincesModule } from './provinces/provinces.module';
+import { MunicipalitiesModule } from './municipalities/municipalities.module';
 import { ProviderModule } from './providers/provider.module';
 import MailModule from './mail/mail.module';
 import { InventoryEntriesModule } from './inventory-entries/product-inventories.module';
@@ -45,8 +45,8 @@ import { PaymentsModule } from './payments/payments.module';
     ProductModule,
     UsersModule,
     ZonesModule,
-    ProvinceModule,
-    MunicipalityModule,
+    ProvincesModule,
+    MunicipalitiesModule,
     ProviderModule,
     MailModule,
     DeliveryMethodsModule,

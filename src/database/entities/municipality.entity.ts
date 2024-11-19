@@ -12,6 +12,9 @@ export default class Municipality {
   @Index({unique: true})
   name: string;
 
+  @Column()
+  provinceId: number;
+
   @ManyToOne(() => Province, (province) => province.municipalities, {onDelete: 'CASCADE'})
   province: Province;
 
