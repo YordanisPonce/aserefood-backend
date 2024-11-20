@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsInt, IsNotEmpty, IsOptional, IsString, Min } from 'class-validator';
 import PaginatedInDto from '../../../utils/dto/in/paginated.in.dto';
+import { Transform } from 'class-transformer';
 
 export default class ZoneSearchInDto extends PaginatedInDto{
   @ApiProperty({required: false})
@@ -14,6 +15,7 @@ export default class ZoneSearchInDto extends PaginatedInDto{
   @IsNotEmpty()
   @IsInt()
   @Min(0)
+  @Transform(({ value }) => parseInt(value, 10))
   provinceId?: number;
 
   @ApiProperty({required: false})
@@ -21,5 +23,6 @@ export default class ZoneSearchInDto extends PaginatedInDto{
   @IsNotEmpty()
   @IsInt()
   @Min(0)
+  @Transform(({ value }) => parseInt(value, 10))
   municipalityId?: number;
 }
