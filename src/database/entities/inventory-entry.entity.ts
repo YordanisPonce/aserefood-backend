@@ -7,8 +7,14 @@ export class InventoryEntry {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column()
+  productId: number;
+
   @ManyToOne(() => Product, (product) => product.inventoryEntries, { onDelete: 'CASCADE' })
   product: Product;
+
+  @Column()
+  zoneId: number;
 
   @ManyToOne(() => Zone, (zone) => zone.inventoryEntries, { onDelete: 'CASCADE' })
   zone: Zone;
