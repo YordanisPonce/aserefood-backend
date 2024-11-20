@@ -25,6 +25,9 @@ export default class Product{
   @Column('boolean')
   isService: boolean;
 
+  @Column()
+  categoryId: number;
+
   @ManyToOne(() => Category, (category) => category.products, {onDelete: 'CASCADE'})
   category: Category;
 
