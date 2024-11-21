@@ -86,6 +86,16 @@ export default class ProductsService {
     };
   }
 
+  async getAll(): Promise<ProductWithProvidersOutDto[]> {
+    const products = await this.pgService.products
+      .createQueryBuilder('product')
+      .leftJoinAndSelect('product.providers', 'provider')
+      .leftJoinAndSelect('product.category', 'category')
+      .getMany();
+
+    return products.map(x => this.toOutWithProvidersDto(x));
+  }
+
   async getById(id: number): Promise<ProductWithProvidersOutDto> {
     const product = await this.pgService.products
       .createQueryBuilder('product')

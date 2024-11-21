@@ -53,6 +53,13 @@ export default class V1ProductsController {
     return this.productsService.search(dto);
   }
 
+  @Get('/all')
+  @ApiOkResponse({ description: 'Ok', type: [ProductWithProvidersOutDto] })
+  @ApiOperation({ summary: 'Get all Products' })
+  async getAll() {
+    return this.productsService.getAll();
+  }
+
   @Get('/:id')
   @ApiOkResponse({ description: 'Ok', type: ProductWithProvidersOutDto })
   @ApiNotFoundResponse({ description: 'Not Found' })

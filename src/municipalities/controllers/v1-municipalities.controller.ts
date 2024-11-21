@@ -52,6 +52,13 @@ export default class V1MunicipalitiesController {
     return this.municipalitiesService.search(dto);
   }
 
+  @Get('/all')
+  @ApiOkResponse({ description: 'Ok', type: [MunicipalityOutDto] })
+  @ApiOperation({ summary: 'Get all Municipalities' })
+  async getAll() {
+    return this.municipalitiesService.getAll();
+  }
+
   @Get('/:id')
   @ApiOkResponse({ description: 'Ok', type: MunicipalityOutDto })
   @ApiNotFoundResponse({ description: 'Not Found' })

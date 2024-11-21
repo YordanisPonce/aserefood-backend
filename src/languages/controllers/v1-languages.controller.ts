@@ -52,6 +52,13 @@ export default class V1LanguagesController {
     return this.languagesService.search(dto);
   }
 
+  @Get('/all')
+  @ApiOkResponse({ description: 'Ok', type: [LanguageOutDto] })
+  @ApiOperation({ summary: 'Get all Languages' })
+  async getAll() {
+    return this.languagesService.getAll();
+  }
+
   @Get('/:id')
   @ApiOkResponse({ description: 'Ok', type: LanguageOutDto })
   @ApiNotFoundResponse({ description: 'Not Found' })

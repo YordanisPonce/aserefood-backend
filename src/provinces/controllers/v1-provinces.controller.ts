@@ -52,6 +52,13 @@ export default class V1ProvincesController {
     return this.provincesService.search(dto);
   }
 
+  @Get('/all')
+  @ApiOkResponse({ description: 'Ok', type: [ProvinceWithMunicipalitiesOutDto] })
+  @ApiOperation({ summary: 'Get all Provinces' })
+  async getAll() {
+    return this.provincesService.getAll();
+  }
+
   @Get('/:id')
   @ApiOkResponse({ description: 'Ok', type: ProvinceWithMunicipalitiesOutDto })
   @ApiNotFoundResponse({ description: 'Not Found' })

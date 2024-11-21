@@ -51,6 +51,13 @@ export default class V1CurrenciesController{
     return this.currenciesService.search(dto);
   }
 
+  @Get('/all')
+  @ApiOkResponse({ description: 'Ok', type: [CurrencyOutDto] })
+  @ApiOperation({ summary: 'Get all Currencies' })
+  async getAll() {
+    return this.currenciesService.getAll();
+  }
+
   @Get('/:id')
   @ApiOkResponse({ description: 'Ok', type: CurrencyOutDto })
   @ApiNotFoundResponse({ description: 'Not Found' })

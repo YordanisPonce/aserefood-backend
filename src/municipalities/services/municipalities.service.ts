@@ -69,6 +69,14 @@ export default class MunicipalitiesService {
     };
   }
 
+  async getAll(): Promise<MunicipalityOutDto[]> {
+    const municipalities = await this.pgService.municipalities.find({
+      relations: ['province'],
+    });
+
+    return municipalities.map(x => this.toOutDto(x));
+  }
+
   async getById(id: number): Promise<MunicipalityOutDto> {
     const municipality = await this.pgService.municipalities.findOne({
       where: { id },

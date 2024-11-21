@@ -53,6 +53,13 @@ export default class V1ProvidersController {
     return this.providersService.search(dto);
   }
 
+  @Get('/all')
+  @ApiOkResponse({ description: 'Ok', type: [ProviderOutDto] })
+  @ApiOperation({ summary: 'Get all Providers' })
+  async getAll() {
+    return this.providersService.getAll();
+  }
+
   @Get('/:id')
   @ApiOkResponse({ description: 'Ok', type: ProviderOutDto })
   @ApiNotFoundResponse({ description: 'Not Found' })

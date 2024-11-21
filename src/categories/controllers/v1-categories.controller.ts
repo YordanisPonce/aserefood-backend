@@ -55,6 +55,13 @@ export default class V1CategoriesController {
     return this.categoriesService.search(dto);
   }
 
+  @Get('/all')
+  @ApiOkResponse({ description: 'Ok', type: [CategoryOutDto] })
+  @ApiOperation({ summary: 'Get all Categories' })
+  async getAll() {
+    return this.categoriesService.getAll();
+  }
+
   @Get('/:id')
   @ApiOkResponse({ description: 'Ok', type: CategoryOutDto })
   @ApiNotFoundResponse({ description: 'Not Found' })

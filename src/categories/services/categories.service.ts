@@ -73,6 +73,14 @@ export default class CategoriesService {
     };
   }
 
+  async getAll(): Promise<CategoryOutDto[]>{
+    const categories = await this.pgService.categories.find({
+      relations: ['children'],
+    });
+
+    return categories.map((category) => this.toOutDto(category));
+  }
+
   async getById(id: number): Promise<CategoryOutDto> {
     const category = await this.pgService.categories.findOne({
       where: { id },

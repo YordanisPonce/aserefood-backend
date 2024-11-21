@@ -52,6 +52,13 @@ export default class V1ZonesController {
     return this.zonesService.search(dto);
   }
 
+  @Get('/all')
+  @ApiOkResponse({ description: 'Ok', type: [ZoneWithMunicipalitiesOutDto] })
+  @ApiOperation({ summary: 'Get all Zones' })
+  async getAll() {
+    return this.zonesService.getAll();
+  }
+
   @Get('/:id')
   @ApiOkResponse({ description: 'Ok', type: ZoneWithMunicipalitiesOutDto })
   @ApiNotFoundResponse({ description: 'Not Found' })

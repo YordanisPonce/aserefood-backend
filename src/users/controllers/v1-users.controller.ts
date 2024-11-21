@@ -49,6 +49,14 @@ export default class V1UsersController {
     return this.usersService.search(dto);
   }
 
+  @Get('/all')
+  @Roles(Role.Admin)
+  @ApiOkResponse({description: "Ok", type: [UserOutDto]})
+  @ApiOperation({summary: 'Get all Users'})
+  async getAll(){
+    return this.usersService.getAll();
+  }
+
   @Get('/:id')
   @Roles(Role.Admin)
   @ApiOkResponse({description: "Ok", type: UserOutDto})

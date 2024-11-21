@@ -64,6 +64,14 @@ export default class LanguagesService{
     };
   }
 
+  async getAll(): Promise<LanguageOutDto[]> {
+    const languages = await this.pgService.languages.find({
+      where: {isActive: true}
+    });
+
+    return languages.map(x => this.toOutDto(x));
+  }
+
   async getById(id: number): Promise<LanguageOutDto> {
     const language = await this.pgService.languages.findOne({
       where: { id }

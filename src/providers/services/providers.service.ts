@@ -60,6 +60,12 @@ export default class ProvidersService {
     };
   }
 
+  async getAll(): Promise<ProviderOutDto[]> {
+    const providers = await this.pgService.providers.find({});
+
+    return providers.map(x => this.toOutDto(x));
+  }
+
   async getById(id: number): Promise<ProviderOutDto> {
     const provider = await this.pgService.providers.findOne({
       where: { id },

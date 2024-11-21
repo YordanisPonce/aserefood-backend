@@ -52,6 +52,13 @@ export default class V1InventoryEntriesController {
     return this.inventoryEntriesService.search(dto);
   }
 
+  @Get('/all')
+  @ApiOkResponse({ description: 'Ok', type: [InventoryEntryOutDto] })
+  @ApiOperation({ summary: 'Get all Inventory Entries' })
+  async getAll() {
+    return this.inventoryEntriesService.getAll();
+  }
+
   @Get('/:id')
   @ApiOkResponse({ description: 'Ok', type: InventoryEntryOutDto })
   @ApiNotFoundResponse({ description: 'Not Found' })

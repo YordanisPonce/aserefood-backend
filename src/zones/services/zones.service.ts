@@ -72,6 +72,16 @@ export default class ZonesService {
     };
   }
 
+  async getAll(): Promise<ZoneWithMunicipalitiesOutDto[]> {
+    const zones = await this.pgService.zones
+      .createQueryBuilder('zone')
+      .leftJoinAndSelect('zone.municipalities', 'municipality')
+      .leftJoinAndSelect('municipality.province', 'province')
+      .getMany();
+
+    return zones.map(zone => this.toOutWithMunicipalitiesDto(zone));
+  }
+
   async getById(id: number): Promise<ZoneWithMunicipalitiesOutDto> {
     const zone = await this.pgService.zones
       .createQueryBuilder('zone')

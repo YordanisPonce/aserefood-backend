@@ -71,6 +71,14 @@ export default class InventoryEntriesService {
     };
   }
 
+  async getAll(): Promise<InventoryEntryOutDto[]>{
+    const inventoryEntries = await this.pgService.inventoryEntries.find({
+      relations: ['product', 'zone']
+    });
+
+    return inventoryEntries.map(x => this.toOutDto(x));
+  }
+
   async getById(id: number): Promise<InventoryEntryOutDto> {
     const inventoryEntry = await this.pgService.inventoryEntries.findOne({
       where: { id },

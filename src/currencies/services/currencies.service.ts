@@ -65,6 +65,14 @@ export default class CurrenciesService{
     };
   }
 
+  async getAll(): Promise<CurrencyOutDto[]>{
+    const currencies = await this.pgService.currencies.find({
+      where: {isActive: true}
+    });
+
+    return currencies.map(x => this.toOutDto(x));
+  }
+
   async getById(id: number): Promise<CurrencyOutDto> {
     const currency = await this.pgService.currencies.findOne({
       where: { id }
