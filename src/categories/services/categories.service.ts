@@ -11,6 +11,7 @@ import CategoryOutDto from '../dto/out/category.out.dto';
 import CategoryInDto from '../dto/in/category.in.dto';
 import Category from '../../database/entities/category.entity';
 import createPatchFields from '../../utils/dto/patch-fields.util';
+import CategoryUpdateInDto from '../dto/in/category.update.in.dto';
 
 @Injectable()
 export default class CategoriesService {
@@ -106,7 +107,7 @@ export default class CategoriesService {
     return this.toOutDto(newCategory);
   }
 
-  async patch(id: number, dto: CategoryInDto): Promise<void> {
+  async patch(id: number, dto: CategoryUpdateInDto): Promise<void> {
     if (dto.name) {
       const category = await this.pgService.categories.findOne({
         where: { name: dto.name },
