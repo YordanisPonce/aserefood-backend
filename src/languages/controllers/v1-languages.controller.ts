@@ -84,7 +84,7 @@ export default class V1LanguagesController {
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  @ApiConflictResponse({ description: 'Conflict (Other language with Name)' })
+  @ApiConflictResponse({ description: 'Conflict (Other language with Code)' })
   @ApiOperation({ summary: 'Update a Language by its id' })
   async put(
     @Param('id', ParseIntPipe) id: number,
