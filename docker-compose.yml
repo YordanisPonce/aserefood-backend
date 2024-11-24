@@ -1,0 +1,39 @@
+services:
+  asere-food-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      
+    ports:
+      - "0.0.0.0:4001:4001"
+
+    environment:
+        APP_PORT: 4001
+        UI_URL: https://asere-food.com
+        EMAIL_CONFIRMATION_URL: https://asere-food.com/confirmEmail
+        EMAIL_RESET_PASSWORD_URL: https://asere-food.com/resetPassword
+        
+        SECRET_KEY: ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789JANDDAFOFAOINAIEEFAD
+        SEED_ADMIN_EMAIL: admin@admin.admin
+        SEED_ADMIN_PASSWORD: Admin2024.
+        
+        MAIL_HOST: smtp.gmail.com
+        MAIL_PORT: 587
+        MAIL_USER: eduardoglez64377@gmail.com
+        MAIL_PASSWORD: pnei wfzu bbwb ufsz
+        MAIL_SECURE: false
+        SENDER_EMAIL: asere-food@gmail.com
+        SENDER_NAME: Asere Food Admin
+        
+        DB_HOST: asere-food-db
+        DB_PORT: 5432
+        DB_DATABASE: asere-food-db
+        DB_USERNAME: postgres
+        DB_PASSWORD: fCXko33My1bFAkKX
+
+    networks:
+      - asere-food
+
+networks:
+  asere-food: 
+    external: true
