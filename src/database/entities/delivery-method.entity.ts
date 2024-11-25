@@ -27,10 +27,10 @@ export class DeliveryMethod {
   @Column('decimal', { precision: 10, scale: 2 })
   minimalDeliveryPrice: number;
 
+  @Column()
+  municipalityId: number;
+
   @ManyToOne(() => Municipality, (municipality) => municipality.id, {onDelete: 'CASCADE'})
   municipality: Municipality;
-
-  @ManyToOne(() => Province, (province) => province.id, {onDelete: 'CASCADE'})
-  province: Province;
 
 }
