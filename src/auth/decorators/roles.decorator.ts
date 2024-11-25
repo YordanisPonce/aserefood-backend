@@ -1,10 +1,8 @@
 import { SetMetadata } from '@nestjs/common';
-import { ApiProperty } from '@nestjs/swagger';
 
-
-export enum Role{
+export enum Role {
   Customer = 'customer',
-  Admin = 'admin'
+  Admin = 'admin',
 }
 
 export const ROLES_KEY = 'roles';

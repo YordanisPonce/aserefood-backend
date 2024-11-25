@@ -1,6 +1,7 @@
 import {
   Body,
-  Controller, Delete,
+  Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -12,18 +13,19 @@ import {
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
-  ApiBearerAuth, ApiConflictResponse, ApiCreatedResponse, ApiForbiddenResponse,
+  ApiBearerAuth,
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
-  ApiTags, ApiUnauthorizedResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { CacheInterceptor } from '@nestjs/cache-manager';
-import CategoriesService from '../../categories/services/categories.service';
 import ProvincesService from '../services/provinces.service';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
-import CategoryOutDto from '../../categories/dto/out/category.out.dto';
-import CategorySearchInDto from '../../categories/dto/in/category.search.in.dto';
 import ProvinceOutDto from '../dto/out/province.out.dto';
 import ProvinceSearchInDto from '../dto/in/province.search.in.dto';
 import { Role, Roles } from '../../auth/decorators/roles.decorator';
@@ -32,7 +34,6 @@ import { RolesGuard } from '../../auth/guards/roles.guard';
 import CategoryInDto from '../../categories/dto/in/category.in.dto';
 import ProvinceInDto from '../dto/in/province.in.dto';
 import ProvinceWithMunicipalitiesOutDto from '../dto/out/province-with-municipalities.out.dto';
-import CategoryUpdateInDto from '../../categories/dto/in/category.update.in.dto';
 import ProvinceUpdateInDto from '../dto/in/province.update.in.dto';
 
 @Controller('v1/provinces')
@@ -53,7 +54,10 @@ export default class V1ProvincesController {
   }
 
   @Get('/all')
-  @ApiOkResponse({ description: 'Ok', type: [ProvinceWithMunicipalitiesOutDto] })
+  @ApiOkResponse({
+    description: 'Ok',
+    type: [ProvinceWithMunicipalitiesOutDto],
+  })
   @ApiOperation({ summary: 'Get all Provinces' })
   async getAll() {
     return this.provincesService.getAll();

@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import MunicipalityOutDto from '../../../municipalities/dto/out/municipality.out.dto';
 
-export default class DeliveryMethodWithMunicipalityOutDto{
+export default class DeliveryMethodWithMunicipalityOutDto {
   @ApiProperty()
   id: number;
 
@@ -14,7 +14,7 @@ export default class DeliveryMethodWithMunicipalityOutDto{
   @ApiProperty()
   isFree: boolean;
 
-  @ApiProperty({nullable: true})
+  @ApiProperty({ nullable: true })
   pickUpDirection?: string;
 
   @ApiProperty()
@@ -23,6 +23,6 @@ export default class DeliveryMethodWithMunicipalityOutDto{
   @ApiProperty()
   minimalDeliveryPrice: number;
 
-  @ApiProperty({type: MunicipalityOutDto})
+  @ApiProperty({ type: MunicipalityOutDto })
   municipality: MunicipalityOutDto;
 }

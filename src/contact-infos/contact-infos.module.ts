@@ -5,13 +5,8 @@ import V1ContactInfosController from './controllers/v1-contact-infos.controller'
 import ContactInfosService from './services/contact-infos.service';
 
 @Module({
-  imports: [
-    AuthModule,
-    DatabaseModule,
-  ],
-  controllers: [
-    V1ContactInfosController
-  ],
+  imports: [AuthModule, DatabaseModule],
+  controllers: [V1ContactInfosController],
   providers: [ContactInfosService],
   exports: [ContactInfosService],
 })

@@ -1,4 +1,9 @@
-import { ConflictException, Injectable, Logger, NotFoundException, NotImplementedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import PgService from '../../database/services/pg.service';
 import ProvinceSearchInDto from '../dto/in/province.search.in.dto';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
@@ -7,7 +12,6 @@ import ProvinceWithMunicipalitiesOutDto from '../dto/out/province-with-municipal
 import ProvinceInDto from '../dto/in/province.in.dto';
 import ProvinceUpdateInDto from '../dto/in/province.update.in.dto';
 import Province from '../../database/entities/province.entity';
-import MunicipalityPOutDto from '../dto/out/municipality-p.out.dto';
 import createPatchFields from '../../utils/dto/patch-fields.util';
 
 @Injectable()
@@ -19,16 +23,14 @@ export default class ProvincesService {
   async search(
     dto: ProvinceSearchInDto,
   ): Promise<PaginatedOutDto<ProvinceOutDto>> {
-    const queryBuilder = this.pgService.provinces.createQueryBuilder('province');
+    const queryBuilder =
+      this.pgService.provinces.createQueryBuilder('province');
 
     // Filtering
     if (dto.search) {
-      queryBuilder.where(
-        'province.name ILIKE :search',
-        {
-          search: `%${dto.search}%`,
-        },
-      );
+      queryBuilder.where('province.name ILIKE :search', {
+        search: `%${dto.search}%`,
+      });
     }
 
     // Ordering
@@ -60,7 +62,7 @@ export default class ProvincesService {
       relations: ['municipalities'],
     });
 
-    return provinces.map(x => this.toOutWithMunicipalitiesDto(x));
+    return provinces.map((x) => this.toOutWithMunicipalitiesDto(x));
   }
 
   async getById(id: number): Promise<ProvinceWithMunicipalitiesOutDto> {
@@ -74,7 +76,7 @@ export default class ProvincesService {
     return this.toOutWithMunicipalitiesDto(province);
   }
 
-  async post(dto: ProvinceInDto): Promise<ProvinceOutDto>{
+  async post(dto: ProvinceInDto): Promise<ProvinceOutDto> {
     const existingProvinceByName = await this.pgService.provinces.findOne({
       where: { name: dto.name },
     });
@@ -123,7 +125,7 @@ export default class ProvincesService {
     this.logger.log({ ...patchDto });
   }
 
-  async delete(id: number): Promise<void>{
+  async delete(id: number): Promise<void> {
     const provinceToDelete = await this.pgService.provinces.findOne({
       where: { id },
       relations: ['municipalities'],
@@ -154,14 +156,16 @@ export default class ProvincesService {
     return dto;
   }
 
-  private toOutWithMunicipalitiesDto(province: Province): ProvinceWithMunicipalitiesOutDto{
+  private toOutWithMunicipalitiesDto(
+    province: Province,
+  ): ProvinceWithMunicipalitiesOutDto {
     const dto = new ProvinceWithMunicipalitiesOutDto();
     dto.id = province.id;
     dto.name = province.name;
-    dto.municipalities = province.municipalities.map(x => ({
+    dto.municipalities = province.municipalities.map((x) => ({
       id: x.id,
       name: x.name,
-    }))
+    }));
 
     return dto;
   }

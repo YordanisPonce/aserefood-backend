@@ -36,6 +36,8 @@ export default class OnlinePayment {
   @Column('character varying', { length: 255 })
   postalCode: string;
 
-  @OneToOne(() => Order, order => order.onlinePayment, { onDelete: 'CASCADE' })
+  @OneToOne(() => Order, (order) => order.onlinePayment, {
+    onDelete: 'CASCADE',
+  })
   order: Order;
 }

@@ -6,19 +6,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import PgService from '../../database/services/pg.service';
-import Zone from '../../database/entities/zone.entity';
-import ZoneOutDto from '../../zones/dto/out/zone.out.dto';
-import ZoneWithMunicipalitiesOutDto from '../../zones/dto/out/zone-with-municipalities.out.dto';
 import ContactInfo from '../../database/entities/contact-info.entity';
 import ContactInfoOutDto from '../dto/out/contact-info.out.dto';
 import ContactInfoWithMunicipalityOutDto from '../dto/out/contact-info-with-municipality.out.dto';
-import ZoneUpdateInDto from '../../zones/dto/in/zone.update.in.dto';
-import { In } from 'typeorm';
 import ContactInfoUpdateInDto from '../dto/in/contact-info.update.in.dto';
 import createPatchFields from '../../utils/dto/patch-fields.util';
-import ZoneInDto from '../../zones/dto/in/zone.in.dto';
 import ContactInfoInDto from '../dto/in/contact-info.in.dto';
-import ZoneSearchInDto from '../../zones/dto/in/zone.search.in.dto';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
 import ContactInfoSearchInDto from '../dto/in/contact-info.search.in.dto';
 

@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import ProviderOutDto from '../../../providers/dto/out/provider.out.dto';
 
 export default class ProductOutDto {
   @ApiProperty()

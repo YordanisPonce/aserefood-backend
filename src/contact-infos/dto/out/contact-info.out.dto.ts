@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsNotEmpty, IsOptional, IsString, MaxLength, Min } from 'class-validator';
 
-export default class ContactInfoOutDto{
+export default class ContactInfoOutDto {
   @ApiProperty()
   id: number;
 
@@ -14,10 +13,10 @@ export default class ContactInfoOutDto{
   @ApiProperty()
   address: string;
 
-  @ApiProperty({nullable: true})
+  @ApiProperty({ nullable: true })
   observations?: string;
 
-  @ApiProperty({nullable: true})
+  @ApiProperty({ nullable: true })
   identificationNumber?: string;
 
   @ApiProperty()

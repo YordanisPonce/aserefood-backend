@@ -1,5 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import {
+  IsEnum,
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export enum OrderDirection {
@@ -7,8 +14,8 @@ export enum OrderDirection {
   DESC = 'DESC',
 }
 
-export default class PaginatedInDto{
-  @ApiProperty({required: false})
+export default class PaginatedInDto {
+  @ApiProperty({ required: false })
   @IsOptional()
   @IsNotEmpty()
   @IsInt()
@@ -16,7 +23,7 @@ export default class PaginatedInDto{
   @Transform(({ value }) => parseInt(value, 10))
   page: number = 1;
 
-  @ApiProperty({required: false})
+  @ApiProperty({ required: false })
   @IsOptional()
   @IsNotEmpty()
   @IsInt()
@@ -30,7 +37,11 @@ export default class PaginatedInDto{
   @IsString()
   orderBy: string = 'id';
 
-  @ApiProperty({ enum: OrderDirection, example: OrderDirection.ASC, required: false })
+  @ApiProperty({
+    enum: OrderDirection,
+    example: OrderDirection.ASC,
+    required: false,
+  })
   @IsOptional()
   @IsNotEmpty()
   @IsEnum(OrderDirection)

@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsBoolean,
-  IsDecimal,
   IsInt,
   IsNotEmpty,
   IsNumber,
@@ -29,7 +28,7 @@ export default class DeliveryMethodInDto {
   @IsBoolean()
   isFree: boolean;
 
-  @ApiProperty({nullable: true})
+  @ApiProperty({ nullable: true })
   @IsOptional()
   @IsNotEmpty()
   @IsString()

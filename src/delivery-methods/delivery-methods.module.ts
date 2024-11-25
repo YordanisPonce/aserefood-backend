@@ -5,16 +5,9 @@ import V1DeliveryMethodsController from './controllers/v1-delivery-methods.contr
 import DeliveryMethodsService from './services/delivery-methods.service';
 
 @Module({
-  imports: [
-    AuthModule,
-    DatabaseModule,
-  ],
-  controllers: [
-    V1DeliveryMethodsController
-  ],
-  providers: [
-    DeliveryMethodsService
-  ],
-  exports: [DeliveryMethodsService]
+  imports: [AuthModule, DatabaseModule],
+  controllers: [V1DeliveryMethodsController],
+  providers: [DeliveryMethodsService],
+  exports: [DeliveryMethodsService],
 })
 export class DeliveryMethodsModule {}

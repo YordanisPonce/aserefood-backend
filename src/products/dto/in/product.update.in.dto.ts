@@ -1,40 +1,49 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsBoolean, IsInt, IsNotEmpty, IsOptional, IsString, MaxLength, Min } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MaxLength,
+  Min,
+} from 'class-validator';
 
-export default class ProductUpdateInDto{
-  @ApiProperty({required: false})
+export default class ProductUpdateInDto {
+  @ApiProperty({ required: false })
   @IsOptional()
   @IsNotEmpty()
   @IsString()
   @MaxLength(50)
   name?: string;
 
-  @ApiProperty({nullable: true, required: false})
+  @ApiProperty({ nullable: true, required: false })
   @IsOptional()
   @IsString()
   description?: string;
 
-  @ApiProperty({required: false})
+  @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
   @IsNotEmpty()
   @MaxLength(100)
   shortDescription?: string;
 
-  @ApiProperty({required: false})
+  @ApiProperty({ required: false })
   @IsOptional()
   @IsInt()
   @Min(0)
   @IsNotEmpty()
   categoryId?: number;
 
-  @ApiProperty({type: [Number], required: false})
+  @ApiProperty({ type: [Number], required: false })
   @IsOptional()
   @IsArray()
   @IsNotEmpty()
   providerIds?: number[];
 
-  @ApiProperty({required: false})
+  @ApiProperty({ required: false })
   @IsOptional()
   @IsNotEmpty()
   @IsBoolean()

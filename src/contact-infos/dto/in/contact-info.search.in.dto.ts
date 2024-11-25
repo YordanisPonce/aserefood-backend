@@ -3,14 +3,14 @@ import { IsInt, IsNotEmpty, IsOptional, IsString, Min } from 'class-validator';
 import PaginatedInDto from '../../../utils/dto/in/paginated.in.dto';
 import { Transform } from 'class-transformer';
 
-export default class ContactInfoSearchInDto extends PaginatedInDto{
-  @ApiProperty({required: false})
+export default class ContactInfoSearchInDto extends PaginatedInDto {
+  @ApiProperty({ required: false })
   @IsOptional()
   @IsNotEmpty()
   @IsString()
   search?: string;
 
-  @ApiProperty({required: false})
+  @ApiProperty({ required: false })
   @IsOptional()
   @IsNotEmpty()
   @IsInt()
@@ -18,7 +18,7 @@ export default class ContactInfoSearchInDto extends PaginatedInDto{
   @Transform(({ value }) => parseInt(value, 10))
   provinceId?: number;
 
-  @ApiProperty({required: false})
+  @ApiProperty({ required: false })
   @IsOptional()
   @IsNotEmpty()
   @IsInt()

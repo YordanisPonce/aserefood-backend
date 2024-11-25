@@ -1,5 +1,10 @@
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import Province from './province.entity';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import Municipality from './municipality.entity';
 import User from './user.entity';
 import Order from './order.entity';
@@ -21,7 +26,9 @@ export default class ContactInfo {
   @Column()
   municipalityId: number;
 
-  @ManyToOne(() => Municipality, (municipality) => municipality.contactInfos, {onDelete: 'CASCADE'})
+  @ManyToOne(() => Municipality, (municipality) => municipality.contactInfos, {
+    onDelete: 'CASCADE',
+  })
   municipality: Municipality;
 
   @Column('character varying', { length: 255 })
@@ -33,7 +40,7 @@ export default class ContactInfo {
   @Column()
   userId: number;
 
-  @ManyToOne(() => User, (user) => user.contactInfos, {onDelete: 'CASCADE'})
+  @ManyToOne(() => User, (user) => user.contactInfos, { onDelete: 'CASCADE' })
   user: User;
 
   @OneToMany(() => Order, (order) => order.contactInfo)

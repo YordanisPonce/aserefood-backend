@@ -2,7 +2,10 @@ import {
   BeforeInsert,
   BeforeUpdate,
   Column,
-  Entity, Index, JoinColumn, ManyToOne, OneToMany, OneToOne,
+  Entity,
+  Index,
+  OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -18,17 +21,17 @@ export default class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column('character varying', {length: 255})
+  @Column('character varying', { length: 255 })
   name: string;
 
-  @Column('character varying', {length: 255})
+  @Column('character varying', { length: 255 })
   lastnames: string;
 
   @Column('character varying', { length: 255 })
   username: string;
 
   @Column('character varying', { length: 255 })
-  @Index({unique: true})
+  @Index({ unique: true })
   email: string;
 
   @Column('character varying', { length: 255 })
@@ -52,13 +55,20 @@ export default class User {
   @OneToMany(() => ContactInfo, (contactInfo) => contactInfo.municipality)
   contactInfos: ContactInfo[];
 
-  @OneToMany(() => CartProduct, shoppingCart => shoppingCart.user)
+  @OneToMany(() => CartProduct, (shoppingCart) => shoppingCart.user)
   shoppingCartItems: CartProduct;
 
-  @OneToOne(() => ConfirmationToken, confirmationToken => confirmationToken.user, { nullable: true, onDelete: 'SET NULL' })
+  @OneToOne(
+    () => ConfirmationToken,
+    (confirmationToken) => confirmationToken.user,
+    { nullable: true, onDelete: 'SET NULL' },
+  )
   confirmationToken?: ConfirmationToken;
 
-  @OneToOne(() => RefreshToken, refreshToken => refreshToken.user, { nullable: true, onDelete: 'SET NULL' })
+  @OneToOne(() => RefreshToken, (refreshToken) => refreshToken.user, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
   refreshToken?: RefreshToken;
 
   @OneToMany(() => Order, (order) => order.user)

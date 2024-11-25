@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsBoolean,
-  IsDecimal,
   IsInt,
   IsNotEmpty,
   IsNumber,
@@ -12,46 +11,46 @@ import {
 } from 'class-validator';
 
 export default class DeliveryMethodUpdateInDto {
-  @ApiProperty({required: false})
+  @ApiProperty({ required: false })
   @IsOptional()
   @IsNotEmpty()
   @IsString()
   @MaxLength(50)
   name?: string;
 
-  @ApiProperty({required: false})
+  @ApiProperty({ required: false })
   @IsOptional()
   @IsNotEmpty()
   @IsString()
   @MaxLength(100)
   estimatedArrivalTime?: string;
 
-  @ApiProperty({required: false})
+  @ApiProperty({ required: false })
   @IsOptional()
   @IsNotEmpty()
   @IsBoolean()
   isFree?: boolean;
 
-  @ApiProperty({nullable: true, required: false})
+  @ApiProperty({ nullable: true, required: false })
   @IsOptional()
   @IsNotEmpty()
   @IsString()
   @MaxLength(200)
   pickUpDirection?: string;
 
-  @ApiProperty({required: false})
+  @ApiProperty({ required: false })
   @IsOptional()
   @IsNumber()
   @Min(0)
   cost?: number;
 
-  @ApiProperty({required: false})
+  @ApiProperty({ required: false })
   @IsOptional()
   @IsNumber()
   @Min(0)
   minimalDeliveryPrice?: number;
 
-  @ApiProperty({required: false})
+  @ApiProperty({ required: false })
   @IsOptional()
   @IsNotEmpty()
   @IsInt()

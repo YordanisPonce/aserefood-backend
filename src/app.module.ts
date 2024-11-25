@@ -33,10 +33,12 @@ import { PaymentsModule } from './payments/payments.module';
     CacheModule.register({
       isGlobal: true,
     }),
-    ThrottlerModule.forRoot([{
-      ttl: 60,
-      limit: 100,
-    }]),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60,
+        limit: 100,
+      },
+    ]),
     AuthModule,
     CategoriesModule,
     DatabaseModule,

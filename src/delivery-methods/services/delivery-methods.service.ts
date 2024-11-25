@@ -6,19 +6,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import PgService from '../../database/services/pg.service';
-import Zone from '../../database/entities/zone.entity';
-import ZoneOutDto from '../../zones/dto/out/zone.out.dto';
-import ZoneWithMunicipalitiesOutDto from '../../zones/dto/out/zone-with-municipalities.out.dto';
 import { DeliveryMethod } from '../../database/entities/delivery-method.entity';
 import DeliveryMethodOutDto from '../dto/out/delivery-method.out.dto';
 import DeliveryMethodWithMunicipalityOutDto from '../dto/out/delivery-method-with-municipality.out.dto';
-import ZoneUpdateInDto from '../../zones/dto/in/zone.update.in.dto';
-import { In } from 'typeorm';
 import DeliveryMethodUpdateInDto from '../dto/in/delivery-method.update.in.dto';
 import createPatchFields from '../../utils/dto/patch-fields.util';
-import ZoneInDto from '../../zones/dto/in/zone.in.dto';
 import DeliveryMethodInDto from '../dto/in/delivery-method.in.dto';
-import ZoneSearchInDto from '../../zones/dto/in/zone.search.in.dto';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
 import DeliveryMethodSearchInDto from '../dto/in/delivery-method.search.in.dto';
 
@@ -207,7 +200,9 @@ export default class DeliveryMethodsService {
     dto.municipalityId = deliveryMethod.municipalityId;
     dto.isFree = deliveryMethod.isFree;
     dto.estimatedArrivalTime = deliveryMethod.estimatedArrivalTime;
-    dto.minimalDeliveryPrice = parseFloat(deliveryMethod.minimalDeliveryPrice.toString());
+    dto.minimalDeliveryPrice = parseFloat(
+      deliveryMethod.minimalDeliveryPrice.toString(),
+    );
     dto.pickUpDirection = deliveryMethod.pickUpDirection;
 
     return dto;
@@ -222,7 +217,9 @@ export default class DeliveryMethodsService {
     dto.cost = parseFloat(deliveryMethod.cost.toString());
     dto.isFree = deliveryMethod.isFree;
     dto.estimatedArrivalTime = deliveryMethod.estimatedArrivalTime;
-    dto.minimalDeliveryPrice = parseFloat(deliveryMethod.minimalDeliveryPrice.toString());
+    dto.minimalDeliveryPrice = parseFloat(
+      deliveryMethod.minimalDeliveryPrice.toString(),
+    );
     dto.pickUpDirection = deliveryMethod.pickUpDirection;
     dto.municipality = {
       id: deliveryMethod.municipality?.id ?? -1,

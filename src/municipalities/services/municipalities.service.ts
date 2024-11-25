@@ -5,17 +5,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import PgService from '../../database/services/pg.service';
-import Province from '../../database/entities/province.entity';
-import ProvinceOutDto from '../../provinces/dto/out/province.out.dto';
 import Municipality from '../../database/entities/municipality.entity';
 import MunicipalityOutDto from '../dto/out/municipality.out.dto';
-import ProvinceSearchInDto from '../../provinces/dto/in/province.search.in.dto';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
 import MunicipalitySearchInDto from '../dto/in/municipality.search.in.dto';
-import ProvinceWithMunicipalitiesOutDto from '../../provinces/dto/out/province-with-municipalities.out.dto';
-import ProvinceInDto from '../../provinces/dto/in/province.in.dto';
 import MunicipalityInDto from '../dto/in/municipality.in.dto';
-import ProvinceUpdateInDto from '../../provinces/dto/in/province.update.in.dto';
 import createPatchFields from '../../utils/dto/patch-fields.util';
 import MunicipalityUpdateInDto from '../dto/in/municipality.update.in.dto';
 
@@ -74,7 +68,7 @@ export default class MunicipalitiesService {
       relations: ['province'],
     });
 
-    return municipalities.map(x => this.toOutDto(x));
+    return municipalities.map((x) => this.toOutDto(x));
   }
 
   async getById(id: number): Promise<MunicipalityOutDto> {
@@ -134,7 +128,7 @@ export default class MunicipalitiesService {
       }
     }
 
-    if(dto.provinceId){
+    if (dto.provinceId) {
       const province = await this.pgService.provinces.findOne({
         where: { id: dto.provinceId },
       });
@@ -161,18 +155,25 @@ export default class MunicipalitiesService {
     this.logger.log({ ...patchDto });
   }
 
-  async delete(id: number): Promise<void>{
+  async delete(id: number): Promise<void> {
     const municipalityToDelete = await this.pgService.municipalities.findOne({
       where: { id },
       relations: ['zones', 'contactInfos'],
     });
 
-    if(municipalityToDelete) {
-      if(municipalityToDelete.zones && municipalityToDelete.zones.length > 0) {
-        throw new ConflictException(`Municipality with ID ${id} has Associated Zones`);
+    if (municipalityToDelete) {
+      if (municipalityToDelete.zones && municipalityToDelete.zones.length > 0) {
+        throw new ConflictException(
+          `Municipality with ID ${id} has Associated Zones`,
+        );
       }
-      if(municipalityToDelete.contactInfos && municipalityToDelete.contactInfos.length > 0){
-        throw new ConflictException(`Municipality with ID ${id} has Associated Contact Infos`);
+      if (
+        municipalityToDelete.contactInfos &&
+        municipalityToDelete.contactInfos.length > 0
+      ) {
+        throw new ConflictException(
+          `Municipality with ID ${id} has Associated Contact Infos`,
+        );
       }
     }
 
@@ -188,7 +189,7 @@ export default class MunicipalitiesService {
     dto.id = municipality.id;
     dto.name = municipality.name;
     dto.provinceId = municipality.provinceId;
-    dto.provinceName = municipality.province?.name ?? "";
+    dto.provinceName = municipality.province?.name ?? '';
 
     return dto;
   }

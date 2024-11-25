@@ -61,8 +61,8 @@ import OrderProducts from './entities/order-product.entity';
           TransferPayment,
           Order,
           OrderProducts,
-        ]
-      })
+        ],
+      }),
     }),
     TypeOrmModule.forFeature([
       User,
@@ -87,7 +87,7 @@ import OrderProducts from './entities/order-product.entity';
       TransferPayment,
       Order,
       OrderProducts,
-    ])
+    ]),
   ],
   exports: [PgService],
   providers: [PgService],

@@ -7,18 +7,12 @@ import {
 } from '@nestjs/common';
 import PgService from '../../database/services/pg.service';
 import ProvidersService from '../../providers/services/providers.service';
-import Zone from '../../database/entities/zone.entity';
-import ZoneOutDto from '../../zones/dto/out/zone.out.dto';
-import ZoneWithMunicipalitiesOutDto from '../../zones/dto/out/zone-with-municipalities.out.dto';
 import Product from '../../database/entities/product.entity';
 import ProductOutDto from '../dto/out/product.out.dto';
 import ProductWithProvidersOutDto from '../dto/out/product-with-providers.out.dto';
-import ZoneUpdateInDto from '../../zones/dto/in/zone.update.in.dto';
 import { In } from 'typeorm';
 import ProductUpdateInDto from '../dto/in/product.update.in.dto';
-import ZoneInDto from '../../zones/dto/in/zone.in.dto';
 import ProductInDto from '../dto/in/product.in.dto';
-import ZoneSearchInDto from '../../zones/dto/in/zone.search.in.dto';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
 import ProductSearchInDto from '../dto/in/product.search.in.dto';
 
@@ -93,7 +87,7 @@ export default class ProductsService {
       .leftJoinAndSelect('product.category', 'category')
       .getMany();
 
-    return products.map(x => this.toOutWithProvidersDto(x));
+    return products.map((x) => this.toOutWithProvidersDto(x));
   }
 
   async getById(id: number): Promise<ProductWithProvidersOutDto> {

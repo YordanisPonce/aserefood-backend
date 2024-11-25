@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import UserOutDto from '../../../users/dto/out/user.out.dto';
 import MunicipalityOutDto from '../../../municipalities/dto/out/municipality.out.dto';
 
 export default class ContactInfoWithMunicipalityOutDto {
@@ -15,13 +14,13 @@ export default class ContactInfoWithMunicipalityOutDto {
   @ApiProperty()
   address: string;
 
-  @ApiProperty({nullable: true})
+  @ApiProperty({ nullable: true })
   observations?: string;
 
-  @ApiProperty({nullable: true})
+  @ApiProperty({ nullable: true })
   identificationNumber?: string;
 
-  @ApiProperty({type: MunicipalityOutDto})
+  @ApiProperty({ type: MunicipalityOutDto })
   municipality: MunicipalityOutDto;
 
   @ApiProperty()

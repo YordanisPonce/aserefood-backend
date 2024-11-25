@@ -5,10 +5,7 @@ import V1InventoryEntriesController from './controllers/v1-inventory-entries.con
 import InventoryEntriesService from './services/inventory-entries.service';
 
 @Module({
-  imports: [
-    AuthModule,
-    DatabaseModule,
-  ],
+  imports: [AuthModule, DatabaseModule],
   controllers: [V1InventoryEntriesController],
   providers: [InventoryEntriesService],
   exports: [InventoryEntriesService],

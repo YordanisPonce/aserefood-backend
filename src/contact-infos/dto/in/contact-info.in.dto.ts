@@ -1,5 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsInt, IsNotEmpty, IsOptional, IsString, MaxLength, Min } from 'class-validator';
+import {
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MaxLength,
+  Min,
+} from 'class-validator';
 
 export default class ContactInfoInDto {
   @ApiProperty()
@@ -20,13 +27,13 @@ export default class ContactInfoInDto {
   @MaxLength(200)
   address: string;
 
-  @ApiProperty({nullable: true})
+  @ApiProperty({ nullable: true })
   @IsOptional()
   @IsNotEmpty()
   @IsString()
   observations?: string;
 
-  @ApiProperty({nullable: true})
+  @ApiProperty({ nullable: true })
   @IsOptional()
   @IsString()
   @IsNotEmpty()

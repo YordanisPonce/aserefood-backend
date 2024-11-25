@@ -79,8 +79,7 @@ export default class UsersService {
   }
 
   public async getAll(): Promise<UserOutDto[]> {
-    const users = await this.pgService.users.find({
-    });
+    const users = await this.pgService.users.find({});
 
     return users.map((user) => this.toOutDto(user));
   }

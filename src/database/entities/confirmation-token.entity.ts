@@ -1,4 +1,11 @@
-import { Column, Entity, Index, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import User from './user.entity';
 
 @Entity({ name: 'confirmation_tokens' })
@@ -7,10 +14,12 @@ export default class ConfirmationToken {
   id: number;
 
   @Column()
-  @Index({unique: true})
+  @Index({ unique: true })
   userId: number;
 
-  @OneToOne(() => User, user => user.confirmationToken, { onDelete: 'CASCADE' })
+  @OneToOne(() => User, (user) => user.confirmationToken, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn()
   user: User;
 

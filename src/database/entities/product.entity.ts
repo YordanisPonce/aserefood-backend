@@ -1,4 +1,13 @@
-import { Column, Entity, Index, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import Category from './category.entity';
 import Provider from './provider.entity';
 import { InventoryEntry } from './inventory-entry.entity';
@@ -8,18 +17,18 @@ import OrderProducts from './order-product.entity';
 import CartProduct from './cart-product.entity';
 
 @Entity({ name: 'products' })
-export default class Product{
+export default class Product {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column('character varying', {length: 255})
-  @Index({unique: true})
+  @Column('character varying', { length: 255 })
+  @Index({ unique: true })
   name: string;
 
-  @Column('character varying', {length: 255})
+  @Column('character varying', { length: 255 })
   shortDescription: string;
 
-  @Column({nullable: true})
+  @Column({ nullable: true })
   description?: string;
 
   @Column('boolean')
@@ -28,7 +37,9 @@ export default class Product{
   @Column()
   categoryId: number;
 
-  @ManyToOne(() => Category, (category) => category.products, {onDelete: 'CASCADE'})
+  @ManyToOne(() => Category, (category) => category.products, {
+    onDelete: 'CASCADE',
+  })
   category: Category;
 
   @ManyToMany(() => Provider, (provider) => provider.products)
@@ -48,7 +59,10 @@ export default class Product{
   @OneToMany(() => InventoryEntry, (entry) => entry.product)
   inventoryEntries: InventoryEntry[];
 
-  @OneToMany(() => ProductComboItem, (productComboItem) => productComboItem.product)
+  @OneToMany(
+    () => ProductComboItem,
+    (productComboItem) => productComboItem.product,
+  )
   productComboItems: ProductComboItem[];
 
   @ManyToMany(() => Promotion, (promotion) => promotion.products)

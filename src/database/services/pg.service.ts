@@ -28,26 +28,39 @@ export default class PgService {
   constructor(
     @InjectEntityManager() public readonly em: EntityManager,
     @InjectRepository(User) public readonly users: Repository<User>,
-    @InjectRepository(RefreshToken) public readonly refreshTokens: Repository<RefreshToken>,
-    @InjectRepository(Municipality) public readonly municipalities: Repository<Municipality>,
+    @InjectRepository(RefreshToken)
+    public readonly refreshTokens: Repository<RefreshToken>,
+    @InjectRepository(Municipality)
+    public readonly municipalities: Repository<Municipality>,
     @InjectRepository(Province) public readonly provinces: Repository<Province>,
     @InjectRepository(Zone) public readonly zones: Repository<Zone>,
     @InjectRepository(Provider) public readonly providers: Repository<Provider>,
-    @InjectRepository(Category) public readonly categories: Repository<Category>,
+    @InjectRepository(Category)
+    public readonly categories: Repository<Category>,
     @InjectRepository(Product) public readonly products: Repository<Product>,
-    @InjectRepository(ConfirmationToken) public readonly confirmationTokens: Repository<ConfirmationToken>,
-    @InjectRepository(InventoryEntry) public readonly inventoryEntries: Repository<InventoryEntry>,
-    @InjectRepository(ProductCombo) public readonly productCombos: Repository<ProductCombo>,
-    @InjectRepository(ProductComboItem) public readonly productComboItems: Repository<ProductComboItem>,
-    @InjectRepository(DeliveryMethod) public readonly deliveryMethods: Repository<DeliveryMethod>,
-    @InjectRepository(Promotion) public readonly promotions: Repository<Promotion>,
-    @InjectRepository(Currency) public readonly currencies: Repository<Currency>,
+    @InjectRepository(ConfirmationToken)
+    public readonly confirmationTokens: Repository<ConfirmationToken>,
+    @InjectRepository(InventoryEntry)
+    public readonly inventoryEntries: Repository<InventoryEntry>,
+    @InjectRepository(ProductCombo)
+    public readonly productCombos: Repository<ProductCombo>,
+    @InjectRepository(ProductComboItem)
+    public readonly productComboItems: Repository<ProductComboItem>,
+    @InjectRepository(DeliveryMethod)
+    public readonly deliveryMethods: Repository<DeliveryMethod>,
+    @InjectRepository(Promotion)
+    public readonly promotions: Repository<Promotion>,
+    @InjectRepository(Currency)
+    public readonly currencies: Repository<Currency>,
     @InjectRepository(Language) public readonly languages: Repository<Language>,
-    @InjectRepository(ContactInfo) public readonly contactInfos: Repository<ContactInfo>,
-    @InjectRepository(CartProduct) public readonly shoppingCarts: Repository<CartProduct>,
-    @InjectRepository(TransferPayment) public readonly transferPayments: Repository<TransferPayment>,
-    @InjectRepository(OnlinePayment) public readonly onlinePayments: Repository<OnlinePayment>,
+    @InjectRepository(ContactInfo)
+    public readonly contactInfos: Repository<ContactInfo>,
+    @InjectRepository(CartProduct)
+    public readonly shoppingCarts: Repository<CartProduct>,
+    @InjectRepository(TransferPayment)
+    public readonly transferPayments: Repository<TransferPayment>,
+    @InjectRepository(OnlinePayment)
+    public readonly onlinePayments: Repository<OnlinePayment>,
     @InjectRepository(Order) public readonly orders: Repository<Order>,
-  ) {
-  }
+  ) {}
 }

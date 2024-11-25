@@ -1,18 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsBoolean,
-  IsEmail,
-  IsEnum,
-  IsInt,
-  IsNotEmpty,
-  IsString,
-  Length,
-  Matches,
-  MaxLength,
-  Min,
-  MinLength,
-} from 'class-validator';
-import { Role } from '../../../auth/decorators/roles.decorator';
+import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
 
 export default class LanguageInDto {
   @ApiProperty()

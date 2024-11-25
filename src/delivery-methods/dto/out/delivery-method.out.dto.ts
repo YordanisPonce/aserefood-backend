@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, Min } from 'class-validator';
 
-export default class DeliveryMethodOutDto{
+export default class DeliveryMethodOutDto {
   @ApiProperty()
   id: number;
 
@@ -14,7 +13,7 @@ export default class DeliveryMethodOutDto{
   @ApiProperty()
   isFree: boolean;
 
-  @ApiProperty({nullable: true})
+  @ApiProperty({ nullable: true })
   pickUpDirection?: string;
 
   @ApiProperty()
