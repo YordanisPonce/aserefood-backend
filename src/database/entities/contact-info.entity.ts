@@ -18,8 +18,11 @@ export default class ContactInfo {
   @Column('character varying', { length: 255, nullable: true })
   identificationNumber?: string;
 
+  @Column()
+  municipalityId: number;
+
   @ManyToOne(() => Municipality, (municipality) => municipality.contactInfos, {onDelete: 'CASCADE'})
-  municipality: string;
+  municipality: Municipality;
 
   @Column('character varying', { length: 255 })
   address: string;
@@ -27,8 +30,11 @@ export default class ContactInfo {
   @Column('text', { nullable: true })
   observations?: string;
 
+  @Column()
+  userId: number;
+
   @ManyToOne(() => User, (user) => user.contactInfos, {onDelete: 'CASCADE'})
-  user: string;
+  user: User;
 
   @OneToMany(() => Order, (order) => order.contactInfo)
   orders: Order[];
