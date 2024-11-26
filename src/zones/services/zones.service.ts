@@ -174,7 +174,7 @@ export default class ZonesService {
       }
 
       z.municipalities = municipalities;
-      await this.pgService.municipalities.save(municipalities);
+      await this.pgService.zones.save(z);
     }
 
     this.logger.log(`Updated zone with ID ${id}`);
