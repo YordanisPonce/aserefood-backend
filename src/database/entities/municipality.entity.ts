@@ -28,8 +28,8 @@ export default class Municipality {
   })
   province: Province;
 
-  @ManyToMany(() => Zone, (zone) => zone.municipalities)
-  zones: Zone[];
+  @ManyToOne(() => Zone, (zone) => zone.municipalities, {onDelete: 'SET NULL', nullable: true})
+  zone?: Zone;
 
   @OneToMany(() => ContactInfo, (contactInfo) => contactInfo.municipality)
   contactInfos: ContactInfo[];
