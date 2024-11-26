@@ -24,66 +24,66 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { CacheInterceptor } from '@nestjs/cache-manager';
-import ProductCombosService from '../services/product-combos.service';
+import PromotionsService from '../services/promotions.service';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
 import { Role, Roles } from '../../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
-import ProductComboSearchInDto from '../dto/in/product-combo.search.in.dto';
-import ProductComboOutDto from '../dto/out/product-combo.out.dto';
-import ProductComboInDto from '../dto/in/product-combo.in.dto';
-import ProductComboUpdateInDto from '../dto/in/product-combo.update.in.dto';
+import PromotionOutDto from '../dto/out/promotion.out.dto';
+import PromotionSearchInDto from '../dto/in/promotion.search.in.dto';
+import PromotionInDto from '../dto/in/promotion.in.dto';
+import PromotionUpdateInDto from '../dto/in/promotion.update.in.dto';
 
-@Controller('v1/product-combos')
-@ApiTags('product-combos')
+@Controller('v1/promotions')
+@ApiTags('promotions')
 @UseInterceptors(CacheInterceptor)
-export default class V1ProductCombosController {
-  constructor(private readonly productCombosService: ProductCombosService) {}
+export default class V1PromotionsController {
+  constructor(private readonly promotionsService: PromotionsService) {}
 
   @Get('')
   @ApiOkResponse({
     description: 'Ok',
-    type: PaginatedOutDto<ProductComboOutDto>,
+    type: PaginatedOutDto<PromotionOutDto>,
   })
   @ApiOperation({
-    summary: 'Get Product Combos with Filtering, Ordering and Pagination',
+    summary: 'Get Promotions with Filtering, Ordering and Pagination',
   })
   async get(
-    @Query() dto: ProductComboSearchInDto,
-  ): Promise<PaginatedOutDto<ProductComboOutDto>> {
-    return this.productCombosService.search(dto);
+    @Query() dto: PromotionSearchInDto,
+  ): Promise<PaginatedOutDto<PromotionOutDto>> {
+    return this.promotionsService.search(dto);
   }
 
   @Get('/all')
-  @ApiOkResponse({ description: 'Ok', type: [ProductComboOutDto] })
-  @ApiOperation({ summary: 'Get all Product Combos' })
+  @ApiOkResponse({ description: 'Ok', type: [PromotionOutDto] })
+  @ApiOperation({ summary: 'Get all Promotions' })
   async getAll() {
-    return this.productCombosService.getAll();
+    return this.promotionsService.getAll();
   }
 
   @Get('/:id')
-  @ApiOkResponse({ description: 'Ok', type: ProductComboOutDto })
+  @ApiOkResponse({ description: 'Ok', type: PromotionOutDto })
   @ApiNotFoundResponse({ description: 'Not Found' })
   @ApiBadRequestResponse({ description: 'Bad Request' })
-  @ApiOperation({ summary: 'Get a Product Combo by its id' })
+  @ApiOperation({ summary: 'Get a Promotion by its id' })
   async getById(@Param('id', ParseIntPipe) id: number) {
-    return this.productCombosService.getById(id);
+    return this.promotionsService.getById(id);
   }
 
   @Post('')
   @Roles(Role.Admin)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
-  @ApiCreatedResponse({ description: 'Ok', type: ProductComboOutDto })
+  @ApiCreatedResponse({ description: 'Ok', type: PromotionOutDto })
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
   @ApiConflictResponse({
-    description: 'Conflict (Other product combo with Name)',
+    description: 'Conflict (Other promotions with Name)',
   })
-  @ApiOperation({ summary: 'Create a new Product Combo if does not exist' })
-  async post(@Body() dto: ProductComboInDto) {
-    return this.productCombosService.post(dto);
+  @ApiOperation({ summary: 'Create a new Promotion if does not exist' })
+  async post(@Body() dto: PromotionInDto) {
+    return this.promotionsService.post(dto);
   }
 
   @Patch('/:id')
@@ -96,14 +96,14 @@ export default class V1ProductCombosController {
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
   @ApiConflictResponse({
-    description: 'Conflict (Other product combo with Name)',
+    description: 'Conflict (Other promotion with Name)',
   })
-  @ApiOperation({ summary: 'Update a Product Combo by its id' })
+  @ApiOperation({ summary: 'Update a Promotion by its id' })
   async put(
     @Param('id', ParseIntPipe) id: number,
-    @Body() dto: ProductComboUpdateInDto,
+    @Body() dto: PromotionUpdateInDto,
   ) {
-    return this.productCombosService.patch(id, dto);
+    return this.promotionsService.patch(id, dto);
   }
 
   @Delete('/:id')
@@ -111,18 +111,14 @@ export default class V1ProductCombosController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Ok' })
-  @ApiConflictResponse({
-    description: 'Conflict (Product Combo with Promotions Associated)',
-  })
   @ApiNotFoundResponse({ description: 'Not Found' })
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
   @ApiOperation({
-    summary:
-      'Delete PERMANENTLY a Product Combo by its id. Just for maintenance. Update isActive in Patch.',
+    summary: 'Delete PERMANENTLY a Promotion by its id.',
   })
   async delete(@Param('id', ParseIntPipe) id: number) {
-    return this.productCombosService.delete(id);
+    return this.promotionsService.delete(id);
   }
 }
