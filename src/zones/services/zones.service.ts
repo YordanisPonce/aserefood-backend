@@ -157,6 +157,13 @@ export default class ZonesService {
         ? { description: dto.description }
         : {}),
     };
+    await this.pgService.zones.update(id, patchDto);
+
+    const z = await this.pgService.zones.findOne({
+      where: { id },
+      relations: ['municipalities']
+    });
+
     if (dto.municipalityIds) {
       const municipalities = await this.pgService.municipalities.findBy({
         id: In(dto.municipalityIds),
@@ -166,14 +173,10 @@ export default class ZonesService {
         throw new BadRequestException('Non Valid Associated Municipalities');
       }
 
-      patchDto = {
-        ...patchDto,
-        ...{
-          municipalities: municipalities,
-        },
-      };
+      z.municipalities = municipalities;
+      await this.pgService.municipalities.save(municipalities);
     }
-    await this.pgService.zones.update(id, patchDto);
+
     this.logger.log(`Updated zone with ID ${id}`);
     this.logger.log({ ...patchDto });
   }

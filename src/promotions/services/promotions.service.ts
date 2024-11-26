@@ -253,6 +253,13 @@ export default class PromotionsService {
         ? { isActive: dto.isActive }
         : {}),
     };
+    await this.pgService.promotions.update(id, patchDto);
+
+    const p = await this.pgService.promotions.findOne({
+      where: { id },
+      relations: ['products', 'productCombos']
+    });
+
     if (dto.productIds) {
       const products = await this.pgService.products.findBy({
         id: In(dto.productIds),
@@ -262,19 +269,9 @@ export default class PromotionsService {
         throw new BadRequestException('Non Valid Associated Products');
       }
 
-      patchDto = {
-        ...patchDto,
-        ...{
-          products: products,
-        },
-      };
+      p.products = products;
     } else if (dto.productIds === null) {
-      patchDto = {
-        ...patchDto,
-        ...{
-          products: [],
-        },
-      };
+      p.products = [];
     }
     if (dto.productComboIds) {
       const productCombos = await this.pgService.productCombos.findBy({
@@ -285,21 +282,12 @@ export default class PromotionsService {
         throw new BadRequestException('Non Valid Associated Product Combos');
       }
 
-      patchDto = {
-        ...patchDto,
-        ...{
-          productCombos: productCombos,
-        },
-      };
+      p.productCombos = productCombos;
     } else if (dto.productComboIds === null) {
-      patchDto = {
-        ...patchDto,
-        ...{
-          productCombos: [],
-        },
-      };
+      p.productCombos = [];
     }
-    await this.pgService.promotions.update(id, patchDto);
+
+    await this.pgService.promotions.save(p);
     this.logger.log(`Updated Promotion with ID ${id}`);
     this.logger.log({ ...patchDto });
   }
