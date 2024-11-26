@@ -113,7 +113,7 @@ export default class V1MunicipalitiesController {
   @ApiOkResponse({ description: 'Ok' })
   @ApiConflictResponse({
     description:
-      'Conflict (Municipality with Zones or Contact Infos Associated)',
+      'Conflict (Municipality with Zone or Contact Infos Associated)',
   })
   @ApiNotFoundResponse({ description: 'Not Found' })
   @ApiBadRequestResponse({ description: 'Bad Request' })

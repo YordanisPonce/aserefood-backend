@@ -158,13 +158,13 @@ export default class MunicipalitiesService {
   async delete(id: number): Promise<void> {
     const municipalityToDelete = await this.pgService.municipalities.findOne({
       where: { id },
-      relations: ['zones', 'contactInfos'],
+      relations: ['zone', 'contactInfos'],
     });
 
     if (municipalityToDelete) {
-      if (municipalityToDelete.zones && municipalityToDelete.zones.length > 0) {
+      if (municipalityToDelete.zone) {
         throw new ConflictException(
-          `Municipality with ID ${id} has Associated Zones`,
+          `Municipality with ID ${id} has Associated Zone`,
         );
       }
       if (

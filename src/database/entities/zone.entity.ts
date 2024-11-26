@@ -23,18 +23,7 @@ export default class Zone {
   @Column('character varying', { length: 255, nullable: true })
   description?: string;
 
-  @ManyToMany(() => Municipality, (municipality) => municipality.zones)
-  @JoinTable({
-    name: 'zone_municipalities',
-    joinColumn: {
-      name: 'zone_id',
-      referencedColumnName: 'id',
-    },
-    inverseJoinColumn: {
-      name: 'municipality_id',
-      referencedColumnName: 'id',
-    },
-  })
+  @OneToMany(() => Municipality, (municipality) => municipality.zone)
   municipalities: Municipality[];
 
   @OneToMany(() => InventoryEntry, (entry) => entry.zone)
