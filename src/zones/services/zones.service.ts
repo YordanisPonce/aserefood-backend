@@ -107,11 +107,12 @@ export default class ZonesService {
       );
     }
 
-    const municipalities = await this.pgService.municipalities.findBy({
-      id: In(dto.municipalityIds),
+    const municipalities = await this.pgService.municipalities.find({
+      where: { id: In(dto.municipalityIds) },
+      relations: ['zones'],
     });
 
-    if (municipalities.length === 0) {
+    if (municipalities.length !== dto.municipalityIds.length || municipalities.filter(x => x.zones.length !== 0)) {
       throw new BadRequestException('Non Valid Associated Municipalities');
     }
 
@@ -165,11 +166,12 @@ export default class ZonesService {
     });
 
     if (dto.municipalityIds) {
-      const municipalities = await this.pgService.municipalities.findBy({
-        id: In(dto.municipalityIds),
+      const municipalities = await this.pgService.municipalities.find({
+        where: { id: In(dto.municipalityIds) },
+        relations: ['zones'],
       });
 
-      if (municipalities.length === 0) {
+      if (municipalities.length !== dto.municipalityIds.length || municipalities.filter(x => x.zones.length !== 0)) {
         throw new BadRequestException('Non Valid Associated Municipalities');
       }
 

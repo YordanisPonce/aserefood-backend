@@ -6,7 +6,7 @@ import CurrenciesService from './services/currencies.service';
 
 @Module({
   imports: [AuthModule, DatabaseModule],
-  controllers: [V1CurrenciesController],
+  // controllers: [V1CurrenciesController],
   providers: [CurrenciesService],
   exports: [CurrenciesService],
 })

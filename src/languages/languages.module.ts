@@ -6,7 +6,7 @@ import LanguagesService from './services/languages.service';
 
 @Module({
   imports: [AuthModule, DatabaseModule],
-  controllers: [V1LanguagesController],
+  // controllers: [V1LanguagesController],
   providers: [LanguagesService],
   exports: [LanguagesService],
 })
