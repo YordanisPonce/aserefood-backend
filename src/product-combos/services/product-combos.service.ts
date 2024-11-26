@@ -221,6 +221,13 @@ export default class ProductCombosService {
         ? { isActive: dto.isActive }
         : {}),
     };
+    await this.pgService.productCombos.update(id, patchDto);
+
+    const pc = await this.pgService.productCombos.findOne({
+      where: { id },
+      relations: ['productComboItems']
+    });
+
     if (dto.productComboItems) {
       const products = await this.pgService.products.findBy({
         id: In(dto.productComboItems.map((x) => x.productId)),
@@ -230,20 +237,18 @@ export default class ProductCombosService {
         throw new BadRequestException('Non Valid Associated Products');
       }
 
-      patchDto = {
-        ...patchDto,
-        ...{
-          productComboItems: dto.productComboItems.map((x) => ({
-            productComboId: productCombo.id,
-            productId: x.productId,
-            amount: x.amount,
-          })),
-        },
-      };
+      pc.productComboItems = dto.productComboItems.map(x => {
+        return this.pgService.productComboItems.create({
+          productComboId: pc.id,
+          productId: x.productId,
+          amount: x.amount,
+        })
+      });
+      await this.pgService.productCombos.save(pc);
     }
-    await this.pgService.productCombos.update(id, patchDto);
+
     this.logger.log(`Updated Product Combo with ID ${id}`);
-    this.logger.log({ ...patchDto });
+    this.logger.log({ ...dto });
   }
 
   async delete(id: number): Promise<void> {

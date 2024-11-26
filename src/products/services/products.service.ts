@@ -183,7 +183,13 @@ export default class ProductsService {
       ...patchDto,
       ...(dto.isService ? { isService: dto.isService } : {}),
     };
+    await this.pgService.products.update(id, patchDto);
+
     if (dto.providerIds) {
+      const product = await this.pgService.products.findOne({
+        where: { id },
+      });
+
       const providers = await this.pgService.providers.findBy({
         id: In(dto.providerIds),
       });
@@ -192,16 +198,12 @@ export default class ProductsService {
         throw new BadRequestException('Non Valid Associated Providers');
       }
 
-      patchDto = {
-        ...patchDto,
-        ...{
-          providers: providers,
-        },
-      };
+      product.providers = providers;
+      await this.pgService.products.save(product);
     }
-    await this.pgService.products.update(id, patchDto);
+
     this.logger.log(`Updated product with ID ${id}`);
-    this.logger.log({ ...patchDto });
+    this.logger.log({ ...dto });
   }
 
   async delete(id: number): Promise<void> {
