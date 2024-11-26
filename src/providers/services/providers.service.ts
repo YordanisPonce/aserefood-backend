@@ -4,18 +4,13 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import Province from '../../database/entities/province.entity';
 import ProvinceOutDto from '../../provinces/dto/out/province.out.dto';
 import Provider from '../../database/entities/provider.entity';
 import ProviderOutDto from '../dto/out/provider.out.dto';
 import PgService from '../../database/services/pg.service';
-import ProvinceSearchInDto from '../../provinces/dto/in/province.search.in.dto';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
 import ProviderSearchInDto from '../dto/in/provider.search.in.dto';
-import ProvinceWithMunicipalitiesOutDto from '../../provinces/dto/out/province-with-municipalities.out.dto';
-import ProvinceInDto from '../../provinces/dto/in/province.in.dto';
 import ProviderInDto from '../dto/in/provider.in.dto';
-import ProvinceUpdateInDto from '../../provinces/dto/in/province.update.in.dto';
 import ProviderUpdateInDto from '../dto/in/provider.update.in.dto';
 import createPatchFields from '../../utils/dto/patch-fields.util';
 
@@ -63,7 +58,7 @@ export default class ProvidersService {
   async getAll(): Promise<ProviderOutDto[]> {
     const providers = await this.pgService.providers.find({});
 
-    return providers.map(x => this.toOutDto(x));
+    return providers.map((x) => this.toOutDto(x));
   }
 
   async getById(id: number): Promise<ProviderOutDto> {
@@ -124,7 +119,7 @@ export default class ProvidersService {
     this.logger.log({ ...patchDto });
   }
 
-  async delete(id: number): Promise<void>{
+  async delete(id: number): Promise<void> {
     const providersToDelete = await this.pgService.providers.findOne({
       where: { id },
       relations: ['products'],

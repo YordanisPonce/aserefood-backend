@@ -5,10 +5,7 @@ import V1ProvidersController from './controllers/v1-providers.controller';
 import ProvidersService from './services/providers.service';
 
 @Module({
-  imports: [
-    DatabaseModule,
-    AuthModule,
-  ],
+  imports: [DatabaseModule, AuthModule],
   controllers: [V1ProvidersController],
   providers: [ProvidersService],
   exports: [ProvidersService],

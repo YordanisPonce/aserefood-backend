@@ -12,27 +12,25 @@ import {
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
-  ApiBearerAuth, ApiConflictResponse, ApiCreatedResponse, ApiForbiddenResponse,
+  ApiBearerAuth,
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
-  ApiTags, ApiUnauthorizedResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { CacheInterceptor } from '@nestjs/cache-manager';
-import ProductsService from '../../products/services/products.service';
 import LanguagesService from '../services/languages.service';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
-import ProductOutDto from '../../products/dto/out/product.out.dto';
-import ProductSearchInDto from '../../products/dto/in/product.search.in.dto';
 import LanguageOutDto from '../dto/out/language.out.dto';
 import LanguageSearchInDto from '../dto/in/language.search.in.dto';
-import ProductWithProvidersOutDto from '../../products/dto/out/product-with-providers.out.dto';
 import { Role, Roles } from '../../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
-import ProductInDto from '../../products/dto/in/product.in.dto';
 import LanguageInDto from '../dto/in/language.in.dto';
-import ProductUpdateInDto from '../../products/dto/in/product.update.in.dto';
 import LanguageUpdateInDto from '../dto/in/language.update.in.dto';
 
 @Controller('v1/languages')
@@ -72,7 +70,7 @@ export default class V1LanguagesController {
   @Roles(Role.Admin)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
-  @ApiCreatedResponse({ description: 'Ok', type: LanguageOutDto})
+  @ApiCreatedResponse({ description: 'Ok', type: LanguageOutDto })
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })

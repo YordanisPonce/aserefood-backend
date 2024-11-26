@@ -12,22 +12,22 @@ import {
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
-  ApiBearerAuth, ApiConflictResponse, ApiCreatedResponse, ApiForbiddenResponse,
+  ApiBearerAuth,
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
-  ApiTags, ApiUnauthorizedResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { CacheInterceptor } from '@nestjs/cache-manager';
-import LanguagesService from '../../languages/services/languages.service';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
 import LanguageOutDto from '../../languages/dto/out/language.out.dto';
-import LanguageSearchInDto from '../../languages/dto/in/language.search.in.dto';
 import { Role, Roles } from '../../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
-import LanguageInDto from '../../languages/dto/in/language.in.dto';
-import LanguageUpdateInDto from '../../languages/dto/in/language.update.in.dto';
 import CurrenciesService from '../services/currencies.service';
 import CurrencyOutDto from '../dto/out/currency.out.dto';
 import CurrencySearchInDto from '../dto/in/currency.search.in.dto';
@@ -37,7 +37,7 @@ import CurrencyUpdateInDto from '../dto/in/currency.update.in.dto';
 @Controller('v1/currencies')
 @ApiTags('currencies')
 @UseInterceptors(CacheInterceptor)
-export default class V1CurrenciesController{
+export default class V1CurrenciesController {
   constructor(private readonly currenciesService: CurrenciesService) {}
 
   @Get('')
@@ -71,11 +71,14 @@ export default class V1CurrenciesController{
   @Roles(Role.Admin)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
-  @ApiCreatedResponse({ description: 'Ok', type: LanguageOutDto})
+  @ApiCreatedResponse({ description: 'Ok', type: LanguageOutDto })
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  @ApiConflictResponse({ description: 'Conflict (Other currency with Code or Base Currency already exists)' })
+  @ApiConflictResponse({
+    description:
+      'Conflict (Other currency with Code or Base Currency already exists)',
+  })
   @ApiOperation({ summary: 'Create a new Currency if does not exist' })
   async post(@Body() dto: CurrencyInDto) {
     return this.currenciesService.post(dto);
@@ -90,7 +93,10 @@ export default class V1CurrenciesController{
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  @ApiConflictResponse({ description: 'Conflict (Other currency with Code or Base Currency already exists)' })
+  @ApiConflictResponse({
+    description:
+      'Conflict (Other currency with Code or Base Currency already exists)',
+  })
   @ApiOperation({ summary: 'Update a Currency by its id' })
   async put(
     @Param('id', ParseIntPipe) id: number,

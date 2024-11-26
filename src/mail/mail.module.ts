@@ -15,7 +15,7 @@ import MailService from './services/mail.service';
           port: configService.get('MAIL_PORT'),
           auth: {
             user: configService.get('MAIL_USER'),
-            pass: configService.get('MAIL_PASSWORD')
+            pass: configService.get('MAIL_PASSWORD'),
           },
         },
       }),

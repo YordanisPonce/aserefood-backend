@@ -1,4 +1,12 @@
-import { Column, Entity, Index, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  ManyToMany,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import Province from './province.entity';
 import Zone from './zone.entity';
 import ContactInfo from './contact-info.entity';
@@ -8,14 +16,16 @@ export default class Municipality {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column('character varying', {length: 255})
-  @Index({unique: true})
+  @Column('character varying', { length: 255 })
+  @Index({ unique: true })
   name: string;
 
   @Column()
   provinceId: number;
 
-  @ManyToOne(() => Province, (province) => province.municipalities, {onDelete: 'CASCADE'})
+  @ManyToOne(() => Province, (province) => province.municipalities, {
+    onDelete: 'CASCADE',
+  })
   province: Province;
 
   @ManyToMany(() => Zone, (zone) => zone.municipalities)
@@ -23,5 +33,4 @@ export default class Municipality {
 
   @OneToMany(() => ContactInfo, (contactInfo) => contactInfo.municipality)
   contactInfos: ContactInfo[];
-
 }

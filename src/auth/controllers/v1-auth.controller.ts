@@ -2,15 +2,17 @@ import {
   Body,
   Controller,
   Post,
+  Request,
   UseGuards,
   UseInterceptors,
-  Request,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
-  ApiBearerAuth, ApiConflictResponse,
+  ApiBearerAuth,
+  ApiConflictResponse,
   ApiCreatedResponse,
-  ApiForbiddenResponse, ApiNotFoundResponse,
+  ApiForbiddenResponse,
+  ApiNotFoundResponse,
   ApiOperation,
   ApiTags,
   ApiUnauthorizedResponse,
@@ -113,7 +115,7 @@ export default class AuthController {
     type: CustomerOutDto,
   })
   @ApiConflictResponse({
-    description: 'Conflict with Username or Email'
+    description: 'Conflict with Username or Email',
   })
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiOperation({ summary: 'Register Customer' })

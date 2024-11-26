@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import ProviderOutDto from '../../../providers/dto/out/provider.out.dto';
 
-export default class ProductWithProvidersOutDto{
+export default class ProductWithProvidersOutDto {
   @ApiProperty()
   id: number;
 
@@ -23,6 +23,6 @@ export default class ProductWithProvidersOutDto{
   @ApiProperty()
   isService: boolean;
 
-  @ApiProperty({type: [ProviderOutDto]})
+  @ApiProperty({ type: [ProviderOutDto] })
   providers: ProviderOutDto[];
 }

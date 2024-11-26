@@ -5,12 +5,9 @@ import V1ProductsController from './controllers/v1-products.controller';
 import ProductsService from './services/products.service';
 
 @Module({
-  imports: [
-    DatabaseModule,
-    AuthModule,
-  ],
+  imports: [DatabaseModule, AuthModule],
   controllers: [V1ProductsController],
   providers: [ProductsService],
-  exports: [ProductsService]
+  exports: [ProductsService],
 })
 export class ProductModule {}

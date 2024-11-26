@@ -1,5 +1,4 @@
 import PgService from '../../database/services/pg.service';
-import UsersService from '../services/users.service';
 import { ConfigService } from '@nestjs/config';
 import { Role } from '../../auth/decorators/roles.decorator';
 import { Injectable } from '@nestjs/common';

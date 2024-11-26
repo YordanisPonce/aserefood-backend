@@ -7,12 +7,12 @@ export default class CategoryOutDto {
   @ApiProperty()
   name: string;
 
-  @ApiProperty({nullable: true})
+  @ApiProperty({ nullable: true })
   description?: string;
 
-  @ApiProperty({nullable: true})
+  @ApiProperty({ nullable: true })
   parentId?: number;
 
-  @ApiProperty({type: CategoryOutDto, nullable: true})
+  @ApiProperty({ type: CategoryOutDto, nullable: true })
   children?: CategoryOutDto[];
 }

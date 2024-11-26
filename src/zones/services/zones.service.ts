@@ -5,19 +5,13 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import Municipality from '../../database/entities/municipality.entity';
-import MunicipalityOutDto from '../../municipalities/dto/out/municipality.out.dto';
 import Zone from '../../database/entities/zone.entity';
 import ZoneOutDto from '../dto/out/zone.out.dto';
 import ZoneWithMunicipalitiesOutDto from '../dto/out/zone-with-municipalities.out.dto';
 import PgService from '../../database/services/pg.service';
-import MunicipalityUpdateInDto from '../../municipalities/dto/in/municipality.update.in.dto';
-import createPatchFields from '../../utils/dto/patch-fields.util';
 import ZoneUpdateInDto from '../dto/in/zone.update.in.dto';
-import MunicipalityInDto from '../../municipalities/dto/in/municipality.in.dto';
 import ZoneInDto from '../dto/in/zone.in.dto';
 import { In } from 'typeorm';
-import MunicipalitySearchInDto from '../../municipalities/dto/in/municipality.search.in.dto';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
 import ZoneSearchInDto from '../dto/in/zone.search.in.dto';
 
@@ -27,9 +21,7 @@ export default class ZonesService {
 
   constructor(private readonly pgService: PgService) {}
 
-  async search(
-    dto: ZoneSearchInDto,
-  ): Promise<PaginatedOutDto<ZoneOutDto>> {
+  async search(dto: ZoneSearchInDto): Promise<PaginatedOutDto<ZoneOutDto>> {
     const queryBuilder = this.pgService.zones
       .createQueryBuilder('zone')
       .leftJoinAndSelect('zone.municipalities', 'municipality')
@@ -37,17 +29,24 @@ export default class ZonesService {
 
     // Filtering
     if (dto.search) {
-      queryBuilder.where('zone.name ILIKE :search OR zone.description ILIKE :search', {
-        search: `%${dto.search}%`,
-      });
+      queryBuilder.where(
+        'zone.name ILIKE :search OR zone.description ILIKE :search',
+        {
+          search: `%${dto.search}%`,
+        },
+      );
     }
 
     if (dto.provinceId) {
-      queryBuilder.andWhere('province.id = :provinceId', { provinceId: dto.provinceId });
+      queryBuilder.andWhere('province.id = :provinceId', {
+        provinceId: dto.provinceId,
+      });
     }
 
     if (dto.municipalityId) {
-      queryBuilder.andWhere('municipality.id = :municipalityId', { municipalityId: dto.municipalityId });
+      queryBuilder.andWhere('municipality.id = :municipalityId', {
+        municipalityId: dto.municipalityId,
+      });
     }
 
     // Ordering
@@ -79,7 +78,7 @@ export default class ZonesService {
       .leftJoinAndSelect('municipality.province', 'province')
       .getMany();
 
-    return zones.map(zone => this.toOutWithMunicipalitiesDto(zone));
+    return zones.map((zone) => this.toOutWithMunicipalitiesDto(zone));
   }
 
   async getById(id: number): Promise<ZoneWithMunicipalitiesOutDto> {

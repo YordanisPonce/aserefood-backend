@@ -73,7 +73,7 @@ export default class CategoriesService {
     };
   }
 
-  async getAll(): Promise<CategoryOutDto[]>{
+  async getAll(): Promise<CategoryOutDto[]> {
     const categories = await this.pgService.categories.find({
       relations: ['children'],
     });
@@ -181,5 +181,4 @@ export default class CategoriesService {
 
     return dto;
   }
-  
 }

@@ -8,12 +8,7 @@ import AdminSeederService from './seeders/admin-seeder.service';
 import MailModule from '../mail/mail.module';
 
 @Module({
-  imports: [
-    AuthModule,
-    ConfigModule,
-    DatabaseModule,
-    MailModule,
-  ],
+  imports: [AuthModule, ConfigModule, DatabaseModule, MailModule],
   controllers: [V1UsersController],
   providers: [UsersService, AdminSeederService],
   exports: [UsersService, AdminSeederService],

@@ -10,13 +10,17 @@ export class InventoryEntry {
   @Column()
   productId: number;
 
-  @ManyToOne(() => Product, (product) => product.inventoryEntries, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Product, (product) => product.inventoryEntries, {
+    onDelete: 'CASCADE',
+  })
   product: Product;
 
   @Column()
   zoneId: number;
 
-  @ManyToOne(() => Zone, (zone) => zone.inventoryEntries, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Zone, (zone) => zone.inventoryEntries, {
+    onDelete: 'CASCADE',
+  })
   zone: Zone;
 
   @Column('int')

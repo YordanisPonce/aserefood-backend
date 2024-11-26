@@ -1,24 +1,15 @@
 import {
   BadRequestException,
-  ConflictException,
   Injectable,
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import ProvidersService from '../../providers/services/providers.service';
 import PgService from '../../database/services/pg.service';
-import Product from '../../database/entities/product.entity';
-import ProductOutDto from '../../products/dto/out/product.out.dto';
 import { InventoryEntry } from '../../database/entities/inventory-entry.entity';
 import InventoryEntryOutDto from '../dto/out/inventory-entry.out.dto';
-import CategoryInDto from '../../categories/dto/in/category.in.dto';
 import createPatchFields from '../../utils/dto/patch-fields.util';
 import InventoryEntryUpdateInDto from '../dto/in/inventory-entry.update.in.dto';
-import ProductInDto from '../../products/dto/in/product.in.dto';
-import { In } from 'typeorm';
 import InventoryEntryInDto from '../dto/in/inventory-entry.in.dto';
-import CategoryOutDto from '../../categories/dto/out/category.out.dto';
-import ProductSearchInDto from '../../products/dto/in/product.search.in.dto';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
 import InventoryEntrySearchInDto from '../dto/in/inventory-entry.search.in.dto';
 
@@ -71,12 +62,12 @@ export default class InventoryEntriesService {
     };
   }
 
-  async getAll(): Promise<InventoryEntryOutDto[]>{
+  async getAll(): Promise<InventoryEntryOutDto[]> {
     const inventoryEntries = await this.pgService.inventoryEntries.find({
-      relations: ['product', 'zone']
+      relations: ['product', 'zone'],
     });
 
-    return inventoryEntries.map(x => this.toOutDto(x));
+    return inventoryEntries.map((x) => this.toOutDto(x));
   }
 
   async getById(id: number): Promise<InventoryEntryOutDto> {
@@ -99,27 +90,32 @@ export default class InventoryEntriesService {
 
     const inventoryEntries: InventoryEntryOutDto[] = [];
     for (const dto of dtoBulk) {
-      const existingInventoryEntry = await this.pgService.inventoryEntries.findOne({
-        where: { productId: dto.productId, zoneId: dto.zoneId },
-      });
+      const existingInventoryEntry =
+        await this.pgService.inventoryEntries.findOne({
+          where: { productId: dto.productId, zoneId: dto.zoneId },
+        });
 
       if (existingInventoryEntry) {
-        await this.patch(existingInventoryEntry.id, {price: dto.price, quantity: dto.quantity});
-      }
-      else{
+        await this.patch(existingInventoryEntry.id, {
+          price: dto.price,
+          quantity: dto.quantity,
+        });
+      } else {
         const product = await this.pgService.products.findOne({
           where: { id: dto.productId },
         });
 
-        if(!product){
-          throw new NotFoundException(`Product with id "${dto.productId}" not found.`);
+        if (!product) {
+          throw new NotFoundException(
+            `Product with id "${dto.productId}" not found.`,
+          );
         }
 
         const zone = await this.pgService.zones.findOne({
           where: { id: dto.zoneId },
-        })
+        });
 
-        if(!zone){
+        if (!zone) {
           throw new NotFoundException(`Zone with id "${dto.zoneId}" not found`);
         }
 
@@ -131,7 +127,9 @@ export default class InventoryEntriesService {
         });
         await this.pgService.inventoryEntries.save(newInventoryEntry);
 
-        this.logger.log(`Created new inventory entry with ID ${newInventoryEntry.id}`);
+        this.logger.log(
+          `Created new inventory entry with ID ${newInventoryEntry.id}`,
+        );
 
         inventoryEntries.push(this.toOutDto(newInventoryEntry));
       }

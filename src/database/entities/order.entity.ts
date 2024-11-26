@@ -1,4 +1,12 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import TransferPayment from './transfer-payment.entity';
 import OnlinePayment from './online-payment.entity';
 import User from './user.entity';
@@ -7,22 +15,30 @@ import { OrderStatus } from './constants';
 import OrderProducts from './order-product.entity';
 
 @Entity({ name: 'orders' })
-export default class Order{
+export default class Order {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @OneToOne(() => TransferPayment, transferPayment => transferPayment.order, { onDelete: 'SET NULL', nullable: true })
+  @OneToOne(() => TransferPayment, (transferPayment) => transferPayment.order, {
+    onDelete: 'SET NULL',
+    nullable: true,
+  })
   @JoinColumn()
   transferPayment?: TransferPayment;
 
-  @OneToOne(() => OnlinePayment, onlinePayment => onlinePayment.order, { onDelete: 'SET NULL', nullable: true })
+  @OneToOne(() => OnlinePayment, (onlinePayment) => onlinePayment.order, {
+    onDelete: 'SET NULL',
+    nullable: true,
+  })
   @JoinColumn()
   onlinePayment?: OnlinePayment;
 
-  @ManyToOne(() => User, (user) => user.orders, {onDelete: 'CASCADE' })
+  @ManyToOne(() => User, (user) => user.orders, { onDelete: 'CASCADE' })
   user: User;
 
-  @ManyToOne(() => ContactInfo, (contactInfo) => contactInfo.orders, {onDelete: 'CASCADE' })
+  @ManyToOne(() => ContactInfo, (contactInfo) => contactInfo.orders, {
+    onDelete: 'CASCADE',
+  })
   contactInfo: ContactInfo;
 
   @Column({

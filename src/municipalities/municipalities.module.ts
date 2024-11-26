@@ -5,10 +5,7 @@ import V1MunicipalitiesController from './controllers/v1-municipalities.controll
 import MunicipalitiesService from './services/municipalities.service';
 
 @Module({
-  imports: [
-    AuthModule,
-    DatabaseModule,
-  ],
+  imports: [AuthModule, DatabaseModule],
   controllers: [V1MunicipalitiesController],
   providers: [MunicipalitiesService],
   exports: [MunicipalitiesService],

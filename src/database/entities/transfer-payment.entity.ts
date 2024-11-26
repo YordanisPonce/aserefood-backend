@@ -9,6 +9,8 @@ export default class TransferPayment {
   @Column('character varying', { length: 255, nullable: true })
   referencePayment?: string;
 
-  @OneToOne(() => Order, order => order.transferPayment, { onDelete: 'CASCADE' })
+  @OneToOne(() => Order, (order) => order.transferPayment, {
+    onDelete: 'CASCADE',
+  })
   order: Order;
 }

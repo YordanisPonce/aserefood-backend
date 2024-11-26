@@ -33,7 +33,7 @@ export default class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    if(!user.isConfirmed){
+    if (!user.isConfirmed) {
       throw new UnauthorizedException('Non confirmed account');
     }
 

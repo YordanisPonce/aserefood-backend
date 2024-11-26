@@ -1,18 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsBoolean,
-  IsEmail,
-  IsEnum,
-  IsInt,
-  IsNotEmpty, IsNumber,
+  IsNotEmpty,
+  IsNumber,
   IsString,
-  Length,
-  Matches,
   MaxLength,
   Min,
-  MinLength,
 } from 'class-validator';
-import { Role } from '../../../auth/decorators/roles.decorator';
 
 export default class CurrencyInDto {
   @ApiProperty()
