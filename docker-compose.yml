@@ -25,10 +25,10 @@ services:
         SENDER_EMAIL: asere-food@gmail.com
         SENDER_NAME: Asere Food Admin
         
-        DB_HOST: aws-0-us-east-1.pooler.supabase.com
+        DB_HOST: asere-food-db
         DB_PORT: 5432
         DB_DATABASE: asere-food-db
-        DB_USERNAME: postgres.giewupmqqrcnrdillwax
+        DB_USERNAME: postgres
         DB_PASSWORD: fCXko33My1bFAkKX
 
     networks:
