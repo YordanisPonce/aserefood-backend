@@ -118,7 +118,7 @@ export default class ZonesService {
     ) {
       throw new BadRequestException('Non Valid Associated Municipalities');
     }
-
+    
     const newZone = this.pgService.zones.create({
       name: dto.name,
       description: dto.description,
