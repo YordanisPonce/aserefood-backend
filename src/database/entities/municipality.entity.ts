@@ -28,7 +28,10 @@ export default class Municipality {
   })
   province: Province;
 
-  @ManyToOne(() => Zone, (zone) => zone.municipalities, {onDelete: 'SET NULL', nullable: true})
+  @ManyToOne(() => Zone, (zone) => zone.municipalities, {
+    onDelete: 'SET NULL',
+    nullable: true,
+  })
   zone?: Zone;
 
   @OneToMany(() => ContactInfo, (contactInfo) => contactInfo.municipality)

@@ -112,8 +112,10 @@ export default class ZonesService {
       relations: ['zone'],
     });
 
-
-    if (municipalities.length !== dto.municipalityIds.length || municipalities.filter(x => x.zone).length !== 0) {
+    if (
+      municipalities.length !== dto.municipalityIds.length ||
+      municipalities.filter((x) => x.zone).length !== 0
+    ) {
       throw new BadRequestException('Non Valid Associated Municipalities');
     }
 
@@ -163,7 +165,7 @@ export default class ZonesService {
 
     const z = await this.pgService.zones.findOne({
       where: { id },
-      relations: ['municipalities']
+      relations: ['municipalities'],
     });
 
     if (dto.municipalityIds) {
@@ -172,7 +174,14 @@ export default class ZonesService {
         relations: ['zone'],
       });
 
-      if (municipalities.length !== dto.municipalityIds.length || municipalities.filter(x => x.zone).length !== 0) {
+      const municipalitiesIds = z.municipalities.map((x) => x.id);
+
+      if (
+        municipalities.length !== dto.municipalityIds.length ||
+        municipalities.filter(
+          (x) => x.zone && !municipalitiesIds.includes(x.id),
+        ).length !== 0
+      ) {
         throw new BadRequestException('Non Valid Associated Municipalities');
       }
 
