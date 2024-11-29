@@ -40,6 +40,18 @@ import MunicipalityUpdateInDto from '../dto/in/municipality.update.in.dto';
 export default class V1MunicipalitiesController {
   constructor(private readonly municipalitiesService: MunicipalitiesService) {}
 
+  @Get('/available')
+  @Roles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({ description: 'Ok', type: [MunicipalityOutDto] })
+  @ApiOperation({
+    summary: 'Get all Available Municipalities for Zone Creation',
+  })
+  async getAllAvailable() {
+    return this.municipalitiesService.getAvailableMunicipalities();
+  }
+
   @Get('')
   @ApiOkResponse({
     description: 'Ok',
