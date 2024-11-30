@@ -58,6 +58,15 @@ export default class V1CategoriesController {
     return this.categoriesService.getAll();
   }
 
+  @Get('/ancestors/:id')
+  @ApiOkResponse({ description: 'Ok', type: [CategoryOutDto] })
+  @ApiNotFoundResponse({ description: 'Not Found' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiOperation({ summary: 'Get ancestor categories of an specific category' })
+  async getAncestors(@Param('id', ParseIntPipe) id: number) {
+    return this.categoriesService.getAncestors(id);
+  }
+
   @Get('/:id')
   @ApiOkResponse({ description: 'Ok', type: CategoryOutDto })
   @ApiNotFoundResponse({ description: 'Not Found' })
