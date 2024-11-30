@@ -92,6 +92,22 @@ export default class CategoriesService {
     return this.toOutDto(category);
   }
 
+  async getAncestors(id: number): Promise<CategoryOutDto[]> {
+    const ancestors: CategoryOutDto[] = [];
+
+    let currentCategory = await this.pgService.categories.findOne({
+      where: { id },
+      relations: ['parent'],
+    });
+
+    while (currentCategory) {
+      ancestors.unshift(this.toOutDto(currentCategory));
+      currentCategory = currentCategory.parent;
+    }
+
+    return ancestors;
+  }
+
   async post(dto: CategoryInDto): Promise<CategoryOutDto> {
     const existingCategoryByName = await this.pgService.categories.findOne({
       where: { name: dto.name },

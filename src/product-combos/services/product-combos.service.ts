@@ -26,6 +26,7 @@ export default class ProductCombosService {
     const queryBuilder = this.pgService.productCombos
       .createQueryBuilder('productCombo')
       .leftJoinAndSelect('productCombo.zone', 'zone')
+      .leftJoinAndSelect('zone.inventoryEntries', 'inventoryEntry')
       .leftJoinAndSelect('productCombo.productComboItems', 'productComboItems')
       .leftJoinAndSelect('productComboItems.product', 'product');
 
@@ -83,6 +84,7 @@ export default class ProductCombosService {
       .leftJoinAndSelect('productCombo.zone', 'zone')
       .leftJoinAndSelect('productCombo.productComboItems', 'productComboItems')
       .leftJoinAndSelect('productComboItems.product', 'product')
+      .leftJoinAndSelect('zone.inventoryEntries', 'inventoryEntry')
       .getMany();
 
     return productCombos.map((pc) => this.toOutDto(pc));
@@ -94,6 +96,7 @@ export default class ProductCombosService {
       .leftJoinAndSelect('productCombo.zone', 'zone')
       .leftJoinAndSelect('productCombo.productComboItems', 'productComboItems')
       .leftJoinAndSelect('productComboItems.product', 'product')
+      .leftJoinAndSelect('zone.inventoryEntries', 'inventoryEntry')
       .where('productCombo.id = :id', { id })
       .getOne();
 
@@ -225,7 +228,7 @@ export default class ProductCombosService {
 
     const pc = await this.pgService.productCombos.findOne({
       where: { id },
-      relations: ['productComboItems']
+      relations: ['productComboItems'],
     });
 
     if (dto.productComboItems) {
@@ -237,12 +240,12 @@ export default class ProductCombosService {
         throw new BadRequestException('Non Valid Associated Products');
       }
 
-      pc.productComboItems = dto.productComboItems.map(x => {
+      pc.productComboItems = dto.productComboItems.map((x) => {
         return this.pgService.productComboItems.create({
           productComboId: pc.id,
           productId: x.productId,
           amount: x.amount,
-        })
+        });
       });
       await this.pgService.productCombos.save(pc);
     }
@@ -286,10 +289,17 @@ export default class ProductCombosService {
     dto.shortDescription = productCombo.shortDescription;
     dto.zoneId = productCombo.zoneId;
     dto.zoneName = productCombo.zone?.name ?? '';
-    dto.referencePrice = productCombo.productComboItems.reduce(
-      (a, b) => a + b.amount,
-      0,
-    );
+    dto.referencePrice = productCombo.zone
+      ? productCombo.productComboItems.reduce(
+          (a, b) =>
+            a +
+            b.amount *
+              productCombo.zone.inventoryEntries
+                .filter((e) => e.productId === b.productId)
+                .reduce((y, z) => y + parseFloat(z.price.toString()), 0),
+          0,
+        )
+      : -1;
     dto.productComboItems =
       productCombo.productComboItems?.map((x) => ({
         id: x.id,

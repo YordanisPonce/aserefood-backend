@@ -10,6 +10,7 @@ import {
 import Zone from './zone.entity';
 import ProductComboItem from './product-combo-item.entity';
 import Promotion from './promotion.entity';
+import CartProduct from './cart-product.entity';
 
 @Entity({ name: 'product_combos' })
 export default class ProductCombo {
@@ -46,6 +47,12 @@ export default class ProductCombo {
     (productComboItem) => productComboItem.productCombo,
   )
   productComboItems: ProductComboItem[];
+
+  @OneToMany(
+    () => CartProduct,
+    (shoppingCartItem) => shoppingCartItem.productCombo,
+  )
+  shoppingCartItems: CartProduct[];
 
   @ManyToMany(() => Promotion, (promotion) => promotion.productCombos)
   promotions: Promotion[];

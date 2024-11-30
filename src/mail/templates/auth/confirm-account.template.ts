@@ -1,4 +1,4 @@
-import MailTemplate from './mail.template';
+import MailTemplate from '../mail.template';
 
 export default class ConfirmAccountTemplate extends MailTemplate<ConfirmAccountData> {
   getEmail(): string {

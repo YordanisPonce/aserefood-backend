@@ -10,6 +10,7 @@ import {
 import Province from './province.entity';
 import Zone from './zone.entity';
 import ContactInfo from './contact-info.entity';
+import CartProduct from './cart-product.entity';
 
 @Entity({ name: 'municipalities' })
 export default class Municipality {
@@ -36,4 +37,10 @@ export default class Municipality {
 
   @OneToMany(() => ContactInfo, (contactInfo) => contactInfo.municipality)
   contactInfos: ContactInfo[];
+
+  @OneToMany(
+    () => CartProduct,
+    (shoppingCartItem) => shoppingCartItem.municipality,
+  )
+  shoppingCartItems: CartProduct[];
 }
