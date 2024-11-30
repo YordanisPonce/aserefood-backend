@@ -1,4 +1,4 @@
-import MailTemplate from './mail.template';
+import MailTemplate from '../mail.template';
 
 export default class ResetPasswordTemplate extends MailTemplate<ResetPasswordData> {
   getEmail(): string {
