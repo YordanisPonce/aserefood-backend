@@ -13,6 +13,6 @@ export default class CategoryOutDto {
   @ApiProperty({ nullable: true })
   parentId?: number;
 
-  @ApiProperty({ type: CategoryOutDto, nullable: true })
+  @ApiProperty({ type: [CategoryOutDto], nullable: true })
   children?: CategoryOutDto[];
 }
