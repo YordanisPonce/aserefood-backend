@@ -24,7 +24,11 @@ export default class CategoriesService {
   ): Promise<PaginatedOutDto<CategoryOutDto>> {
     const queryBuilder = this.pgService.categories
       .createQueryBuilder('category')
-      .leftJoinAndSelect('category.children', 'children');
+      .leftJoinAndSelect('category.children', 'children1')
+      .leftJoinAndSelect('children1.children', 'children2')
+      .leftJoinAndSelect('children2.children', 'children3')
+      .leftJoinAndSelect('children3.children', 'children4')
+      .leftJoinAndSelect('children4.children', 'children5');
 
     if (dto.search) {
       queryBuilder.where(
@@ -75,7 +79,7 @@ export default class CategoriesService {
 
   async getAll(): Promise<CategoryOutDto[]> {
     const categories = await this.pgService.categories.find({
-      relations: ['children'],
+      relations: ['children.children.children.children.children'],
     });
 
     return categories.map((category) => this.toOutDto(category));
@@ -84,7 +88,7 @@ export default class CategoriesService {
   async getById(id: number): Promise<CategoryOutDto> {
     const category = await this.pgService.categories.findOne({
       where: { id },
-      relations: ['children'],
+      relations: ['children.children.children.children.children'],
     });
     if (!category) {
       throw new NotFoundException(`Category with ID ${id} not found`);
@@ -97,7 +101,7 @@ export default class CategoriesService {
 
     let currentCategory = await this.pgService.categories.findOne({
       where: { id },
-      relations: ['parent'],
+      relations: ['parent.parent.parent.parent.parent'],
     });
 
     while (currentCategory) {
@@ -152,7 +156,7 @@ export default class CategoriesService {
       throw new NotFoundException(`Category with ID ${id} not found`);
     }
 
-    let patchDto = createPatchFields(dto);
+    const patchDto = createPatchFields(dto);
 
     await this.pgService.categories.update(id, patchDto);
     this.logger.log(`Updated category with ID ${id}`);

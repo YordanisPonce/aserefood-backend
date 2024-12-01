@@ -1,6 +1,4 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import ProductOutDto from '../../products/dto/out/product.out.dto';
-import Product from '../../database/entities/product.entity';
 import PgService from '../../database/services/pg.service';
 import { MoreThan } from 'typeorm';
 import AvailableItemsByMunicipalityOutDto from '../dto/out/available-by-municipality.out.dto';
