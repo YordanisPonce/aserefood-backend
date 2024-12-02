@@ -13,6 +13,9 @@ export default class CategoryOutDto {
   @ApiProperty({ nullable: true })
   parentId?: number;
 
+  @ApiProperty({ nullable: true })
+  parentName?: string;
+
   @ApiProperty({ type: [CategoryOutDto], nullable: true })
   children?: CategoryOutDto[];
 }
