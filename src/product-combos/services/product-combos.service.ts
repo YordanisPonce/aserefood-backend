@@ -240,13 +240,19 @@ export default class ProductCombosService {
         throw new BadRequestException('Non Valid Associated Products');
       }
 
-      pc.productComboItems = dto.productComboItems.map((x) => {
+      await this.pgService.productComboItems.remove(pc.productComboItems);
+      const newProductComboItems = dto.productComboItems.map((x) => {
         return this.pgService.productComboItems.create({
           productComboId: pc.id,
           productId: x.productId,
           amount: x.amount,
         });
       });
+      await this.pgService.productComboItems.save(newProductComboItems);
+
+      pc.productComboItems = newProductComboItems;
+
+      this.logger.log(pc.productComboItems);
       await this.pgService.productCombos.save(pc);
     }
 
