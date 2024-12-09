@@ -12,6 +12,7 @@ import {
   Min,
 } from 'class-validator';
 import { DiscountOption } from '../../../database/entities/constants';
+import { Type } from 'class-transformer';
 
 export default class PromotionUpdateInDto {
   @ApiProperty({ required: false })
@@ -74,11 +75,13 @@ export default class PromotionUpdateInDto {
   @IsOptional()
   @IsNotEmpty()
   @IsDate()
+  @Type(() => Date)
   startDate?: Date;
 
   @ApiProperty({ required: false })
   @IsOptional()
   @IsNotEmpty()
   @IsDate()
+  @Type(() => Date)
   endDate?: Date;
 }
