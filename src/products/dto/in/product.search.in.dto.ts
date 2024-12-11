@@ -25,13 +25,17 @@ export default class ProductSearchInDto extends PaginatedInDto {
   @Transform(({ value }) => parseInt(value, 10))
   providerId?: number;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, type: [Number] })
   @IsOptional()
   @IsNotEmpty()
-  @IsInt()
-  @Min(0)
-  @Transform(({ value }) => parseInt(value, 10))
-  categoryId?: number;
+  @IsInt({ each: true })
+  @Min(0, { each: true })
+  @Transform(({ value }) =>
+    Array.isArray(value)
+      ? value.map((val) => parseInt(val, 10))
+      : [value].map((val) => parseInt(val, 10)),
+  )
+  categoryIds?: number[];
 
   @ApiProperty({ required: false })
   @IsOptional()
