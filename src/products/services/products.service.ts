@@ -131,6 +131,7 @@ export default class ProductsService {
       isService: dto.isService,
       categoryId: dto.categoryId,
       providers: providers,
+      image: dto.image
     });
     await this.pgService.products.save(newProduct);
 
@@ -167,6 +168,12 @@ export default class ProductsService {
       ...patchDto,
       ...(dto.description !== undefined
         ? { description: dto.description }
+        : {}),
+    };
+    patchDto = {
+      ...patchDto,
+      ...(dto.image !== undefined
+        ? { image: dto.image }
         : {}),
     };
     patchDto = {
@@ -271,6 +278,7 @@ export default class ProductsService {
     dto.isService = product.isService;
     dto.categoryId = product.categoryId;
     dto.categoryName = product.category?.name ?? '';
+    dto.image = product.image;
 
     return dto;
   }
@@ -288,6 +296,7 @@ export default class ProductsService {
       id: x.id,
       name: x.name,
     }));
+    dto.image = product.image;
 
     return dto;
   }
