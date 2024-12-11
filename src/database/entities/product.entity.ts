@@ -29,6 +29,9 @@ export default class Product {
   shortDescription: string;
 
   @Column({ nullable: true })
+  image?: string;
+
+  @Column({ nullable: true })
   description?: string;
 
   @Column('boolean')

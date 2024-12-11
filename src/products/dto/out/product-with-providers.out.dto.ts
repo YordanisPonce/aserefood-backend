@@ -8,6 +8,9 @@ export default class ProductWithProvidersOutDto {
   @ApiProperty()
   name: string;
 
+  @ApiProperty({ nullable: true })
+  image?: string;
+
   @ApiProperty()
   shortDescription: string;
 

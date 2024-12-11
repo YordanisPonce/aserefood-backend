@@ -20,6 +20,11 @@ export default class ProductInDto {
   @ApiProperty({ nullable: true })
   @IsOptional()
   @IsString()
+  image?: string;
+
+  @ApiProperty({ nullable: true })
+  @IsOptional()
+  @IsString()
   description?: string;
 
   @ApiProperty()

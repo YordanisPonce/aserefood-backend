@@ -21,6 +21,11 @@ export default class ProductUpdateInDto {
   @ApiProperty({ nullable: true, required: false })
   @IsOptional()
   @IsString()
+  image?: string;
+
+  @ApiProperty({ nullable: true, required: false })
+  @IsOptional()
+  @IsString()
   description?: string;
 
   @ApiProperty({ required: false })
