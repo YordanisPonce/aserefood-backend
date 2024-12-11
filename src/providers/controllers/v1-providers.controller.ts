@@ -113,6 +113,6 @@ export default class V1ProvidersController {
   @ApiForbiddenResponse({ description: 'Forbidden' })
   @ApiOperation({ summary: 'Delete PERMANENTLY a Provider by its id.' })
   async delete(@Param('id', ParseIntPipe) id: number) {
-    return this.providersService.delete(id);
+    return await this.providersService.delete(id);
   }
 }
