@@ -40,9 +40,9 @@ export default class ProductsService {
       );
     }
 
-    if (dto.categoryId) {
-      queryBuilder.andWhere('category.id = :categoryId', {
-        categoryId: dto.categoryId,
+    if (dto.categoryIds && dto.categoryIds.length > 0) {
+      queryBuilder.andWhere('product.categoryId IN (:...categoryIds)', {
+        categoryIds: dto.categoryIds,
       });
     }
 
