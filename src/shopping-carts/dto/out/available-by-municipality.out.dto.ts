@@ -4,7 +4,7 @@ import ProductComboOutDto from '../../../product-combos/dto/out/product-combo.ou
 import ProductCombo from '../../../database/entities/product-combo.entity';
 
 export class ProductScOutDto {
-  @ApiProperty({ type: ProductComboOutDto })
+  @ApiProperty({ type: ProductOutDto })
   product: ProductOutDto;
 
   @ApiProperty()
