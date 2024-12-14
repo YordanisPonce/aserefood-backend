@@ -22,7 +22,6 @@ import OrdersService from '../services/orders.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Role, Roles } from '../../auth/decorators/roles.decorator';
-import AddToCartInDto from '../../shopping-carts/dto/in/shopping-cart/add-to-cart.in.dto';
 import OrderInDto from '../dto/in/order.in.dto';
 
 @Controller('v1/orders')
@@ -42,7 +41,7 @@ export default class V1OrdersController {
   @ApiConflictResponse({ description: 'Municipality not selected' })
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiOperation({
-    summary: 'Create an Order of the current user',
+    summary: 'Create an Order of the current customer. Only for Costumers',
   })
   async addToCart(@Request() req, @Body() dto: OrderInDto) {
     const userId = req.user.userId;
