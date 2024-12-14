@@ -162,7 +162,7 @@ export default class V1ShoppingCartsController {
   })
   async deleteAll(@Request() req) {
     const userId = req.user.userId;
-    return this.shoppingCartsService.deleteAll(userId);
+    return this.shoppingCartsService.deleteAll(userId, true);
   }
 
   @Delete('/:id')
@@ -178,6 +178,6 @@ export default class V1ShoppingCartsController {
   })
   async delete(@Param('id', ParseIntPipe) id: number, @Request() req) {
     const userId = req.user.userId;
-    return this.shoppingCartsService.delete(userId, id);
+    return this.shoppingCartsService.delete(userId, id, true);
   }
 }

@@ -12,7 +12,6 @@ import MailService from '../../mail/services/mail.service';
 import OrderInDto, { PaymentSelection } from '../dto/in/order.in.dto';
 import ShoppingCartsService from '../../shopping-carts/services/shopping-carts.service';
 import { OrderStatus } from '../../database/entities/constants';
-import OrderItems from '../../database/entities/order-item.entity';
 
 @Injectable()
 export default class OrdersService {
@@ -117,7 +116,7 @@ export default class OrdersService {
 
     await this.pgService.orders.save(newOrder);
 
-    await this.shoppingCartService.deleteAll(userId);
+    await this.shoppingCartService.deleteAll(userId, false);
 
     await this.mailService.sendPendingOrderEmail(
       user.email,
