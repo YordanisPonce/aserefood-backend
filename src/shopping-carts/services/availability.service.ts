@@ -1,10 +1,10 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import PgService from '../../database/services/pg.service';
-import ProductAvailabilitySearchInDto from '../dto/in/product-availability.search.in.dto';
+import ProductAvailabilitySearchInDto from '../dto/in/availability/product-availability.search.in.dto';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
-import { ProductAvailableByMunicipalityOutDto } from '../dto/out/product-available-by-municipality.out..dto';
-import ProductComboAvailabilitySearchInDto from '../dto/in/product-combo-availability.search.in.dto';
-import { ProductComboAvailableByMunicipalityOutDto } from '../dto/out/product-combo-available-by-municipality.out.dto';
+import { ProductAvailableByMunicipalityOutDto } from '../dto/out/availability/product-available-by-municipality.out..dto';
+import ProductComboAvailabilitySearchInDto from '../dto/in/availability/product-combo-availability.search.in.dto';
+import { ProductComboAvailableByMunicipalityOutDto } from '../dto/out/availability/product-combo-available-by-municipality.out.dto';
 import { MoreThan } from 'typeorm';
 
 @Injectable()
@@ -14,15 +14,25 @@ export default class AvailabilityService {
   constructor(private readonly pgService: PgService) {}
 
   async getAvailableProductsByMunicipality(
-    municipalityId: number,
+    userId: number,
     dto: ProductAvailabilitySearchInDto,
+    productIds: number[] | null = null,
+    quantityCheck: boolean = true,
   ): Promise<PaginatedOutDto<ProductAvailableByMunicipalityOutDto>> {
-    const municipality = await this.pgService.municipalities.findOne({
-      where: { id: municipalityId },
+    const identityCart = await this.pgService.shoppingCarts.findOne({
+      where: {
+        userId: userId,
+        productId: null,
+        productComboId: null,
+      },
     });
-    if (!municipality) {
-      throw new NotFoundException('Municipality does not exist');
+    if (!identityCart) {
+      throw new ConflictException(
+        `Municipality for User ${userId} has not been selected`,
+      );
     }
+
+    const municipalityId = identityCart.municipalityId;
 
     const queryBuilder = this.pgService.products
       .createQueryBuilder('product')
@@ -32,8 +42,11 @@ export default class AvailabilityService {
       .leftJoinAndSelect('product.category', 'category')
       .where('municipality.id = :municipalityId', {
         municipalityId: municipalityId,
-      })
-      .andWhere('inventoryEntry.quantity > 0');
+      });
+
+    if (quantityCheck) {
+      queryBuilder.andWhere('inventoryEntry.quantity > 0');
+    }
 
     // Filtering
     if (dto.search) {
@@ -54,6 +67,12 @@ export default class AvailabilityService {
     if (dto.isService !== undefined && dto.isService !== null) {
       queryBuilder.andWhere('provider.isService = :isService', {
         isService: dto.isService,
+      });
+    }
+
+    if (productIds !== null && productIds.length > 0) {
+      queryBuilder.andWhere('product.id IN (:...productIds)', {
+        productIds,
       });
     }
 
@@ -106,21 +125,31 @@ export default class AvailabilityService {
   }
 
   async getAvailableProductCombosByMunicipality(
-    municipalityId: number,
+    userId: number,
     dto: ProductComboAvailabilitySearchInDto,
+    productComboIds: number[] | null = null,
+    quantityCheck: boolean = true,
   ): Promise<PaginatedOutDto<ProductComboAvailableByMunicipalityOutDto>> {
-    const municipality = await this.pgService.municipalities.findOne({
-      where: { id: municipalityId },
+    const identityCart = await this.pgService.shoppingCarts.findOne({
+      where: {
+        userId: userId,
+        productId: null,
+        productComboId: null,
+      },
     });
-    if (!municipality) {
-      throw new NotFoundException('Municipality does not exist');
+    if (!identityCart) {
+      throw new ConflictException(
+        `Municipality for User ${userId} has not been selected`,
+      );
     }
+
+    const municipalityId = identityCart.municipalityId;
 
     const products = await this.pgService.products.find({
       where: {
         inventoryEntries: {
           zone: { municipalities: { id: municipalityId } },
-          quantity: MoreThan(0),
+          ...(quantityCheck ? { quantity: MoreThan(0) } : {}),
         },
       },
       relations: ['inventoryEntries', 'category'],
@@ -175,6 +204,12 @@ export default class AvailabilityService {
     if (dto.isActive !== undefined && dto.isActive !== null) {
       queryBuilder.andWhere('productCombo.isActive = :isActive', {
         isActive: dto.isActive,
+      });
+    }
+
+    if (productComboIds !== null && productComboIds.length > 0) {
+      queryBuilder.andWhere('productCombo.id IN (:...productComboIds)', {
+        productComboIds,
       });
     }
 

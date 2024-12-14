@@ -7,7 +7,7 @@ import {
   IsString,
   Min,
 } from 'class-validator';
-import PaginatedInDto from '../../../utils/dto/in/paginated.in.dto';
+import PaginatedInDto from '../../../../utils/dto/in/paginated.in.dto';
 import { Transform } from 'class-transformer';
 
 export default class ProductAvailabilitySearchInDto extends PaginatedInDto {

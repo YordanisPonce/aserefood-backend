@@ -1,11 +1,11 @@
 import {
-  Column,
+  Column, CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   OneToMany,
   OneToOne,
-  PrimaryGeneratedColumn,
+  PrimaryGeneratedColumn, UpdateDateColumn,
 } from 'typeorm';
 import TransferPayment from './transfer-payment.entity';
 import OnlinePayment from './online-payment.entity';
@@ -47,8 +47,11 @@ export default class Order {
   })
   status: OrderStatus;
 
-  @Column({ type: 'timestamp' })
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdDate: Date;
+
+  @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  updatedDate: Date;
 
   @OneToMany(() => OrderProducts, (orderItem) => orderItem.order)
   orderItems: OrderProducts[];
