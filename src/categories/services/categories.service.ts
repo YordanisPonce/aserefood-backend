@@ -203,7 +203,7 @@ export default class CategoriesService {
     dto.name = category.name;
     dto.description = category.description;
     dto.parentId = category.parentId;
-    dto.parentName = category.parent?.name ?? "";
+    dto.parentName = category.parent?.name ?? '';
 
     if (category.children && category.children.length > 0) {
       dto.children = category.children.map((child) => this.toOutDto(child));
