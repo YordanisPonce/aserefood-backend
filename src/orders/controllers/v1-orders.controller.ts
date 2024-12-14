@@ -1,0 +1,51 @@
+import {
+  Body,
+  Controller,
+  Post,
+  Request,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
+import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
+  ApiNotFoundResponse,
+  ApiOperation,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
+import { CacheInterceptor } from '@nestjs/cache-manager';
+import OrdersService from '../services/orders.service';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../../auth/guards/roles.guard';
+import { Role, Roles } from '../../auth/decorators/roles.decorator';
+import AddToCartInDto from '../../shopping-carts/dto/in/shopping-cart/add-to-cart.in.dto';
+import OrderInDto from '../dto/in/order.in.dto';
+
+@Controller('v1/orders')
+@ApiTags('orders')
+@UseInterceptors(CacheInterceptor)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@ApiBearerAuth()
+@ApiUnauthorizedResponse({ description: 'Unauthorized' })
+@ApiForbiddenResponse({ description: 'Forbidden' })
+export default class V1OrdersController {
+  constructor(private readonly ordersService: OrdersService) {}
+
+  @Post()
+  @Roles(Role.Customer)
+  @ApiCreatedResponse({ description: 'Ok' })
+  @ApiNotFoundResponse({ description: 'Not Found User' })
+  @ApiConflictResponse({ description: 'Municipality not selected' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiOperation({
+    summary: 'Create an Order of the current user',
+  })
+  async addToCart(@Request() req, @Body() dto: OrderInDto) {
+    const userId = req.user.userId;
+    return this.ordersService.post(userId, dto);
+  }
+}

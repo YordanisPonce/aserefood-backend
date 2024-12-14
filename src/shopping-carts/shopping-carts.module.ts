@@ -9,5 +9,6 @@ import AvailabilityService from './services/availability.service';
   imports: [AuthModule, DatabaseModule],
   controllers: [V1ShoppingCartsController],
   providers: [ShoppingCartsService, AvailabilityService],
+  exports: [ShoppingCartsService],
 })
 export class ShoppingCartsModule {}

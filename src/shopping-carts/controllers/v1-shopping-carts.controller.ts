@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -145,5 +146,35 @@ export default class V1ShoppingCartsController {
   ) {
     const userId = req.user.userId;
     return this.shoppingCartsService.initMunicipality(userId, municipalityId);
+  }
+
+  @Delete('/all')
+  @Roles(Role.Customer)
+  @ApiOkResponse({
+    description: 'Ok',
+  })
+  @ApiNotFoundResponse({ description: 'Not Found User' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiOperation({
+    summary: 'Delete all Cart Items of the current user',
+  })
+  async deleteAll(@Request() req) {
+    const userId = req.user.userId;
+    return this.shoppingCartsService.deleteAll(userId);
+  }
+
+  @Delete('/:id')
+  @Roles(Role.Customer)
+  @ApiOkResponse({
+    description: 'Ok',
+  })
+  @ApiNotFoundResponse({ description: 'Not Found User' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiOperation({
+    summary: 'Delete an specific Cart Item of the current user',
+  })
+  async delete(@Param('id', ParseIntPipe) id: number, @Request() req) {
+    const userId = req.user.userId;
+    return this.shoppingCartsService.delete(userId, id);
   }
 }

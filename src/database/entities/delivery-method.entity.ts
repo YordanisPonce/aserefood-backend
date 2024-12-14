@@ -3,9 +3,11 @@ import {
   Entity,
   Index,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import Municipality from './municipality.entity';
+import Order from './order.entity';
 
 @Entity({ name: 'delivery_methods' })
 export class DeliveryMethod {
@@ -38,4 +40,7 @@ export class DeliveryMethod {
     onDelete: 'CASCADE',
   })
   municipality: Municipality;
+
+  @OneToMany(() => Order, (order) => order.deliveryMethod)
+  orders: Order[];
 }

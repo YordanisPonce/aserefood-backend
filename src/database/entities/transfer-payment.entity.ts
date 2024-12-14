@@ -13,4 +13,7 @@ export default class TransferPayment {
     onDelete: 'CASCADE',
   })
   order: Order;
+
+  @Column()
+  orderId: number;
 }

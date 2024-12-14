@@ -245,6 +245,37 @@ export default class ShoppingCartsService {
     };
   }
 
+  public async delete(userId: number, id: number) {
+    const cart = await this.pgService.shoppingCarts.findOne({
+      where: { userId, id },
+    });
+    if (!cart) {
+      throw new NotFoundException(
+        `User with id ${userId} and cart item ${id} does not exist`,
+      );
+    }
+
+    const result = await this.pgService.shoppingCarts.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Shopping Cart with ID ${id} not found`);
+    }
+    this.logger.log(`Deleted Shopping Cart with ID ${id}`);
+  }
+
+  public async deleteAll(userId: number) {
+    const result = await this.pgService.shoppingCarts.delete({ userId });
+
+    if (result.affected === 0) {
+      throw new NotFoundException(
+        `No shopping cart items were deleted for user with ID ${userId}`,
+      );
+    }
+
+    this.logger.log(
+      `Deleted all shopping cart items for user with ID ${userId}`,
+    );
+  }
+
   private async checkInventory(userId: number, municipalityId: number) {
     const carts = (
       await this.pgService.shoppingCarts.find({
