@@ -28,6 +28,7 @@ export default class Category {
   parentId?: number;
 
   @ManyToOne(() => Category, (category) => category.children, {
+    cascade: true,
     nullable: true,
     onDelete: 'SET NULL',
   })
