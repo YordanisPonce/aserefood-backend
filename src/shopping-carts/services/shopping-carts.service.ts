@@ -255,6 +255,17 @@ export default class ShoppingCartsService {
       );
     }
 
+    await this.manageInventory(
+      cart.municipalityId,
+      {
+        cartItemType: cart.productId ? CartItem.Product : CartItem.ProductCombo,
+        itemId: cart.productId ? cart.productId : cart.productComboId,
+        amount: 0,
+      },
+      cart.amount,
+      userId,
+    );
+
     const result = await this.pgService.shoppingCarts.delete(id);
     if (result.affected === 0) {
       throw new NotFoundException(`Shopping Cart with ID ${id} not found`);
@@ -263,6 +274,29 @@ export default class ShoppingCartsService {
   }
 
   public async deleteAll(userId: number) {
+    const carts = (
+      await this.pgService.shoppingCarts.find({
+        where: {
+          userId: userId,
+        },
+      })
+    ).filter((x) => !(x.productId === null && x.productComboId === null));
+
+    for (const cart of carts) {
+      await this.manageInventory(
+        cart.municipalityId,
+        {
+          cartItemType: cart.productId
+            ? CartItem.Product
+            : CartItem.ProductCombo,
+          itemId: cart.productId ? cart.productId : cart.productComboId,
+          amount: 0,
+        },
+        cart.amount,
+        userId,
+      );
+    }
+
     const result = await this.pgService.shoppingCarts.delete({ userId });
 
     if (result.affected === 0) {
