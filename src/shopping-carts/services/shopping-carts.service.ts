@@ -245,7 +245,7 @@ export default class ShoppingCartsService {
     };
   }
 
-  public async delete(userId: number, id: number) {
+  public async delete(userId: number, id: number, restoreInventory: boolean) {
     const cart = await this.pgService.shoppingCarts.findOne({
       where: { userId, id },
     });
@@ -255,34 +255,7 @@ export default class ShoppingCartsService {
       );
     }
 
-    await this.manageInventory(
-      cart.municipalityId,
-      {
-        cartItemType: cart.productId ? CartItem.Product : CartItem.ProductCombo,
-        itemId: cart.productId ? cart.productId : cart.productComboId,
-        amount: 0,
-      },
-      cart.amount,
-      userId,
-    );
-
-    const result = await this.pgService.shoppingCarts.delete(id);
-    if (result.affected === 0) {
-      throw new NotFoundException(`Shopping Cart with ID ${id} not found`);
-    }
-    this.logger.log(`Deleted Shopping Cart with ID ${id}`);
-  }
-
-  public async deleteAll(userId: number) {
-    const carts = (
-      await this.pgService.shoppingCarts.find({
-        where: {
-          userId: userId,
-        },
-      })
-    ).filter((x) => !(x.productId === null && x.productComboId === null));
-
-    for (const cart of carts) {
+    if (restoreInventory) {
       await this.manageInventory(
         cart.municipalityId,
         {
@@ -295,6 +268,39 @@ export default class ShoppingCartsService {
         cart.amount,
         userId,
       );
+    }
+
+    const result = await this.pgService.shoppingCarts.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Shopping Cart with ID ${id} not found`);
+    }
+    this.logger.log(`Deleted Shopping Cart with ID ${id}`);
+  }
+
+  public async deleteAll(userId: number, restoreInventory: boolean) {
+    const carts = (
+      await this.pgService.shoppingCarts.find({
+        where: {
+          userId: userId,
+        },
+      })
+    ).filter((x) => !(x.productId === null && x.productComboId === null));
+
+    if (restoreInventory) {
+      for (const cart of carts) {
+        await this.manageInventory(
+          cart.municipalityId,
+          {
+            cartItemType: cart.productId
+              ? CartItem.Product
+              : CartItem.ProductCombo,
+            itemId: cart.productId ? cart.productId : cart.productComboId,
+            amount: 0,
+          },
+          cart.amount,
+          userId,
+        );
+      }
     }
 
     const result = await this.pgService.shoppingCarts.delete({ userId });
