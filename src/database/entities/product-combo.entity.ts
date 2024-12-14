@@ -11,6 +11,8 @@ import Zone from './zone.entity';
 import ProductComboItem from './product-combo-item.entity';
 import Promotion from './promotion.entity';
 import CartProduct from './cart-product.entity';
+import Order from './order.entity';
+import OrderItems from './order-item.entity';
 
 @Entity({ name: 'product_combos' })
 export default class ProductCombo {
@@ -56,4 +58,7 @@ export default class ProductCombo {
 
   @ManyToMany(() => Promotion, (promotion) => promotion.productCombos)
   promotions: Promotion[];
+
+  @OneToMany(() => OrderItems, (orderItem) => orderItem.productCombo)
+  orderItems: Order[];
 }

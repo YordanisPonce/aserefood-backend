@@ -1,0 +1,49 @@
+import { OrderStatus } from '../../../database/entities/constants';
+import { PaymentSelection } from '../in/order.in.dto';
+import { ApiProperty } from '@nestjs/swagger';
+
+export class OrderItemOutDto {
+  @ApiProperty()
+  id: number;
+
+  @ApiProperty()
+  productId: number;
+
+  @ApiProperty()
+  productName: string;
+
+  @ApiProperty()
+  amount: number;
+}
+
+export default class OrderOutDto {
+  @ApiProperty()
+  id: number;
+
+  @ApiProperty()
+  code: string;
+
+  @ApiProperty()
+  contactInfoId: number;
+
+  @ApiProperty({ enum: OrderStatus })
+  status: OrderStatus;
+
+  @ApiProperty()
+  createdDate: Date;
+
+  @ApiProperty()
+  updatedDate: Date;
+
+  @ApiProperty({ enum: PaymentSelection })
+  paymentSelection: PaymentSelection;
+
+  @ApiProperty()
+  totalAmount: number;
+
+  @ApiProperty()
+  deliveryMethodId: number;
+
+  @ApiProperty({ type: [OrderItemOutDto] })
+  orderItems: OrderItemOutDto[];
+}

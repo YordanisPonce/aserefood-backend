@@ -13,7 +13,7 @@ import Provider from './provider.entity';
 import { InventoryEntry } from './inventory-entry.entity';
 import ProductComboItem from './product-combo-item.entity';
 import Promotion from './promotion.entity';
-import OrderProducts from './order-product.entity';
+import OrderItems from './order-item.entity';
 import CartProduct from './cart-product.entity';
 
 @Entity({ name: 'products' })
@@ -74,6 +74,6 @@ export default class Product {
   @OneToMany(() => CartProduct, (shoppingCartItem) => shoppingCartItem.product)
   shoppingCartItems: CartProduct[];
 
-  @OneToMany(() => OrderProducts, (orderItem) => orderItem.product)
-  orderItems: OrderProducts[];
+  @OneToMany(() => OrderItems, (orderItem) => orderItem.product)
+  orderItems: OrderItems[];
 }

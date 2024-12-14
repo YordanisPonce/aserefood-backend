@@ -40,4 +40,7 @@ export default class OnlinePayment {
     onDelete: 'CASCADE',
   })
   order: Order;
+
+  @Column()
+  orderId: number;
 }

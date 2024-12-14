@@ -50,7 +50,6 @@ export default class MailService {
   async sendPendingOrderEmail(
     email: string,
     username: string,
-    resetPasswordToken: string,
     orderId: number,
     totalPayment: number,
     currency: string,

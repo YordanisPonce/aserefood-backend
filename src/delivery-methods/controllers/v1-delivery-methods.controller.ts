@@ -85,8 +85,6 @@ export default class V1DeliveryMethodsController {
   @ApiBearerAuth()
   @ApiCreatedResponse({ description: 'Ok', type: DeliveryMethodInDto })
   @ApiBadRequestResponse({ description: 'Bad Request' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiForbiddenResponse({ description: 'Forbidden' })
   @ApiConflictResponse({
     description: 'Conflict (Other delivery method with Name)',
   })

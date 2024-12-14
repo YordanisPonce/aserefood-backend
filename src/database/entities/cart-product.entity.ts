@@ -1,4 +1,11 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import User from './user.entity';
 import Product from './product.entity';
 import ProductCombo from './product-combo.entity';
@@ -14,11 +21,17 @@ export default class CartProduct {
   })
   user: User;
 
+  @Column()
+  userId: number;
+
   @ManyToOne(() => Product, (product) => product.shoppingCartItems, {
     onDelete: 'CASCADE',
     nullable: true,
   })
   product?: Product;
+
+  @Column({ nullable: true })
+  productId?: number;
 
   @ManyToOne(
     () => ProductCombo,
@@ -30,6 +43,9 @@ export default class CartProduct {
   )
   productCombo?: ProductCombo;
 
+  @Column({ nullable: true })
+  productComboId?: number;
+
   @ManyToOne(
     () => Municipality,
     (municipality) => municipality.shoppingCartItems,
@@ -39,6 +55,15 @@ export default class CartProduct {
   )
   municipality: Municipality;
 
+  @Column()
+  municipalityId: number;
+
   @Column('int')
   amount: number;
+
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  createdDate: Date;
+
+  @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  updatedDate: Date;
 }
