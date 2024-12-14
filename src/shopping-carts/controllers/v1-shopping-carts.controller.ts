@@ -59,7 +59,7 @@ export default class V1ShoppingCartsController {
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiOperation({
     summary:
-      'Get all products and product combos of current User Shopping Cart',
+      'Get all products and product combos of current Costumer Shopping Cart. Only for Costumers',
   })
   async getAll(@Request() req) {
     const userId = req.user.userId;
@@ -73,7 +73,8 @@ export default class V1ShoppingCartsController {
   @ApiConflictResponse({ description: 'Municipality not selected' })
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiOperation({
-    summary: 'Add or Update a Product or Product Combo to Cart if possible',
+    summary:
+      'Add or Update a Product or Product Combo to Cart if possible. Only for Costumers',
   })
   async addToCart(@Request() req, @Body() dto: AddToCartInDto) {
     const userId = req.user.userId;
@@ -91,7 +92,7 @@ export default class V1ShoppingCartsController {
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiOperation({
     summary:
-      'Get available products by municipality of current user with Pagination, Ordering and Filtering',
+      'Get available products by municipality of current customer with Pagination, Ordering and Filtering. Only for Costumers',
   })
   async getAvailableProducts(
     @Query() dto: ProductAvailabilitySearchInDto,
@@ -115,7 +116,7 @@ export default class V1ShoppingCartsController {
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiOperation({
     summary:
-      'Get available product combos by municipality of current user with Pagination, Ordering and Filtering',
+      'Get available product combos by municipality of current customer with Pagination, Ordering and Filtering. Only for Costumers',
   })
   async getAvailableProductCombos(
     @Query() dto: ProductComboAvailabilitySearchInDto,
@@ -138,7 +139,7 @@ export default class V1ShoppingCartsController {
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiOperation({
     summary:
-      'Update Municipality for Current User. If there are existing Cart Items, they will be processed in the new location.',
+      'Update Municipality for Current Customer. If there are existing Cart Items, they will be processed in the new location. Only for Costumers',
   })
   async init(
     @Param('municipalityId', ParseIntPipe) municipalityId: number,
@@ -156,7 +157,8 @@ export default class V1ShoppingCartsController {
   @ApiNotFoundResponse({ description: 'Not Found User' })
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiOperation({
-    summary: 'Delete all Cart Items of the current user',
+    summary:
+      'Delete all Cart Items of the current customer. Only for Costumers',
   })
   async deleteAll(@Request() req) {
     const userId = req.user.userId;
@@ -171,7 +173,8 @@ export default class V1ShoppingCartsController {
   @ApiNotFoundResponse({ description: 'Not Found User' })
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiOperation({
-    summary: 'Delete an specific Cart Item of the current user',
+    summary:
+      'Delete an specific Cart Item of the current customer. Only for Costumers',
   })
   async delete(@Param('id', ParseIntPipe) id: number, @Request() req) {
     const userId = req.user.userId;
