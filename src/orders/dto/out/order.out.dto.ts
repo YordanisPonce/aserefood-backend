@@ -10,7 +10,7 @@ export class OrderItemOutDto {
   productId: number;
 
   @ApiProperty()
-  productName: string;
+  productComboId: number;
 
   @ApiProperty()
   amount: number;
