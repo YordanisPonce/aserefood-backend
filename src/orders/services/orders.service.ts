@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   ConflictException,
   Injectable,
   Logger,
@@ -35,7 +34,8 @@ export default class OrdersService {
     const queryBuilder =
       this.pgService.orders
         .createQueryBuilder('order')
-        .leftJoinAndSelect('order.orderItems', 'orderItem');
+        .leftJoinAndSelect('order.orderItems', 'orderItem')
+        .leftJoinAndSelect('order.municipality', 'municipality');
 
     // Filtering
     if (dto.status !== undefined && dto.status !== null) {
@@ -86,7 +86,7 @@ export default class OrdersService {
 
   async getAll(): Promise<OrderOutDto[]> {
     const orders = await this.pgService.orders.find({
-      relations: ['orderItems'],
+      relations: ['orderItems', 'municipality'],
     });
 
     return orders.map((x) => this.toOutDto(x));
@@ -100,7 +100,7 @@ export default class OrdersService {
 
     const orders = await this.pgService.orders.find({
       where: { userId },
-      relations: ['orderItems'],
+      relations: ['orderItems', 'municipality'],
     });
 
     return orders.map(x => this.toOutDto(x));
@@ -109,7 +109,7 @@ export default class OrdersService {
   async getById(id: number): Promise<OrderOutDto> {
     const order = await this.pgService.orders.findOne({
       where: { id },
-      relations: ['orderItems'],
+      relations: ['orderItems', 'municipality'],
     });
     if (!order) {
       throw new NotFoundException(`Order with ID ${id} not found`);
@@ -321,6 +321,7 @@ export default class OrdersService {
     dto.contactInfoId = order.contactInfoId;
     dto.totalAmount = order.totalAmount;
     dto.municipalityId = order.municipalityId;
+    dto.municipalityName = order.municipality?.name ?? "";
     dto.paymentSelection =
       order.onlinePayment !== null
         ? PaymentSelection.Online
