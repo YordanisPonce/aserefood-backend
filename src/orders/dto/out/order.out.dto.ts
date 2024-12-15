@@ -24,6 +24,9 @@ export default class OrderOutDto {
   code: string;
 
   @ApiProperty()
+  municipalityId: number;
+
+  @ApiProperty()
   contactInfoId: number;
 
   @ApiProperty({ enum: OrderStatus })

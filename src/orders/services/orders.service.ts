@@ -45,6 +45,14 @@ export default class OrdersService {
       );
     }
 
+    const identityCart = await this.pgService.shoppingCarts.findOne({
+      where: {
+        userId: userId,
+        productId: null,
+        productComboId: null,
+      },
+    });
+
     const deliveryMethod = await this.pgService.deliveryMethods.findOneBy({
       id: dto.deliveryMethodId,
     });
@@ -71,6 +79,7 @@ export default class OrdersService {
       totalAmount: shoppingCart.totalPrice,
       transferPayment: null,
       onlinePayment: null,
+      municipalityId: identityCart.municipalityId,
       orderItems: shoppingCart.products
         .map((x) => ({
           productComboId: null,
@@ -128,6 +137,9 @@ export default class OrdersService {
       newOrder.createdDate,
     );
 
+
+    this.logger.log(`Created new Order with id ${newOrder.id} for user ${user.id}`);
+
     return this.toOutDto(newOrder);
   }
 
@@ -140,6 +152,7 @@ export default class OrdersService {
     dto.updatedDate = order.updatedDate;
     dto.contactInfoId = order.contactInfoId;
     dto.totalAmount = order.totalAmount;
+    dto.municipalityId = order.municipalityId;
     dto.paymentSelection =
       order.onlinePayment !== null
         ? PaymentSelection.Online

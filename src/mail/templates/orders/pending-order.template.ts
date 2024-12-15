@@ -11,9 +11,8 @@ export default class PendingOrderTemplate extends MailTemplate<PendingOrderData>
         <strong>Estimado/a ${this.templateData.username},</strong>
       </p>
       <p>
-        Según nuestros registros, usted tiene pendiente un pago asociado a la orden:</a>.
+        Según nuestros registros, usted tiene pendiente un pago asociado a la orden:
       </p>
-      <br/>
       <ul>
         <li><strong>Número de la orden:</strong> ${idFormatter(this.templateData.orderId)}</li>
         <li><strong>Fecha de creación: </strong>${dateFormatter(this.templateData.createdDate)}</li>

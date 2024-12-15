@@ -23,6 +23,7 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Role, Roles } from '../../auth/decorators/roles.decorator';
 import OrderInDto from '../dto/in/order.in.dto';
+import AutoCancelOrdersJob from '../jobs/auto-cancel-orders.job';
 
 @Controller('v1/orders')
 @ApiTags('orders')
@@ -32,7 +33,10 @@ import OrderInDto from '../dto/in/order.in.dto';
 @ApiUnauthorizedResponse({ description: 'Unauthorized' })
 @ApiForbiddenResponse({ description: 'Forbidden' })
 export default class V1OrdersController {
-  constructor(private readonly ordersService: OrdersService) {}
+  constructor(
+    private readonly ordersService: OrdersService,
+    private readonly autoCancelledJob: AutoCancelOrdersJob,
+  ) {}
 
   @Post()
   @Roles(Role.Customer)
@@ -46,5 +50,15 @@ export default class V1OrdersController {
   async addToCart(@Request() req, @Body() dto: OrderInDto) {
     const userId = req.user.userId;
     return this.ordersService.post(userId, dto);
+  }
+
+  @Post('/cancelled/job')
+  @Roles(Role.Admin)
+  @ApiCreatedResponse({ description: 'Ok' })
+  @ApiOperation({
+    summary: 'Auto Cancelled Orders Job. ONLY FOR TESTING',
+  })
+  async syncCancelled() {
+    return this.autoCancelledJob.execute();
   }
 }

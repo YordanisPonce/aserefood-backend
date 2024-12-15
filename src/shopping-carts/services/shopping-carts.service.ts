@@ -15,6 +15,7 @@ import ShoppingCartOutDto, {
   ShoppingCartProductComboOutDto,
   ShoppingCartProductOutDto,
 } from '../dto/out/shopping-cart/shopping-cart.out.dto';
+import MunicipalityPOutDto from '../../provinces/dto/out/municipality-p.out.dto';
 
 @Injectable()
 export default class ShoppingCartsService {
@@ -316,6 +317,27 @@ export default class ShoppingCartsService {
     );
   }
 
+  async getCurrentMunicipality(userId: number): Promise<MunicipalityPOutDto> {
+    const identityCart = await this.pgService.shoppingCarts.findOne({
+      where: {
+        userId: userId,
+        productId: null,
+        productComboId: null,
+      },
+      relations: ['municipality'],
+    });
+    if (!identityCart) {
+      throw new ConflictException(
+        `Municipality for User ${userId} has not been selected`,
+      );
+    }
+
+    return {
+      id: identityCart.municipality.id,
+      name: identityCart.municipality.name,
+    };
+  }
+
   private async checkInventory(userId: number, municipalityId: number) {
     const carts = (
       await this.pgService.shoppingCarts.find({
@@ -361,7 +383,7 @@ export default class ShoppingCartsService {
     }
   }
 
-  private async manageInventory(
+  public async manageInventory(
     municipalityId: number,
     dto: AddToCartInDto,
     existingAmount: number,
