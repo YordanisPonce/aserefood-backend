@@ -21,6 +21,7 @@ export default class OrdersService {
     private readonly pgService: PgService,
     private readonly mailService: MailService,
     private readonly shoppingCartService: ShoppingCartsService,
+    private readonly,
   ) {}
 
   public async post(userId: number, dto: OrderInDto): Promise<OrderOutDto> {
@@ -98,6 +99,8 @@ export default class OrdersService {
     await this.pgService.orders.save(newOrder);
 
     if (dto.paymentSelection === PaymentSelection.Online) {
+      // ToDo: Implement Payment in TropyPay
+
       const onlinePayment = this.pgService.onlinePayments.create({
         orderId: newOrder.id,
         address1: dto.onlinePaymentDto.address1,
@@ -114,6 +117,19 @@ export default class OrdersService {
 
       await this.pgService.onlinePayments.save(onlinePayment);
       newOrder.onlinePaymentId = onlinePayment.id;
+      newOrder.status = OrderStatus.PAYED;
+
+      await this.mailService.sendPaidOrderEmail(
+        user.email,
+        user.username,
+        newOrder.id,
+        shoppingCart.totalPrice,
+        'CUP',
+        newOrder.createdDate,
+        contactInfo.phoneNumber,
+        deliveryMethod.pickUpDirection,
+        'FUNCIONÓ ESTO'
+      )
     } else {
       const transferPayment = this.pgService.transferPayments.create({
         orderId: newOrder.id,
@@ -137,8 +153,9 @@ export default class OrdersService {
       newOrder.createdDate,
     );
 
-
-    this.logger.log(`Created new Order with id ${newOrder.id} for user ${user.id}`);
+    this.logger.log(
+      `Created new Order with id ${newOrder.id} for user ${user.id}`,
+    );
 
     return this.toOutDto(newOrder);
   }
