@@ -21,7 +21,6 @@ export default class OrdersService {
     private readonly pgService: PgService,
     private readonly mailService: MailService,
     private readonly shoppingCartService: ShoppingCartsService,
-    private readonly,
   ) {}
 
   public async post(userId: number, dto: OrderInDto): Promise<OrderOutDto> {
