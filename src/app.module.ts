@@ -23,6 +23,7 @@ import { ContactInfosModule } from './contact-infos/contact-infos.module';
 import { ShoppingCartsModule } from './shopping-carts/shopping-carts.module';
 import { OrdersModule } from './orders/orders.module';
 import { PaymentsModule } from './payments/payments.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { PaymentsModule } from './payments/payments.module';
       },
     ]),
     AuthModule,
+    ScheduleModule.forRoot(),
     CategoriesModule,
     DatabaseModule,
     ProductCombosModule,

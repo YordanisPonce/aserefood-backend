@@ -20,4 +20,6 @@ export const configSchema = Joi.object({
   UI_URL: Joi.string().uri().required(),
   EMAIL_CONFIRMATION_URL: Joi.string().uri().required(),
   EMAIL_RESET_PASSWORD_URL: Joi.string().uri().required(),
+  MAX_HOURS_TO_AUTO_CANCEL_ORDER: Joi.number().min(0).required(),
+  MAX_HOURS_TO_DELETE_SHOPPING_CART: Joi.number().min(0).required(),
 }).unknown();

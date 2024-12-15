@@ -361,7 +361,7 @@ export default class ShoppingCartsService {
     }
   }
 
-  private async manageInventory(
+  public async manageInventory(
     municipalityId: number,
     dto: AddToCartInDto,
     existingAmount: number,

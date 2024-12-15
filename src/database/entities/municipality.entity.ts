@@ -11,6 +11,7 @@ import Province from './province.entity';
 import Zone from './zone.entity';
 import ContactInfo from './contact-info.entity';
 import CartProduct from './cart-product.entity';
+import Order from './order.entity';
 
 @Entity({ name: 'municipalities' })
 export default class Municipality {
@@ -37,6 +38,9 @@ export default class Municipality {
 
   @OneToMany(() => ContactInfo, (contactInfo) => contactInfo.municipality)
   contactInfos: ContactInfo[];
+
+  @OneToMany(() => Order, (order) => order.municipality)
+  orders: Order[];
 
   @OneToMany(
     () => CartProduct,

@@ -16,6 +16,7 @@ import ContactInfo from './contact-info.entity';
 import { OrderStatus } from './constants';
 import OrderItems from './order-item.entity';
 import { DeliveryMethod } from './delivery-method.entity';
+import Municipality from './municipality.entity';
 
 @Entity({ name: 'orders' })
 export default class Order {
@@ -81,4 +82,13 @@ export default class Order {
 
   @ManyToOne(() => DeliveryMethod, (deliveryMethod) => deliveryMethod.orders)
   deliveryMethod: DeliveryMethod;
+
+  @ManyToOne(() => Municipality, (municipality) => municipality.orders, {
+    onDelete: 'CASCADE',
+    nullable: true
+  })
+  municipality: Municipality;
+
+  @Column({nullable: true})
+  municipalityId: number;
 }
