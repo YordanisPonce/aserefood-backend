@@ -217,7 +217,7 @@ export default class OrdersService {
         user.username,
         newOrder.id,
         shoppingCart.totalPrice,
-        'CUP',
+        'USD',
         newOrder.createdDate,
         contactInfo.phoneNumber,
         deliveryMethod.pickUpDirection,
@@ -241,7 +241,7 @@ export default class OrdersService {
       user.username,
       newOrder.id,
       newOrder.totalAmount,
-      'CUP',
+      'USD',
       36,
       newOrder.createdDate,
     );
