@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   Logger,
@@ -12,6 +13,11 @@ import MailService from '../../mail/services/mail.service';
 import OrderInDto, { PaymentSelection } from '../dto/in/order.in.dto';
 import ShoppingCartsService from '../../shopping-carts/services/shopping-carts.service';
 import { OrderStatus } from '../../database/entities/constants';
+import createPatchFields from '../../utils/dto/patch-fields.util';
+import OrderUpdateInDto from '../dto/in/order.update.in.dto';
+import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
+import OrderSearchInDto from '../dto/in/order.search.in.dto';
+import { CartItem } from '../../shopping-carts/dto/in/shopping-cart/cart-item.enum';
 
 @Injectable()
 export default class OrdersService {
@@ -22,6 +28,94 @@ export default class OrdersService {
     private readonly mailService: MailService,
     private readonly shoppingCartService: ShoppingCartsService,
   ) {}
+
+  async search(
+    dto: OrderSearchInDto,
+  ): Promise<PaginatedOutDto<OrderOutDto>> {
+    const queryBuilder =
+      this.pgService.orders
+        .createQueryBuilder('order')
+        .leftJoinAndSelect('order.orderItems', 'orderItem');
+
+    // Filtering
+    if (dto.status !== undefined && dto.status !== null) {
+      queryBuilder.where('order.status = :status', {
+        status: dto.status,
+      });
+    }
+
+    if (dto.deliveryMethodId) {
+      queryBuilder.andWhere('order.deliveryMethodId = :deliveryMethodId', {
+        deliveryMethodId: dto.deliveryMethodId,
+      });
+    }
+
+    if (dto.municipalityId) {
+      queryBuilder.andWhere('order.municipalityId = :municipalityId', {
+        municipalityId: dto.municipalityId,
+      });
+    }
+
+    if (dto.userId) {
+      queryBuilder.andWhere('order.userId = :userId', {
+        userId: dto.userId,
+      });
+    }
+
+    // Ordering
+    const orderBy = dto.orderBy || 'id';
+    const orderDirection =
+      dto.orderDirection?.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+    queryBuilder.orderBy(`order.${orderBy}`, orderDirection);
+
+    // Pagination
+    const [result, total] = await queryBuilder
+      .skip((dto.page - 1) * dto.pageSize)
+      .take(dto.pageSize)
+      .getManyAndCount();
+
+    return {
+      data:  result.map((p) => this.toOutDto(p)),
+      total,
+      page: dto.page,
+      pageSize: dto.pageSize,
+      hasNextPage: dto.page * dto.pageSize < total,
+      hasPreviousPage: dto.page > 1,
+    };
+  }
+
+  async getAll(): Promise<OrderOutDto[]> {
+    const orders = await this.pgService.orders.find({
+      relations: ['orderItems'],
+    });
+
+    return orders.map((x) => this.toOutDto(x));
+  }
+
+  async getByUserId(userId: number): Promise<OrderOutDto[]> {
+    const user = await this.pgService.users.findOneBy({id: userId});
+    if(!user) {
+      throw new NotFoundException(`User with id ${userId} not found`);
+    }
+
+    const orders = await this.pgService.orders.find({
+      where: { userId },
+      relations: ['orderItems'],
+    });
+
+    return orders.map(x => this.toOutDto(x));
+  }
+
+  async getById(id: number): Promise<OrderOutDto> {
+    const order = await this.pgService.orders.findOne({
+      where: { id },
+      relations: ['orderItems'],
+    });
+    if (!order) {
+      throw new NotFoundException(`Order with ID ${id} not found`);
+    }
+    return this.toOutDto(order);
+  }
 
   public async post(userId: number, dto: OrderInDto): Promise<OrderOutDto> {
     const user = await this.pgService.users.findOneBy({
@@ -127,8 +221,8 @@ export default class OrdersService {
         newOrder.createdDate,
         contactInfo.phoneNumber,
         deliveryMethod.pickUpDirection,
-        'FUNCIONÓ ESTO'
-      )
+        'FUNCIONÓ ESTO',
+      );
     } else {
       const transferPayment = this.pgService.transferPayments.create({
         orderId: newOrder.id,
@@ -159,6 +253,64 @@ export default class OrdersService {
     return this.toOutDto(newOrder);
   }
 
+  async patch(id: number, dto: OrderUpdateInDto): Promise<void> {
+    const order = await this.pgService.orders.findOne({
+      where: {
+        id: id,
+      },
+      relations: ['user', 'orderItems'],
+    });
+    if (!order) {
+      throw new NotFoundException(`Order with id ${id} does not exist`);
+    }
+
+    if (dto.status) {
+      if (order.status === OrderStatus.CANCELLED && dto.status !== order.status) {
+        throw new ConflictException(`Order with id ${id} was canceled`);
+      }
+
+      if (dto.status !== order.status && dto.status === OrderStatus.CANCELLED) {
+        for(const orderItem of order.orderItems){
+          await this.shoppingCartService.manageInventory(
+            order.municipalityId,
+            {
+              cartItemType:
+                orderItem.productId !== null
+                  ? CartItem.Product
+                  : CartItem.ProductCombo,
+              itemId:
+                orderItem.productId !== null
+                  ? orderItem.productId
+                  : orderItem.productComboId,
+              amount: 0,
+            },
+            orderItem.amount,
+            order.userId,
+          );
+        }
+
+        await this.mailService.sendCancelledOrderEmail(
+          order.user.email,
+          order.user.username,
+          order.id,
+          'Cancelación Manual',
+        );
+      }
+    }
+
+    await this.pgService.orders.update(id, createPatchFields(dto));
+    this.logger.log(`Updated order with ID ${id}`);
+    this.logger.log({ ...dto });
+  }
+
+  async delete(id: number): Promise<void> {
+    const result = await this.pgService.orders.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Order with ID ${id} not found`);
+    }
+    this.logger.log(`Deleted order with ID ${id}`);
+  }
+
   private toOutDto(order: Order): OrderOutDto {
     const dto = new OrderOutDto();
     dto.id = order.id;
@@ -177,7 +329,7 @@ export default class OrdersService {
       order.orderItems?.map((x) => ({
         id: x.id,
         productId: x.productId,
-        productName: x.product?.name ?? '',
+        productComboId: x.productComboId,
         amount: x.amount,
       })) ?? [];
 

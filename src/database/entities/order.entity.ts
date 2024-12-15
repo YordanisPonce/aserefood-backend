@@ -87,7 +87,7 @@ export default class Order {
     onDelete: 'CASCADE',
     nullable: true
   })
-  municipality: Municipality;
+  municipality?: Municipality;
 
   @Column({nullable: true})
   municipalityId: number;
