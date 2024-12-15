@@ -6,6 +6,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { OrderStatus } from '../../database/entities/constants';
 import ShoppingCartsService from '../../shopping-carts/services/shopping-carts.service';
 import { CartItem } from '../../shopping-carts/dto/in/shopping-cart/cart-item.enum';
+import { LessThan, MoreThan } from 'typeorm';
 
 @Injectable()
 export default class AutoCancelOrdersJob {
@@ -22,24 +23,16 @@ export default class AutoCancelOrdersJob {
   async execute() {
     this.logger.log('Executing');
 
-    const maxAllowedHours = this.configService.get<number>(
-      'MAX_HOURS_TO_AUTO_CANCEL_ORDER',
-    );
+    const maxAllowedHours = this.configService.get<number>('MAX_HOURS_TO_AUTO_CANCEL_ORDER');
+    const allowedCancellationDate = new Date();
+    allowedCancellationDate.setHours(allowedCancellationDate.getHours() - maxAllowedHours);
 
-    const orders = await this.pgService.orders.find({
+    const ordersToCancel = await this.pgService.orders.find({
       where: [
-        { status: OrderStatus.PAYMENT_PENDING },
-        { status: OrderStatus.PROCESSING_PAYMENT },
+        { status: OrderStatus.PAYMENT_PENDING, updatedDate: LessThan(allowedCancellationDate) },
+        { status: OrderStatus.PROCESSING_PAYMENT, updatedDate: LessThan(allowedCancellationDate) },
       ],
       relations: ['user', 'orderItems'],
-    });
-
-    const ordersToCancel = orders.filter((order) => {
-      const allowedCancellationDate = new Date(order.updatedDate);
-      allowedCancellationDate.setHours(
-        allowedCancellationDate.getHours() + maxAllowedHours,
-      );
-      return new Date() >= allowedCancellationDate;
     });
 
     if (ordersToCancel.length > 0) {

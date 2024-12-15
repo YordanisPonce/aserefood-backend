@@ -31,6 +31,7 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Role, Roles } from '../../auth/decorators/roles.decorator';
 import MunicipalityPOutDto from '../../provinces/dto/out/municipality-p.out.dto';
+import AutoDeleteShoppingCartsJob from '../jobs/auto-delete-shopping-carts.job';
 
 @Controller('v1/shopping-carts')
 @ApiTags('shopping-carts')
@@ -42,6 +43,7 @@ import MunicipalityPOutDto from '../../provinces/dto/out/municipality-p.out.dto'
 export default class V1ShoppingCartsController {
   constructor(
     private readonly shoppingCartsService: ShoppingCartsService,
+    private readonly autoDeleteShoppingCartsJob: AutoDeleteShoppingCartsJob,
   ) {}
 
   @Get('')
@@ -87,6 +89,17 @@ export default class V1ShoppingCartsController {
   async addToCart(@Request() req, @Body() dto: AddToCartInDto) {
     const userId = req.user.userId;
     return this.shoppingCartsService.addToCart(userId, dto);
+  }
+
+  @Post('/auto-delete/job')
+  @Roles(Role.Admin)
+  @ApiCreatedResponse({ description: 'Ok' })
+  @ApiOperation({
+    summary:
+      'Auto Delete Old Carts Job. ONLY FOR TESTING',
+  })
+  async deleteCartsJob() {
+    return this.autoDeleteShoppingCartsJob.execute();
   }
 
   @Put('/municipality/:municipalityId')
