@@ -47,16 +47,16 @@ export default class V1OrdersController {
   @ApiOperation({
     summary: 'Create an Order of the current customer. Only for Costumers',
   })
-  async addToCart(@Request() req, @Body() dto: OrderInDto) {
+  async post(@Request() req, @Body() dto: OrderInDto) {
     const userId = req.user.userId;
     return this.ordersService.post(userId, dto);
   }
 
-  @Post('/cancelled/job')
+  @Post('/cancel/job')
   @Roles(Role.Admin)
   @ApiCreatedResponse({ description: 'Ok' })
   @ApiOperation({
-    summary: 'Auto Cancelled Orders Job. ONLY FOR TESTING',
+    summary: 'Auto Cancel Orders Job. ONLY FOR TESTING',
   })
   async syncCancelled() {
     return this.autoCancelledJob.execute();
