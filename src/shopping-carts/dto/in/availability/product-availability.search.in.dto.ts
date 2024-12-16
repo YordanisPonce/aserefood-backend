@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   IsBooleanString,
   IsInt,
-  IsNotEmpty,
+  IsNotEmpty, IsNumber,
   IsOptional,
   IsString,
   Min,
@@ -34,4 +34,15 @@ export default class ProductAvailabilitySearchInDto extends PaginatedInDto {
   @IsBooleanString()
   isService?: boolean;
 
+  @ApiProperty({required: false})
+  @IsOptional()
+  @IsNumber()
+  @Transform(({ value }) => parseFloat(value))
+  minimumPrice?: number;
+
+  @ApiProperty({required: false})
+  @IsOptional()
+  @IsNumber()
+  @Transform(({ value }) => parseFloat(value))
+  maximumPrice?: number;
 }

@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, Logger } from '@nestjs/common';
 import PgService from '../../database/services/pg.service';
 import ProductAvailabilitySearchInDto from '../dto/in/availability/product-availability.search.in.dto';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
@@ -6,7 +6,6 @@ import { ProductAvailableByMunicipalityOutDto } from '../dto/out/availability/pr
 import ProductComboAvailabilitySearchInDto from '../dto/in/availability/product-combo-availability.search.in.dto';
 import { ProductComboAvailableByMunicipalityOutDto } from '../dto/out/availability/product-combo-available-by-municipality.out.dto';
 import { MoreThan } from 'typeorm';
-import MunicipalityPOutDto from '../../provinces/dto/out/municipality-p.out.dto';
 
 @Injectable()
 export default class AvailabilityService {
@@ -497,10 +496,10 @@ export default class AvailabilityService {
                 products
                   .find((p) => p.id === b.productId)
                   .inventoryEntries.reduce(
-                  (a, b) => a + parseFloat(b.price.toString()),
-                  0,
-                ) *
-                b.amount,
+                    (a, b) => a + parseFloat(b.price.toString()),
+                    0,
+                  ) *
+                  b.amount,
               0,
             ),
             productComboItems: x.productComboItems.map((y) => ({
@@ -519,6 +518,312 @@ export default class AvailabilityService {
       pageSize: dto.pageSize,
       hasNextPage: dto.page * dto.pageSize < total,
       hasPreviousPage: dto.page > 1,
+    };
+  }
+
+  async getAvailableProductById(
+    id: number,
+    municipalityId: number
+  ): Promise<ProductAvailableByMunicipalityOutDto> {
+    const product = await this.pgService.products
+      .createQueryBuilder('product')
+      .leftJoinAndSelect('product.inventoryEntries', 'inventoryEntry')
+      .leftJoinAndSelect('inventoryEntry.zone', 'zone')
+      .leftJoinAndSelect('zone.municipalities', 'municipality')
+      .leftJoinAndSelect('product.category', 'category')
+      .where('municipality.id = :municipalityId', { municipalityId: municipalityId, })
+      .andWhere('product.id = :productId', { productId: id, })
+      .getOne();
+
+    if(!product){
+      throw new BadRequestException('Product Non Available.');
+    }
+
+    const totalQuantity = product.inventoryEntries.reduce(
+      (sum, entry) => sum + entry.quantity,
+      0,
+    );
+
+    return {
+      product: {
+        id: product.id,
+        name: product.name,
+        image: product.image,
+        isService: product.isService,
+        categoryId: product.categoryId,
+        shortDescription: product.shortDescription,
+        categoryName: product.category.name,
+        description: product.description,
+      },
+      inventoryAmount: totalQuantity,
+      price: product.inventoryEntries.reduce(
+        (a, b) => a + parseFloat(b.price.toString()),
+        0,
+      ),
+    };
+  }
+
+  async getAvailableProductByIdCustomer(
+    id: number,
+    userId: number
+  ): Promise<ProductAvailableByMunicipalityOutDto> {
+    const identityCart = await this.pgService.shoppingCarts.findOne({
+      where: {
+        userId: userId,
+        productId: null,
+        productComboId: null,
+      },
+    });
+    if (!identityCart) {
+      throw new ConflictException(
+        `Municipality for User ${userId} has not been selected`,
+      );
+    }
+
+    const municipalityId = identityCart.municipalityId;
+
+    const product = await this.pgService.products
+      .createQueryBuilder('product')
+      .leftJoinAndSelect('product.inventoryEntries', 'inventoryEntry')
+      .leftJoinAndSelect('inventoryEntry.zone', 'zone')
+      .leftJoinAndSelect('zone.municipalities', 'municipality')
+      .leftJoinAndSelect('product.category', 'category')
+      .where('municipality.id = :municipalityId', { municipalityId: municipalityId, })
+      .andWhere('product.id = :productId', { productId: id, })
+      .getOne();
+
+    if(!product){
+      throw new BadRequestException('Product Non Available.');
+    }
+
+    const totalQuantity = product.inventoryEntries.reduce(
+      (sum, entry) => sum + entry.quantity,
+      0,
+    );
+
+    return {
+      product: {
+        id: product.id,
+        name: product.name,
+        image: product.image,
+        isService: product.isService,
+        categoryId: product.categoryId,
+        shortDescription: product.shortDescription,
+        categoryName: product.category.name,
+        description: product.description,
+      },
+      inventoryAmount: totalQuantity,
+      price: product.inventoryEntries.reduce(
+        (a, b) => a + parseFloat(b.price.toString()),
+        0,
+      ),
+    };
+  }
+
+  async getAvailableProductComboByMunicipalityCustomer(
+    id: number,
+    userId: number,
+  ): Promise<ProductComboAvailableByMunicipalityOutDto> {
+    const identityCart = await this.pgService.shoppingCarts.findOne({
+      where: {
+        userId: userId,
+        productId: null,
+        productComboId: null,
+      },
+    });
+    if (!identityCart) {
+      throw new ConflictException(
+        `Municipality for User ${userId} has not been selected`,
+      );
+    }
+
+    const municipalityId = identityCart.municipalityId;
+
+    const products = await this.pgService.products.find({
+      where: {
+        inventoryEntries: {
+          zone: { municipalities: { id: municipalityId } },
+          quantity: MoreThan(0),
+        },
+      },
+      relations: ['inventoryEntries', 'category'],
+    });
+
+    const productIds = products.map((product) => product.id);
+
+    if (productIds.length === 0) {
+      throw new BadRequestException('Product Combo Non Available.');
+    }
+
+    const productCombo = await this.pgService.productCombos
+      .createQueryBuilder('productCombo')
+      .leftJoinAndSelect('productCombo.zone', 'zone')
+      .leftJoinAndSelect('zone.municipalities', 'municipality')
+      .leftJoinAndSelect('productCombo.productComboItems', 'productComboItem')
+      .leftJoinAndSelect('productComboItem.product', 'product')
+      .leftJoinAndSelect('product.inventoryEntries', 'inventoryEntry')
+      .where('productCombo.isActive = :isActive', {
+        isActive: true,
+      })
+      .andWhere('productCombo.id = :id', { id })
+      .andWhere('municipality.id = :municipalityId', { municipalityId })
+      .andWhere('product.id IN (:...productIds)', { productIds })
+      .getOne();
+
+    if (!productCombo) {
+      throw new BadRequestException('Product Combo Non Available.');
+    }
+
+    const productInventoryMap = new Map<number, number>();
+
+    products.forEach((product) => {
+      const totalQuantity = product.inventoryEntries.reduce(
+        (sum, entry) => sum + entry.quantity,
+        0,
+      );
+      productInventoryMap.set(product.id, totalQuantity);
+    });
+
+    let maxCombos = Infinity;
+
+    productCombo.productComboItems.forEach((item) => {
+      const availableQuantity =
+        productInventoryMap.get(item.productId) || 0;
+      const possibleCombos = Math.floor(availableQuantity / item.amount);
+
+      if (possibleCombos < maxCombos) {
+        maxCombos = possibleCombos;
+      }
+    });
+
+    return {
+      productCombo: {
+        id: productCombo.id,
+        name: productCombo.name,
+        description: productCombo.description,
+        shortDescription: productCombo.shortDescription,
+        isActive: productCombo.isActive,
+        image: productCombo.image,
+        price: parseFloat(productCombo.price.toString()),
+        zoneId: productCombo.zoneId,
+        zoneName: productCombo.zone.name,
+        referencePrice: productCombo.productComboItems.reduce(
+          (a, b) =>
+            a +
+            products
+              .find((p) => p.id === b.productId)
+              .inventoryEntries.reduce(
+              (a, b) => a + parseFloat(b.price.toString()),
+              0,
+            ) *
+            b.amount,
+          0,
+        ),
+        productComboItems: productCombo.productComboItems.map((y) => ({
+          id: y.id,
+          productId: y.productId,
+          productName: y.product.name,
+          amount: y.amount,
+        })),
+      },
+      inventoryAmount: maxCombos === Infinity ? 0 : maxCombos,
+      price: parseFloat(productCombo.price.toString()),
+    };
+  }
+
+  async getAvailableProductComboByMunicipality(
+    id: number,
+    municipalityId: number,
+  ): Promise<ProductComboAvailableByMunicipalityOutDto> {
+    const products = await this.pgService.products.find({
+      where: {
+        inventoryEntries: {
+          zone: { municipalities: { id: municipalityId } },
+          quantity: MoreThan(0),
+        },
+      },
+      relations: ['inventoryEntries', 'category'],
+    });
+
+    const productIds = products.map((product) => product.id);
+
+    if (productIds.length === 0) {
+      throw new BadRequestException('Product Combo Non Available.');
+    }
+
+    const productCombo = await this.pgService.productCombos
+      .createQueryBuilder('productCombo')
+      .leftJoinAndSelect('productCombo.zone', 'zone')
+      .leftJoinAndSelect('zone.municipalities', 'municipality')
+      .leftJoinAndSelect('productCombo.productComboItems', 'productComboItem')
+      .leftJoinAndSelect('productComboItem.product', 'product')
+      .leftJoinAndSelect('product.inventoryEntries', 'inventoryEntry')
+      .where('productCombo.isActive = :isActive', {
+        isActive: true,
+      })
+      .andWhere('productCombo.id = :id', { id })
+      .andWhere('municipality.id = :municipalityId', { municipalityId })
+      .andWhere('product.id IN (:...productIds)', { productIds })
+      .getOne();
+
+    if (!productCombo) {
+      throw new BadRequestException('Product Combo Non Available.');
+    }
+
+    const productInventoryMap = new Map<number, number>();
+
+    products.forEach((product) => {
+      const totalQuantity = product.inventoryEntries.reduce(
+        (sum, entry) => sum + entry.quantity,
+        0,
+      );
+      productInventoryMap.set(product.id, totalQuantity);
+    });
+
+    let maxCombos = Infinity;
+
+    productCombo.productComboItems.forEach((item) => {
+      const availableQuantity =
+        productInventoryMap.get(item.productId) || 0;
+      const possibleCombos = Math.floor(availableQuantity / item.amount);
+
+      if (possibleCombos < maxCombos) {
+        maxCombos = possibleCombos;
+      }
+    });
+
+    return {
+      productCombo: {
+        id: productCombo.id,
+        name: productCombo.name,
+        description: productCombo.description,
+        shortDescription: productCombo.shortDescription,
+        isActive: productCombo.isActive,
+        image: productCombo.image,
+        price: parseFloat(productCombo.price.toString()),
+        zoneId: productCombo.zoneId,
+        zoneName: productCombo.zone.name,
+        referencePrice: productCombo.productComboItems.reduce(
+          (a, b) =>
+            a +
+            products
+              .find((p) => p.id === b.productId)
+              .inventoryEntries.reduce(
+              (a, b) => a + parseFloat(b.price.toString()),
+              0,
+            ) *
+            b.amount,
+          0,
+        ),
+        productComboItems: productCombo.productComboItems.map((y) => ({
+          id: y.id,
+          productId: y.productId,
+          productName: y.product.name,
+          amount: y.amount,
+        })),
+      },
+      inventoryAmount: maxCombos === Infinity ? 0 : maxCombos,
+      price: parseFloat(productCombo.price.toString()),
     };
   }
 }
