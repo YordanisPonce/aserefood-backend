@@ -34,6 +34,7 @@ import ContactInfoOutDto from '../dto/out/contact-info.out.dto';
 import ContactInfoSearchInDto from '../dto/in/contact-info.search.in.dto';
 import ContactInfoInDto from '../dto/in/contact-info.in.dto';
 import ContactInfoUpdateInDto from '../dto/in/contact-info.update.in.dto';
+import ContactInfoWithMunicipalityOutDto from '../dto/out/contact-info-with-municipality.out.dto';
 
 @Controller('v1/contact-infos')
 @ApiTags('contact-infos')
@@ -62,7 +63,7 @@ export default class V1ContactInfosController {
     return this.contactInfosService.search(dto, req.user.userId);
   }
 
-  @Get('/backoffice/:id')
+  @Get('/search/backoffice/:userId')
   @Roles(Role.Admin)
   @ApiOkResponse({
     description: 'Ok',
@@ -74,9 +75,25 @@ export default class V1ContactInfosController {
   })
   async getBackOffice(
     @Query() dto: ContactInfoSearchInDto,
-    @Param('id', ParseIntPipe) id: number,
+    @Param('userId', ParseIntPipe) userId: number,
   ): Promise<PaginatedOutDto<ContactInfoOutDto>> {
-    return this.contactInfosService.search(dto, id);
+    return this.contactInfosService.search(dto, userId);
+  }
+
+  @Get('/backoffice/:id')
+  @Roles(Role.Admin)
+  @ApiOkResponse({
+    description: 'Ok',
+    type: ContactInfoWithMunicipalityOutDto,
+  })
+  @ApiOperation({
+    summary:
+      'Get an specific Contact Info. Only for Admins',
+  })
+  async getBackOfficeById(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ContactInfoWithMunicipalityOutDto> {
+    return this.contactInfosService.getById(id);
   }
 
   @Get('/all')
@@ -89,14 +106,14 @@ export default class V1ContactInfosController {
     return this.contactInfosService.getAll(req.user.userId);
   }
 
-  @Get('/all/backoffice/:id')
+  @Get('/all/backoffice/:userId')
   @Roles(Role.Admin)
   @ApiOkResponse({ description: 'Ok', type: [ContactInfoOutDto] })
   @ApiOperation({
     summary: 'Get all Contact Infos of given customer. Only for Admins',
   })
-  async getAllBackoffice(@Param('id', ParseIntPipe) id: number) {
-    return this.contactInfosService.getAll(id);
+  async getAllBackoffice(@Param('userId', ParseIntPipe) userId: number) {
+    return this.contactInfosService.getAll(userId);
   }
 
   @Get('/:id')

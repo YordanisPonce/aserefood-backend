@@ -33,4 +33,5 @@ export default class ProductAvailabilitySearchInDto extends PaginatedInDto {
   @IsOptional()
   @IsBooleanString()
   isService?: boolean;
+
 }
