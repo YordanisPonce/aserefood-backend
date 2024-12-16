@@ -22,4 +22,9 @@ export const configSchema = Joi.object({
   EMAIL_RESET_PASSWORD_URL: Joi.string().uri().required(),
   MAX_HOURS_TO_AUTO_CANCEL_ORDER: Joi.number().min(0).required(),
   MAX_HOURS_TO_DELETE_SHOPPING_CART: Joi.number().min(0).required(),
+  TROPIPAY_URL_SUCCESS: Joi.string().uri().required(),
+  TROPIPAY_URL_FAILURE: Joi.string().uri().required(),
+  TROPIPAY_URL_NOTIFICATION: Joi.string().uri().required(),
+  TROPIPAY_CLIENT_ID: Joi.string().required(),
+  TROPIPAY_CLIENT_SECRET: Joi.string().required(),
 }).unknown();

@@ -13,12 +13,18 @@ services:
         EMAIL_CONFIRMATION_URL: https://asere-food.com/confirmEmail
         EMAIL_RESET_PASSWORD_URL: https://asere-food.com/resetPassword
 
+        TROPIPAY_URL_SUCCESS: https://asere-food.com/payment/success
+        TROPIPAY_URL_FAILURE: https://asere-food.com/payment/failure
+        TROPIPAY_URL_NOTIFICATION: https://asere-food-api.mdialityc.com/v1/payments/charging
+
         MAX_HOURS_TO_AUTO_CANCEL_ORDER: 48
         MAX_HOURS_TO_DELETE_SHOPPING_CART: 24
         
         SECRET_KEY: ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789JANDDAFOFAOINAIEEFAD
         SEED_ADMIN_EMAIL: admin@admin.admin
         SEED_ADMIN_PASSWORD: Admin2024.
+        TROPIPAY_CLIENT_ID: ABC
+        TROPIPAY_CLIENT_SECRET: ABC
         
         MAIL_HOST: smtp.gmail.com
         MAIL_PORT: 587

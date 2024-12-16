@@ -43,4 +43,7 @@ export default class OnlinePayment {
 
   @Column()
   orderId: number;
+
+  @Column({nullable: true})
+  paymentId?: string;
 }

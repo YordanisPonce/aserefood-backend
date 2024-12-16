@@ -192,7 +192,7 @@ export default class OrdersService {
     await this.pgService.orders.save(newOrder);
 
     if (dto.paymentSelection === PaymentSelection.Online) {
-      // ToDo: Implement Payment in TropyPay
+      // ToDo: Implement Payment in TropiPay
 
       const onlinePayment = this.pgService.onlinePayments.create({
         orderId: newOrder.id,
@@ -210,7 +210,7 @@ export default class OrdersService {
 
       await this.pgService.onlinePayments.save(onlinePayment);
       newOrder.onlinePaymentId = onlinePayment.id;
-      newOrder.status = OrderStatus.PAYED;
+      newOrder.status = OrderStatus.PAYMENT_PENDING;
 
       await this.mailService.sendPaidOrderEmail(
         user.email,
@@ -221,7 +221,7 @@ export default class OrdersService {
         newOrder.createdDate,
         contactInfo.phoneNumber,
         deliveryMethod.pickUpDirection,
-        'FUNCIONÓ ESTO',
+        'Pago Creado',
       );
     } else {
       const transferPayment = this.pgService.transferPayments.create({
