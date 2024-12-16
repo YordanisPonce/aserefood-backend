@@ -10,8 +10,8 @@ services:
     environment:
         APP_PORT: 4001
         UI_URL: https://asere-food.com
-        EMAIL_CONFIRMATION_URL: https://asere-food.com/confirmEmail
-        EMAIL_RESET_PASSWORD_URL: https://asere-food.com/resetPassword
+        EMAIL_CONFIRMATION_URL: https://asere-food.com/auth/verifyEmail
+        EMAIL_RESET_PASSWORD_URL: https://asere-food.com/auth/resetPassword
 
         TROPIPAY_URL_SUCCESS: https://asere-food.com/payment/success
         TROPIPAY_URL_FAILURE: https://asere-food.com/payment/failure
