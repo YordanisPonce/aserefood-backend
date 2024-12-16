@@ -82,40 +82,49 @@ export default class AvailabilityService {
       dto.orderDirection?.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
     queryBuilder.orderBy(`product.${orderBy}`, orderDirection);
 
-    // Pagination
-    const [products, total] = await queryBuilder
-      .skip((dto.page - 1) * dto.pageSize)
-      .take(dto.pageSize)
-      .getManyAndCount();
-
+    const data = await queryBuilder
+      .getMany();
     const productInventoryMap = new Map<number, number>();
-
-    products.forEach((product) => {
+    data.forEach((product) => {
       const totalQuantity = product.inventoryEntries.reduce(
         (sum, entry) => sum + entry.quantity,
         0,
       );
       productInventoryMap.set(product.id, totalQuantity);
     });
+    let products = data.map((x) => ({
+      product: {
+        id: x.id,
+        name: x.name,
+        image: x.image,
+        isService: x.isService,
+        categoryId: x.categoryId,
+        shortDescription: x.shortDescription,
+        categoryName: x.category.name,
+        description: x.description,
+      },
+      inventoryAmount: productInventoryMap.get(x.id),
+      price: x.inventoryEntries.reduce(
+        (a, b) => a + parseFloat(b.price.toString()),
+        0,
+      ),
+    }));
+
+    // Filtering
+    if(dto.minimumPrice){
+      products = products.filter(x => x.price >= dto.minimumPrice);
+    }
+
+    if(dto.maximumPrice){
+      products = products.filter(x => x.price <= dto.maximumPrice);
+    }
+
+    // Pagination
+    const total = products.length;
+    products = products.slice((dto.page - 1) * dto.pageSize, dto.pageSize);
 
     return {
-      data: products.map((x) => ({
-        product: {
-          id: x.id,
-          name: x.name,
-          image: x.image,
-          isService: x.isService,
-          categoryId: x.categoryId,
-          shortDescription: x.shortDescription,
-          categoryName: x.category.name,
-          description: x.description,
-        },
-        inventoryAmount: productInventoryMap.get(x.id),
-        price: x.inventoryEntries.reduce(
-          (a, b) => a + parseFloat(b.price.toString()),
-          0,
-        ),
-      })),
+      data: products,
       total,
       page: dto.page,
       pageSize: dto.pageSize,
@@ -219,12 +228,7 @@ export default class AvailabilityService {
       dto.orderDirection?.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
     queryBuilder.orderBy(`productCombo.${orderBy}`, orderDirection);
 
-    // Pagination
-    const [productCombos, total] = await queryBuilder
-      .skip((dto.page - 1) * dto.pageSize)
-      .take(dto.pageSize)
-      .getManyAndCount();
-
+    const data = await queryBuilder.getMany();
     const productInventoryMap = new Map<number, number>();
 
     products.forEach((product) => {
@@ -235,54 +239,69 @@ export default class AvailabilityService {
       productInventoryMap.set(product.id, totalQuantity);
     });
 
-    return {
-      data: productCombos.map((x) => {
-        let maxCombos = Infinity;
+    let productCombos = data.map((x) => {
+      let maxCombos = Infinity;
 
-        x.productComboItems.forEach((item) => {
-          const availableQuantity =
-            productInventoryMap.get(item.productId) || 0;
-          const possibleCombos = Math.floor(availableQuantity / item.amount);
+      x.productComboItems.forEach((item) => {
+        const availableQuantity =
+          productInventoryMap.get(item.productId) || 0;
+        const possibleCombos = Math.floor(availableQuantity / item.amount);
 
-          if (possibleCombos < maxCombos) {
-            maxCombos = possibleCombos;
-          }
-        });
+        if (possibleCombos < maxCombos) {
+          maxCombos = possibleCombos;
+        }
+      });
 
-        return {
-          productCombo: {
-            id: x.id,
-            name: x.name,
-            description: x.description,
-            shortDescription: x.shortDescription,
-            isActive: x.isActive,
-            image: x.image,
-            price: parseFloat(x.price.toString()),
-            zoneId: x.zoneId,
-            zoneName: x.zone.name,
-            referencePrice: x.productComboItems.reduce(
-              (a, b) =>
-                a +
-                products
-                  .find((p) => p.id === b.productId)
-                  .inventoryEntries.reduce(
-                    (a, b) => a + parseFloat(b.price.toString()),
-                    0,
-                  ) *
-                  b.amount,
-              0,
-            ),
-            productComboItems: x.productComboItems.map((y) => ({
-              id: y.id,
-              productId: y.productId,
-              productName: y.product.name,
-              amount: y.amount,
-            })),
-          },
-          inventoryAmount: maxCombos === Infinity ? 0 : maxCombos,
+      return {
+        productCombo: {
+          id: x.id,
+          name: x.name,
+          description: x.description,
+          shortDescription: x.shortDescription,
+          isActive: x.isActive,
+          image: x.image,
           price: parseFloat(x.price.toString()),
-        };
-      }),
+          zoneId: x.zoneId,
+          zoneName: x.zone.name,
+          referencePrice: x.productComboItems.reduce(
+            (a, b) =>
+              a +
+              products
+                .find((p) => p.id === b.productId)
+                .inventoryEntries.reduce(
+                (a, b) => a + parseFloat(b.price.toString()),
+                0,
+              ) *
+              b.amount,
+            0,
+          ),
+          productComboItems: x.productComboItems.map((y) => ({
+            id: y.id,
+            productId: y.productId,
+            productName: y.product.name,
+            amount: y.amount,
+          })),
+        },
+        inventoryAmount: maxCombos === Infinity ? 0 : maxCombos,
+        price: parseFloat(x.price.toString()),
+      };
+    });
+
+    // Filtering
+    if(dto.minimumPrice){
+      productCombos = productCombos.filter(x => x.price >= dto.minimumPrice);
+    }
+
+    if(dto.maximumPrice){
+      productCombos = productCombos.filter(x => x.price <= dto.maximumPrice);
+    }
+
+    // Pagination
+    const total = productCombos.length;
+    productCombos = productCombos.slice((dto.page - 1) * dto.pageSize, dto.pageSize);
+
+    return {
+      data: productCombos,
       total,
       page: dto.page,
       pageSize: dto.pageSize,
@@ -335,40 +354,49 @@ export default class AvailabilityService {
       dto.orderDirection?.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
     queryBuilder.orderBy(`product.${orderBy}`, orderDirection);
 
-    // Pagination
-    const [products, total] = await queryBuilder
-      .skip((dto.page - 1) * dto.pageSize)
-      .take(dto.pageSize)
-      .getManyAndCount();
-
+    const data = await queryBuilder
+      .getMany();
     const productInventoryMap = new Map<number, number>();
-
-    products.forEach((product) => {
+    data.forEach((product) => {
       const totalQuantity = product.inventoryEntries.reduce(
         (sum, entry) => sum + entry.quantity,
         0,
       );
       productInventoryMap.set(product.id, totalQuantity);
     });
+    let products = data.map((x) => ({
+      product: {
+        id: x.id,
+        name: x.name,
+        image: x.image,
+        isService: x.isService,
+        categoryId: x.categoryId,
+        shortDescription: x.shortDescription,
+        categoryName: x.category.name,
+        description: x.description,
+      },
+      inventoryAmount: productInventoryMap.get(x.id),
+      price: x.inventoryEntries.reduce(
+        (a, b) => a + parseFloat(b.price.toString()),
+        0,
+      ),
+    }));
+
+    // Filtering
+    if(dto.minimumPrice){
+      products = products.filter(x => x.price >= dto.minimumPrice);
+    }
+
+    if(dto.maximumPrice){
+      products = products.filter(x => x.price <= dto.maximumPrice);
+    }
+
+    // Pagination
+    const total = products.length;
+    products = products.slice((dto.page - 1) * dto.pageSize, dto.pageSize);
 
     return {
-      data: products.map((x) => ({
-        product: {
-          id: x.id,
-          name: x.name,
-          image: x.image,
-          isService: x.isService,
-          categoryId: x.categoryId,
-          shortDescription: x.shortDescription,
-          categoryName: x.category.name,
-          description: x.description,
-        },
-        inventoryAmount: productInventoryMap.get(x.id),
-        price: x.inventoryEntries.reduce(
-          (a, b) => a + parseFloat(b.price.toString()),
-          0,
-        ),
-      })),
+      data: products,
       total,
       page: dto.page,
       pageSize: dto.pageSize,
@@ -449,12 +477,7 @@ export default class AvailabilityService {
       dto.orderDirection?.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
     queryBuilder.orderBy(`productCombo.${orderBy}`, orderDirection);
 
-    // Pagination
-    const [productCombos, total] = await queryBuilder
-      .skip((dto.page - 1) * dto.pageSize)
-      .take(dto.pageSize)
-      .getManyAndCount();
-
+    const data = await queryBuilder.getMany();
     const productInventoryMap = new Map<number, number>();
 
     products.forEach((product) => {
@@ -465,54 +488,69 @@ export default class AvailabilityService {
       productInventoryMap.set(product.id, totalQuantity);
     });
 
-    return {
-      data: productCombos.map((x) => {
-        let maxCombos = Infinity;
+    let productCombos = data.map((x) => {
+      let maxCombos = Infinity;
 
-        x.productComboItems.forEach((item) => {
-          const availableQuantity =
-            productInventoryMap.get(item.productId) || 0;
-          const possibleCombos = Math.floor(availableQuantity / item.amount);
+      x.productComboItems.forEach((item) => {
+        const availableQuantity =
+          productInventoryMap.get(item.productId) || 0;
+        const possibleCombos = Math.floor(availableQuantity / item.amount);
 
-          if (possibleCombos < maxCombos) {
-            maxCombos = possibleCombos;
-          }
-        });
+        if (possibleCombos < maxCombos) {
+          maxCombos = possibleCombos;
+        }
+      });
 
-        return {
-          productCombo: {
-            id: x.id,
-            name: x.name,
-            description: x.description,
-            shortDescription: x.shortDescription,
-            isActive: x.isActive,
-            image: x.image,
-            price: parseFloat(x.price.toString()),
-            zoneId: x.zoneId,
-            zoneName: x.zone.name,
-            referencePrice: x.productComboItems.reduce(
-              (a, b) =>
-                a +
-                products
-                  .find((p) => p.id === b.productId)
-                  .inventoryEntries.reduce(
-                    (a, b) => a + parseFloat(b.price.toString()),
-                    0,
-                  ) *
-                  b.amount,
-              0,
-            ),
-            productComboItems: x.productComboItems.map((y) => ({
-              id: y.id,
-              productId: y.productId,
-              productName: y.product.name,
-              amount: y.amount,
-            })),
-          },
-          inventoryAmount: maxCombos === Infinity ? 0 : maxCombos,
+      return {
+        productCombo: {
+          id: x.id,
+          name: x.name,
+          description: x.description,
+          shortDescription: x.shortDescription,
+          isActive: x.isActive,
+          image: x.image,
           price: parseFloat(x.price.toString()),
-        };
-      }),
+          zoneId: x.zoneId,
+          zoneName: x.zone.name,
+          referencePrice: x.productComboItems.reduce(
+            (a, b) =>
+              a +
+              products
+                .find((p) => p.id === b.productId)
+                .inventoryEntries.reduce(
+                (a, b) => a + parseFloat(b.price.toString()),
+                0,
+              ) *
+              b.amount,
+            0,
+          ),
+          productComboItems: x.productComboItems.map((y) => ({
+            id: y.id,
+            productId: y.productId,
+            productName: y.product.name,
+            amount: y.amount,
+          })),
+        },
+        inventoryAmount: maxCombos === Infinity ? 0 : maxCombos,
+        price: parseFloat(x.price.toString()),
+      };
+    });
+
+    // Filtering
+    if(dto.minimumPrice){
+      productCombos = productCombos.filter(x => x.price >= dto.minimumPrice);
+    }
+
+    if(dto.maximumPrice){
+      productCombos = productCombos.filter(x => x.price <= dto.maximumPrice);
+    }
+
+    // Pagination
+    const total = productCombos.length;
+    productCombos = productCombos.slice((dto.page - 1) * dto.pageSize, dto.pageSize);
+
+    return {
+      data: productCombos,
       total,
       page: dto.page,
       pageSize: dto.pageSize,
