@@ -64,6 +64,32 @@ export class V1AvailabilityController {
     );
   }
 
+  @Get('/availability/product/:id')
+  @Roles(Role.Customer)
+  @ApiOkResponse({
+    description: 'Ok',
+    type: ProductAvailableByMunicipalityOutDto,
+  })
+  @ApiConflictResponse({ description: 'Municipality not selected' })
+  @ApiNotFoundResponse({ description: 'Not Found Municipality' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @UseInterceptors(CacheInterceptor)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
+  @ApiOperation({
+    summary:
+      'Get available product by id of current customer. Only for Costumers',
+  })
+  async getAvailableProductById(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req,
+  ) {
+    const userId = req.user.userId;
+    return this.availabilityService.getAvailableProductByIdCustomer(id, userId);
+  }
+
   @Get('/availability/products/:municipalityId')
   @ApiOkResponse({
     description: 'Ok',
@@ -82,6 +108,26 @@ export class V1AvailabilityController {
     return this.availabilityService.getAvailableProductsByMunicipalityId(
       municipalityId,
       dto,
+    );
+  }
+
+  @Get('/availability/products/:municipalityId/:id')
+  @ApiOkResponse({
+    description: 'Ok',
+    type: ProductAvailableByMunicipalityOutDto,
+  })
+  @ApiNotFoundResponse({ description: 'Not Found Municipality' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiOperation({
+    summary: 'Get available product by municipality and id.',
+  })
+  async getAvailableProductByMunicipalityId(
+    @Param('municipalityId', ParseIntPipe) municipalityId: number,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.availabilityService.getAvailableProductById(
+      id,
+      municipalityId,
     );
   }
 
@@ -114,6 +160,35 @@ export class V1AvailabilityController {
     );
   }
 
+  @Get('/availability/product-combo/:id')
+  @Roles(Role.Customer)
+  @ApiOkResponse({
+    description: 'Ok',
+    type: ProductComboAvailableByMunicipalityOutDto,
+  })
+  @ApiConflictResponse({ description: 'Municipality not selected' })
+  @ApiNotFoundResponse({ description: 'Not Found Municipality' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @UseInterceptors(CacheInterceptor)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
+  @ApiOperation({
+    summary:
+      'Get available product combo by municipality of current customer. Only for Costumers',
+  })
+  async getAvailableProductComboById(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req,
+  ) {
+    const userId = req.user.userId;
+    return this.availabilityService.getAvailableProductComboByMunicipalityCustomer(
+      id,
+      userId,
+    );
+  }
+
   @Get('/availability/product-combos/:municipalityId')
   @ApiOkResponse({
     description: 'Ok',
@@ -135,5 +210,24 @@ export class V1AvailabilityController {
     );
   }
 
-
+  @Get('/availability/product-combos/:municipalityId/:id')
+  @ApiOkResponse({
+    description: 'Ok',
+    type: ProductComboAvailableByMunicipalityOutDto,
+  })
+  @ApiNotFoundResponse({ description: 'Not Found Municipality' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiOperation({
+    summary:
+      'Get available product combo by municipality.',
+  })
+  async getAvailableProductComboByMunicipalityId(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('municipalityId', ParseIntPipe) municipalityId: number,
+  ) {
+    return this.availabilityService.getAvailableProductComboByMunicipality(
+      id,
+      municipalityId,
+    );
+  }
 }
