@@ -30,12 +30,12 @@ import ProductAvailabilitySearchInDto from '../dto/in/availability/product-avail
 import { ProductComboAvailableByMunicipalityOutDto } from '../dto/out/availability/product-combo-available-by-municipality.out.dto';
 import ProductComboAvailabilitySearchInDto from '../dto/in/availability/product-combo-availability.search.in.dto';
 
-@Controller('v1/shopping-carts')
-@ApiTags('shopping-carts')
+@Controller('v1/availability')
+@ApiTags('availability')
 export class V1AvailabilityController {
   constructor(private readonly availabilityService: AvailabilityService) {}
 
-  @Get('/availability/products')
+  @Get('/products')
   @Roles(Role.Customer)
   @ApiOkResponse({
     description: 'Ok',
@@ -64,7 +64,7 @@ export class V1AvailabilityController {
     );
   }
 
-  @Get('/availability/product/:id')
+  @Get('/product/:id')
   @Roles(Role.Customer)
   @ApiOkResponse({
     description: 'Ok',
@@ -90,7 +90,7 @@ export class V1AvailabilityController {
     return this.availabilityService.getAvailableProductByIdCustomer(id, userId);
   }
 
-  @Get('/availability/products/:municipalityId')
+  @Get('/products/:municipalityId')
   @ApiOkResponse({
     description: 'Ok',
     type: PaginatedOutDto<ProductAvailableByMunicipalityOutDto>,
@@ -111,7 +111,7 @@ export class V1AvailabilityController {
     );
   }
 
-  @Get('/availability/products/:municipalityId/:id')
+  @Get('/products/:municipalityId/:id')
   @ApiOkResponse({
     description: 'Ok',
     type: ProductAvailableByMunicipalityOutDto,
@@ -131,7 +131,7 @@ export class V1AvailabilityController {
     );
   }
 
-  @Get('/availability/product-combos')
+  @Get('/product-combos')
   @Roles(Role.Customer)
   @ApiOkResponse({
     description: 'Ok',
@@ -160,7 +160,7 @@ export class V1AvailabilityController {
     );
   }
 
-  @Get('/availability/product-combo/:id')
+  @Get('/product-combo/:id')
   @Roles(Role.Customer)
   @ApiOkResponse({
     description: 'Ok',
@@ -189,7 +189,7 @@ export class V1AvailabilityController {
     );
   }
 
-  @Get('/availability/product-combos/:municipalityId')
+  @Get('/product-combos/:municipalityId')
   @ApiOkResponse({
     description: 'Ok',
     type: PaginatedOutDto<ProductComboAvailableByMunicipalityOutDto>,
@@ -210,7 +210,7 @@ export class V1AvailabilityController {
     );
   }
 
-  @Get('/availability/product-combos/:municipalityId/:id')
+  @Get('/product-combos/:municipalityId/:id')
   @ApiOkResponse({
     description: 'Ok',
     type: ProductComboAvailableByMunicipalityOutDto,
