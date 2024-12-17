@@ -50,7 +50,7 @@ export default class V1ContactInfosController {
   @Roles(Role.Customer)
   @ApiOkResponse({
     description: 'Ok',
-    type: PaginatedOutDto<ContactInfoOutDto>,
+    type: PaginatedOutDto<ContactInfoWithMunicipalityOutDto>,
   })
   @ApiOperation({
     summary:
@@ -59,7 +59,7 @@ export default class V1ContactInfosController {
   async get(
     @Query() dto: ContactInfoSearchInDto,
     @Request() req,
-  ): Promise<PaginatedOutDto<ContactInfoOutDto>> {
+  ): Promise<PaginatedOutDto<ContactInfoWithMunicipalityOutDto>> {
     return this.contactInfosService.search(dto, req.user.userId);
   }
 
@@ -67,7 +67,7 @@ export default class V1ContactInfosController {
   @Roles(Role.Admin)
   @ApiOkResponse({
     description: 'Ok',
-    type: PaginatedOutDto<ContactInfoOutDto>,
+    type: PaginatedOutDto<ContactInfoWithMunicipalityOutDto>,
   })
   @ApiOperation({
     summary:
@@ -76,7 +76,7 @@ export default class V1ContactInfosController {
   async getBackOffice(
     @Query() dto: ContactInfoSearchInDto,
     @Param('userId', ParseIntPipe) userId: number,
-  ): Promise<PaginatedOutDto<ContactInfoOutDto>> {
+  ): Promise<PaginatedOutDto<ContactInfoWithMunicipalityOutDto>> {
     return this.contactInfosService.search(dto, userId);
   }
 
@@ -108,7 +108,7 @@ export default class V1ContactInfosController {
 
   @Get('/all/backoffice/:userId')
   @Roles(Role.Admin)
-  @ApiOkResponse({ description: 'Ok', type: [ContactInfoOutDto] })
+  @ApiOkResponse({ description: 'Ok', type: [ContactInfoWithMunicipalityOutDto] })
   @ApiOperation({
     summary: 'Get all Contact Infos of given customer. Only for Admins',
   })

@@ -24,7 +24,7 @@ export default class ContactInfosService {
   async search(
     dto: ContactInfoSearchInDto,
     userId: number,
-  ): Promise<PaginatedOutDto<ContactInfoOutDto>> {
+  ): Promise<PaginatedOutDto<ContactInfoWithMunicipalityOutDto>> {
     const queryBuilder = this.pgService.contactInfos
       .createQueryBuilder('contactInfo')
       .leftJoinAndSelect('contactInfo.municipality', 'municipality')
@@ -69,7 +69,7 @@ export default class ContactInfosService {
       .getManyAndCount();
 
     return {
-      data: result.map((m) => this.toOutDto(m)),
+      data: result.map((m) => this.toOutWithMunicipalitiesDto(m)),
       total,
       page: dto.page,
       pageSize: dto.pageSize,
