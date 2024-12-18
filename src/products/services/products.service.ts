@@ -30,7 +30,7 @@ export default class ProductsService {
       .leftJoinAndSelect('product.providers', 'provider')
       .leftJoinAndSelect('product.category', 'category');
 
-    // Filtering
+    // Filterin g
     if (dto.search) {
       queryBuilder.where(
         'product.name ILIKE :search OR product.description ILIKE :search OR product.shortDescription ILIKE :search',
@@ -53,7 +53,7 @@ export default class ProductsService {
     }
 
     if (dto.isService !== undefined && dto.isService !== null) {
-      queryBuilder.andWhere('provider.isService = :isService', {
+      queryBuilder.andWhere('product.isService = :isService', {
         isService: dto.isService,
       });
     }
