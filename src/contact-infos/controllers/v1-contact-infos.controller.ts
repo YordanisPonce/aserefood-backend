@@ -155,8 +155,9 @@ export default class V1ContactInfosController {
   async put(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: ContactInfoUpdateInDto,
+    @Request() req,
   ) {
-    return this.contactInfosService.patch(id, dto);
+    return this.contactInfosService.patch(id, dto, req.user.userId);
   }
 
   @Delete('/:id')
@@ -171,7 +172,7 @@ export default class V1ContactInfosController {
   @ApiOperation({
     summary: 'Delete PERMANENTLY a Contact Info by its id. Only for Customers',
   })
-  async delete(@Param('id', ParseIntPipe) id: number) {
-    return this.contactInfosService.delete(id);
+  async delete(@Param('id', ParseIntPipe) id: number, @Request() req) {
+    return this.contactInfosService.delete(id, req.user.userId);
   }
 }

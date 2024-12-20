@@ -152,7 +152,7 @@ export default class ContactInfosService {
     return this.toOutDto(newContactInfo);
   }
 
-  async patch(id: number, dto: ContactInfoUpdateInDto): Promise<void> {
+  async patch(id: number, dto: ContactInfoUpdateInDto, userId: number): Promise<void> {
     if (dto.name) {
       const contactInfo = await this.pgService.contactInfos.findOne({
         where: { name: dto.name },
@@ -166,11 +166,11 @@ export default class ContactInfosService {
     }
 
     const contactInfo = await this.pgService.contactInfos.findOne({
-      where: { id },
+      where: { id, userId },
     });
 
     if (!contactInfo) {
-      throw new NotFoundException(`Contact Info with ID ${id} not found`);
+      throw new NotFoundException(`Contact Info with ID ${id} and User ${userId} not found`);
     }
 
     const municipality = await this.pgService.municipalities.findOne({
@@ -183,15 +183,15 @@ export default class ContactInfosService {
       );
     }
 
-    let patchDto = createPatchFields(dto);
+    const patchDto = createPatchFields(dto);
     await this.pgService.contactInfos.update(id, patchDto);
     this.logger.log(`Updated Contact Info with ID ${id}`);
     this.logger.log({ ...patchDto });
   }
 
-  async delete(id: number): Promise<void> {
+  async delete(id: number, userId: number): Promise<void> {
     const contactInfoToDelete = await this.pgService.contactInfos.findOne({
-      where: { id },
+      where: { id, userId },
       relations: ['orders'],
     });
 
@@ -201,13 +201,15 @@ export default class ContactInfosService {
           `Contact Info with ID ${id} has Associated Orders`,
         );
       }
+    } else{
+      throw new NotFoundException(`Contact Info with ID ${id} and User ${userId} not found`);
     }
 
     const result = await this.pgService.contactInfos.delete(id);
     if (result.affected === 0) {
-      throw new NotFoundException(`Contact Info with ID ${id} not found`);
+      throw new NotFoundException(`Contact Info with ID ${id} and User ${userId} not found`);
     }
-    this.logger.log(`Deleted Contact Info with ID ${id}`);
+    this.logger.log(`Deleted Contact Info with ID ${id} and User ${userId}`);
   }
 
   private toOutDto(contactInfo: ContactInfo): ContactInfoOutDto {
