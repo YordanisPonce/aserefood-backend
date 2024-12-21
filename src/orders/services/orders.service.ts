@@ -333,6 +333,7 @@ export default class OrdersService {
         productComboId: x.productComboId,
         amount: x.amount,
       })) ?? [];
+    dto.deliveryMethodId = order.deliveryMethodId;
 
     return dto;
   }
