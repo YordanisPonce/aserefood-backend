@@ -24,6 +24,7 @@ import { ShoppingCartsModule } from './shopping-carts/shopping-carts.module';
 import { OrdersModule } from './orders/orders.module';
 import { PaymentsModule } from './payments/payments.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ZelleConfModule } from './zelle-conf/zelle-conf.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     ShoppingCartsModule,
     OrdersModule,
     PaymentsModule,
+    ZelleConfModule,
   ],
   controllers: [],
   providers: [],

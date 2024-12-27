@@ -31,4 +31,7 @@ export default class OrderItems {
 
   @Column('int')
   amount: number;
+
+  @Column('decimal', { precision: 10, scale: 2, nullable: true })
+  price?: number;
 }
