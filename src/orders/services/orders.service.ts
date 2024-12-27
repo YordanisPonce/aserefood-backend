@@ -22,6 +22,9 @@ import Product from '../../database/entities/product.entity';
 import ProductOutDto from '../../products/dto/out/product.out.dto';
 import ProductCombo from '../../database/entities/product-combo.entity';
 import ProductComboOutDto from '../../product-combos/dto/out/product-combo.out.dto';
+import generateUniqueCode from '../../utils/generators/unique-code.generator';
+import ZellePaymentOutDto from '../dto/out/zelle-payment.out.dto';
+import { IsNull, Not } from 'typeorm';
 
 @Injectable()
 export default class OrdersService {
@@ -44,6 +47,15 @@ export default class OrdersService {
       queryBuilder.where('order.status = :status', {
         status: dto.status,
       });
+    }
+
+    if (dto.code) {
+      const codeId = parseInt(dto.code, 10);
+      if (codeId) {
+        queryBuilder.andWhere('order.id = :codeId', {
+          codeId: codeId,
+        });
+      }
     }
 
     if (dto.deliveryMethodId) {
@@ -94,7 +106,10 @@ export default class OrdersService {
     return orders.map((x) => this.toOutDto(x));
   }
 
-  async getByUserId(dto: OrderSearchInDto, userId: number): Promise<PaginatedOutDto<OrderMeOutDto>> {
+  async getByUserId(
+    dto: OrderSearchInDto,
+    userId: number,
+  ): Promise<PaginatedOutDto<OrderMeOutDto>> {
     const queryBuilder = this.pgService.orders
       .createQueryBuilder('order')
       .leftJoinAndSelect('order.orderItems', 'orderItem')
@@ -106,13 +121,22 @@ export default class OrdersService {
       .leftJoinAndSelect('zone.inventoryEntries', 'inventoryEntry')
       .leftJoinAndSelect('productCombo.productComboItems', 'productComboItem')
       .leftJoinAndSelect('productComboItem.product', 'productComboItemProduct')
-      .where('order.userId = :userId', { userId: userId, });
+      .where('order.userId = :userId', { userId: userId });
 
     // Filtering
     if (dto.status !== undefined && dto.status !== null) {
       queryBuilder.andWhere('order.status = :status', {
         status: dto.status,
       });
+    }
+
+    if (dto.code) {
+      const codeId = parseInt(dto.code, 10);
+      if (codeId) {
+        queryBuilder.andWhere('order.id = :codeId', {
+          codeId: codeId,
+        });
+      }
     }
 
     if (dto.deliveryMethodId) {
@@ -186,6 +210,51 @@ export default class OrdersService {
     return this.toOutDto(order);
   }
 
+  async updateOrderZelle(id: number, userId: number) {
+    const order = await this.pgService.orders.findOne({
+      where: { id, userId, onlinePayment: Not(IsNull()) },
+      relations: ['onlinePayment'],
+    });
+
+    if (!order) {
+      throw new NotFoundException(
+        `Order with ID ${id} and User ${userId} not found`,
+      );
+    }
+
+    if (order.status == OrderStatus.PAYMENT_PENDING){
+      order.status = OrderStatus.PROCESSING_PAYMENT;
+      await this.pgService.orders.save(order);
+    }
+  }
+
+  async getZellePayment(
+    id: number,
+    userId: number,
+  ): Promise<ZellePaymentOutDto> {
+    const order = await this.pgService.orders.findOne({
+      where: { id, userId, onlinePayment: Not(IsNull()) },
+      relations: ['onlinePayment'],
+    });
+
+    if (!order) {
+      throw new NotFoundException(
+        `Order with ID ${id} and User ${userId} not found`,
+      );
+    }
+
+    const zelleList = await this.pgService.zelleConfs.find({ take: 1 });
+    const zelle = zelleList[0];
+
+    return {
+      transferAmount: order.totalAmount,
+      orderNumber: idFormatter(order.id),
+      paymentCode: order.onlinePayment.paymentCode,
+      phoneNumber: zelle?.phoneNumber ?? '',
+      qr: zelle?.qr ?? '',
+    };
+  }
+
   public async post(userId: number, dto: OrderInDto): Promise<OrderOutDto> {
     const user = await this.pgService.users.findOneBy({
       id: userId,
@@ -248,12 +317,14 @@ export default class OrdersService {
           productComboId: null,
           productId: x.product.id,
           amount: x.amount,
+          price: x.price,
         }))
         .concat(
           shoppingCart.productCombos.map((x) => ({
             amount: x.amount,
             productComboId: x.productCombo.id,
             productId: null,
+            price: x.price,
           })),
         ),
     });
@@ -275,6 +346,7 @@ export default class OrdersService {
         phoneNumber: dto.onlinePaymentDto.phoneNumber,
         postalCode: dto.onlinePaymentDto.postalCode,
         state: dto.onlinePaymentDto.state,
+        paymentCode: generateUniqueCode(6),
       });
 
       await this.pgService.onlinePayments.save(onlinePayment);
@@ -327,7 +399,7 @@ export default class OrdersService {
       where: {
         id: id,
       },
-      relations: ['user', 'orderItems'],
+      relations: ['user', 'orderItems', 'contactInfo', 'deliveryMethod'],
     });
     if (!order) {
       throw new NotFoundException(`Order with id ${id} does not exist`);
@@ -341,32 +413,46 @@ export default class OrdersService {
         throw new ConflictException(`Order with id ${id} was canceled`);
       }
 
-      if (dto.status !== order.status && dto.status === OrderStatus.CANCELLED) {
-        for (const orderItem of order.orderItems) {
-          await this.shoppingCartService.manageInventory(
-            order.municipalityId,
-            {
-              cartItemType:
-                orderItem.productId !== null
-                  ? CartItem.Product
-                  : CartItem.ProductCombo,
-              itemId:
-                orderItem.productId !== null
-                  ? orderItem.productId
-                  : orderItem.productComboId,
-              amount: 0,
-            },
-            orderItem.amount,
-            order.userId,
+      if (dto.status !== order.status) {
+        if (dto.status === OrderStatus.CANCELLED) {
+          for (const orderItem of order.orderItems) {
+            await this.shoppingCartService.manageInventory(
+              order.municipalityId,
+              {
+                cartItemType:
+                  orderItem.productId !== null
+                    ? CartItem.Product
+                    : CartItem.ProductCombo,
+                itemId:
+                  orderItem.productId !== null
+                    ? orderItem.productId
+                    : orderItem.productComboId,
+                amount: 0,
+              },
+              orderItem.amount,
+              order.userId,
+            );
+          }
+
+          await this.mailService.sendCancelledOrderEmail(
+            order.user.email,
+            order.user.username,
+            order.id,
+            'Cancelación Manual',
+          );
+        } else if (dto.status === OrderStatus.PAYED) {
+          await this.mailService.sendPaidOrderEmail(
+            order.user.email,
+            order.user.username,
+            order.id,
+            order.totalAmount,
+            'USD',
+            order.createdDate,
+            order.contactInfo.phoneNumber,
+            order.deliveryMethod.pickUpDirection,
+            'STATEMENT',
           );
         }
-
-        await this.mailService.sendCancelledOrderEmail(
-          order.user.email,
-          order.user.username,
-          order.id,
-          'Cancelación Manual',
-        );
       }
     }
 
@@ -403,8 +489,11 @@ export default class OrdersService {
       order.orderItems?.map((x) => ({
         id: x.id,
         product: x.productId ? this.productToOutDto(x.product) : null,
-        productCombo: x.productComboId ? this.productComboToOutDto(x.productCombo) : null,
+        productCombo: x.productComboId
+          ? this.productComboToOutDto(x.productCombo)
+          : null,
         amount: x.amount,
+        price: parseFloat(x.price.toString()),
       })) ?? [];
 
     return dto;
@@ -431,6 +520,7 @@ export default class OrdersService {
         productId: x.productId,
         productComboId: x.productComboId,
         amount: x.amount,
+        price: parseFloat(x.price.toString()),
       })) ?? [];
     dto.deliveryMethodId = order.deliveryMethodId;
 

@@ -14,6 +14,9 @@ export class OrderItemOutDto {
 
   @ApiProperty()
   amount: number;
+
+  @ApiProperty()
+  price: number;
 }
 
 export default class OrderOutDto {

@@ -24,6 +24,7 @@ import OnlinePayment from './entities/online-payment.entity';
 import TransferPayment from './entities/transfer-payment.entity';
 import Order from './entities/order.entity';
 import OrderItems from './entities/order-item.entity';
+import ZelleConf from './entities/zelle-conf.entity';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import OrderItems from './entities/order-item.entity';
           TransferPayment,
           Order,
           OrderItems,
+          ZelleConf
         ],
       }),
     }),
@@ -87,6 +89,7 @@ import OrderItems from './entities/order-item.entity';
       TransferPayment,
       Order,
       OrderItems,
+      ZelleConf
     ]),
   ],
   exports: [PgService],

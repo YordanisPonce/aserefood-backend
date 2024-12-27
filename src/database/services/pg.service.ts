@@ -22,6 +22,7 @@ import CartProduct from '../entities/cart-product.entity';
 import TransferPayment from '../entities/transfer-payment.entity';
 import OnlinePayment from '../entities/online-payment.entity';
 import Order from '../entities/order.entity';
+import ZelleConf from '../entities/zelle-conf.entity';
 
 @Injectable()
 export default class PgService {
@@ -62,5 +63,6 @@ export default class PgService {
     @InjectRepository(OnlinePayment)
     public readonly onlinePayments: Repository<OnlinePayment>,
     @InjectRepository(Order) public readonly orders: Repository<Order>,
+    @InjectRepository(ZelleConf) public readonly zelleConfs: Repository<ZelleConf>,
   ) {}
 }

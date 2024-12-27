@@ -3,8 +3,7 @@ import {
   IsEnum,
   IsInt,
   IsNotEmpty,
-  IsOptional,
-  IsString,
+  IsOptional, IsString, MaxLength,
   Min,
 } from 'class-validator';
 import PaginatedInDto from '../../../utils/dto/in/paginated.in.dto';
@@ -16,7 +15,7 @@ export default class OrderSearchInDto extends PaginatedInDto {
   @IsOptional()
   @IsNotEmpty()
   @IsEnum(OrderStatus)
-  @Transform(({value}) => value as OrderStatus)
+  @Transform(({value}) => parseInt(value, 10))
   status?: OrderStatus;
 
   @ApiProperty({ required: false })
@@ -42,4 +41,11 @@ export default class OrderSearchInDto extends PaginatedInDto {
   @Min(0)
   @Transform(({ value }) => parseInt(value, 10))
   userId?: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNotEmpty()
+  @IsString()
+  @MaxLength(12)
+  code?: string;
 }
