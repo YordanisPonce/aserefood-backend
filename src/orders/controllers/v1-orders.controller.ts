@@ -28,6 +28,7 @@ import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
 import OrderOutDto from '../dto/out/order.out.dto';
 import OrderSearchInDto from '../dto/in/order.search.in.dto';
 import OrderUpdateInDto from '../dto/in/order.update.in.dto';
+import OrderMeOutDto from '../dto/out/order-me.out.dto';
 
 @Controller('v1/orders')
 @ApiTags('orders')
@@ -59,11 +60,21 @@ export default class V1OrdersController {
 
   @Get('/me')
   @Roles(Role.Customer)
-  @ApiOkResponse({ description: 'Ok', type: [OrderOutDto] })
-  @ApiOperation({ summary: 'Get all Orders of current Customer' })
-  async getAllCustomer(@Request() req) {
+  @ApiOkResponse({ description: 'Ok', type: PaginatedOutDto<OrderMeOutDto> })
+  @ApiOperation({ summary: 'Get all Orders of current Customer with Filtering, Ordering and Pagination' })
+  async getAllCustomer(@Query() dto: OrderSearchInDto, @Request() req) {
     const userId = req.user.userId;
-    return this.ordersService.getByUserId(userId);
+    return this.ordersService.getByUserId(dto,userId);
+  }
+
+  @Get('/me/:id')
+  @Roles(Role.Customer)
+  @ApiOkResponse({ description: 'Ok', type: OrderMeOutDto })
+  @ApiNotFoundResponse({ description: 'Not Found' })
+  @ApiOperation({ summary: 'Get an specific Order of current Customer' })
+  async getOneCustomer(@Param('id', ParseIntPipe) id: number, @Request() req) {
+    const userId = req.user.userId;
+    return this.ordersService.getByIdAndUserId(id, userId);
   }
 
   @Get('/all')

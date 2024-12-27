@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export default class PaginatedOutDto<T> {
-  @ApiProperty()
+  @ApiProperty({ type: 'array', items: { type: 'object' } })
   data: T[] = [];
 
   @ApiProperty()

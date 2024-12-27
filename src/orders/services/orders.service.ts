@@ -17,6 +17,11 @@ import OrderUpdateInDto from '../dto/in/order.update.in.dto';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
 import OrderSearchInDto from '../dto/in/order.search.in.dto';
 import { CartItem } from '../../shopping-carts/dto/in/shopping-cart/cart-item.enum';
+import OrderMeOutDto from '../dto/out/order-me.out.dto';
+import Product from '../../database/entities/product.entity';
+import ProductOutDto from '../../products/dto/out/product.out.dto';
+import ProductCombo from '../../database/entities/product-combo.entity';
+import ProductComboOutDto from '../../product-combos/dto/out/product-combo.out.dto';
 
 @Injectable()
 export default class OrdersService {
@@ -28,14 +33,11 @@ export default class OrdersService {
     private readonly shoppingCartService: ShoppingCartsService,
   ) {}
 
-  async search(
-    dto: OrderSearchInDto,
-  ): Promise<PaginatedOutDto<OrderOutDto>> {
-    const queryBuilder =
-      this.pgService.orders
-        .createQueryBuilder('order')
-        .leftJoinAndSelect('order.orderItems', 'orderItem')
-        .leftJoinAndSelect('order.municipality', 'municipality');
+  async search(dto: OrderSearchInDto): Promise<PaginatedOutDto<OrderOutDto>> {
+    const queryBuilder = this.pgService.orders
+      .createQueryBuilder('order')
+      .leftJoinAndSelect('order.orderItems', 'orderItem')
+      .leftJoinAndSelect('order.municipality', 'municipality');
 
     // Filtering
     if (dto.status !== undefined && dto.status !== null) {
@@ -75,7 +77,7 @@ export default class OrdersService {
       .getManyAndCount();
 
     return {
-      data:  result.map((p) => this.toOutDto(p)),
+      data: result.map((p) => this.toOutDto(p)),
       total,
       page: dto.page,
       pageSize: dto.pageSize,
@@ -92,18 +94,85 @@ export default class OrdersService {
     return orders.map((x) => this.toOutDto(x));
   }
 
-  async getByUserId(userId: number): Promise<OrderOutDto[]> {
-    const user = await this.pgService.users.findOneBy({id: userId});
-    if(!user) {
+  async getByUserId(dto: OrderSearchInDto, userId: number): Promise<PaginatedOutDto<OrderMeOutDto>> {
+    const queryBuilder = this.pgService.orders
+      .createQueryBuilder('order')
+      .leftJoinAndSelect('order.orderItems', 'orderItem')
+      .leftJoinAndSelect('order.municipality', 'municipality')
+      .leftJoinAndSelect('orderItem.product', 'product')
+      .leftJoinAndSelect('product.category', 'category')
+      .leftJoinAndSelect('orderItem.productCombo', 'productCombo')
+      .leftJoinAndSelect('productCombo.zone', 'zone')
+      .leftJoinAndSelect('zone.inventoryEntries', 'inventoryEntry')
+      .leftJoinAndSelect('productCombo.productComboItems', 'productComboItem')
+      .leftJoinAndSelect('productComboItem.product', 'productComboItemProduct')
+      .where('order.userId = :userId', { userId: userId, });
+
+    // Filtering
+    if (dto.status !== undefined && dto.status !== null) {
+      queryBuilder.andWhere('order.status = :status', {
+        status: dto.status,
+      });
+    }
+
+    if (dto.deliveryMethodId) {
+      queryBuilder.andWhere('order.deliveryMethodId = :deliveryMethodId', {
+        deliveryMethodId: dto.deliveryMethodId,
+      });
+    }
+
+    if (dto.municipalityId) {
+      queryBuilder.andWhere('order.municipalityId = :municipalityId', {
+        municipalityId: dto.municipalityId,
+      });
+    }
+
+    // Ordering
+    const orderBy = dto.orderBy || 'id';
+    const orderDirection =
+      dto.orderDirection?.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+    queryBuilder.orderBy(`order.${orderBy}`, orderDirection);
+
+    // Pagination
+    const [result, total] = await queryBuilder
+      .skip((dto.page - 1) * dto.pageSize)
+      .take(dto.pageSize)
+      .getManyAndCount();
+
+    return {
+      data: result.map((p) => this.toOutMeDto(p)),
+      total,
+      page: dto.page,
+      pageSize: dto.pageSize,
+      hasNextPage: dto.page * dto.pageSize < total,
+      hasPreviousPage: dto.page > 1,
+    };
+  }
+
+  async getByIdAndUserId(id: number, userId: number): Promise<OrderMeOutDto> {
+    const user = await this.pgService.users.findOneBy({ id: userId });
+    if (!user) {
       throw new NotFoundException(`User with id ${userId} not found`);
     }
 
-    const orders = await this.pgService.orders.find({
-      where: { userId },
-      relations: ['orderItems', 'municipality'],
+    const order = await this.pgService.orders.findOne({
+      where: { userId, id },
+      relations: [
+        'orderItems',
+        'municipality',
+        'orderItems.product.category',
+        'orderItems.productCombo.zone.inventoryEntries',
+        'orderItems.productCombo.productComboItems.product',
+      ],
     });
 
-    return orders.map(x => this.toOutDto(x));
+    if (!order) {
+      throw new NotFoundException(
+        `Order with id ${id} of User ${userId} not found`,
+      );
+    }
+
+    return this.toOutMeDto(order);
   }
 
   async getById(id: number): Promise<OrderOutDto> {
@@ -265,12 +334,15 @@ export default class OrdersService {
     }
 
     if (dto.status) {
-      if (order.status === OrderStatus.CANCELLED && dto.status !== order.status) {
+      if (
+        order.status === OrderStatus.CANCELLED &&
+        dto.status !== order.status
+      ) {
         throw new ConflictException(`Order with id ${id} was canceled`);
       }
 
       if (dto.status !== order.status && dto.status === OrderStatus.CANCELLED) {
-        for(const orderItem of order.orderItems){
+        for (const orderItem of order.orderItems) {
           await this.shoppingCartService.manageInventory(
             order.municipalityId,
             {
@@ -311,6 +383,33 @@ export default class OrdersService {
     this.logger.log(`Deleted order with ID ${id}`);
   }
 
+  private toOutMeDto(order: Order): OrderMeOutDto {
+    const dto = new OrderMeOutDto();
+    dto.id = order.id;
+    dto.code = idFormatter(order.id);
+    dto.status = order.status;
+    dto.createdDate = order.createdDate;
+    dto.updatedDate = order.updatedDate;
+    dto.contactInfoId = order.contactInfoId;
+    dto.totalAmount = order.totalAmount;
+    dto.municipalityId = order.municipalityId;
+    dto.municipalityName = order.municipality?.name ?? '';
+    dto.paymentSelection =
+      order.onlinePayment !== null
+        ? PaymentSelection.Online
+        : PaymentSelection.Transfer;
+    dto.deliveryMethodId = order.deliveryMethodId;
+    dto.orderItems =
+      order.orderItems?.map((x) => ({
+        id: x.id,
+        product: x.productId ? this.productToOutDto(x.product) : null,
+        productCombo: x.productComboId ? this.productComboToOutDto(x.productCombo) : null,
+        amount: x.amount,
+      })) ?? [];
+
+    return dto;
+  }
+
   private toOutDto(order: Order): OrderOutDto {
     const dto = new OrderOutDto();
     dto.id = order.id;
@@ -321,7 +420,7 @@ export default class OrdersService {
     dto.contactInfoId = order.contactInfoId;
     dto.totalAmount = order.totalAmount;
     dto.municipalityId = order.municipalityId;
-    dto.municipalityName = order.municipality?.name ?? "";
+    dto.municipalityName = order.municipality?.name ?? '';
     dto.paymentSelection =
       order.onlinePayment !== null
         ? PaymentSelection.Online
@@ -334,6 +433,53 @@ export default class OrdersService {
         amount: x.amount,
       })) ?? [];
     dto.deliveryMethodId = order.deliveryMethodId;
+
+    return dto;
+  }
+
+  private productToOutDto(product: Product): ProductOutDto {
+    const dto = new ProductOutDto();
+    dto.id = product.id;
+    dto.name = product.name;
+    dto.description = product.description;
+    dto.shortDescription = product.shortDescription;
+    dto.isService = product.isService;
+    dto.categoryId = product.categoryId;
+    dto.categoryName = product.category?.name ?? '';
+    dto.image = product.image;
+
+    return dto;
+  }
+
+  private productComboToOutDto(productCombo: ProductCombo): ProductComboOutDto {
+    const dto = new ProductComboOutDto();
+    dto.id = productCombo.id;
+    dto.description = productCombo.description;
+    dto.name = productCombo.name;
+    dto.image = productCombo.image;
+    dto.isActive = productCombo.isActive;
+    dto.price = parseFloat(productCombo.price.toString());
+    dto.shortDescription = productCombo.shortDescription;
+    dto.zoneId = productCombo.zoneId;
+    dto.zoneName = productCombo.zone?.name ?? '';
+    dto.referencePrice = productCombo.zone
+      ? productCombo.productComboItems.reduce(
+          (a, b) =>
+            a +
+            b.amount *
+              productCombo.zone.inventoryEntries
+                .filter((e) => e.productId === b.productId)
+                .reduce((y, z) => y + parseFloat(z.price.toString()), 0),
+          0,
+        )
+      : -1;
+    dto.productComboItems =
+      productCombo.productComboItems?.map((x) => ({
+        id: x.id,
+        productId: x.productId,
+        amount: x.amount,
+        productName: x.product?.name ?? '',
+      })) ?? [];
 
     return dto;
   }
