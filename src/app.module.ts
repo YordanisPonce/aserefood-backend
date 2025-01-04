@@ -25,6 +25,7 @@ import { OrdersModule } from './orders/orders.module';
 import { PaymentsModule } from './payments/payments.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ZelleConfModule } from './zelle-conf/zelle-conf.module';
+import { AvailabilityModule } from './availability/availability.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { ZelleConfModule } from './zelle-conf/zelle-conf.module';
       },
     ]),
     AuthModule,
+    AvailabilityModule,
     ScheduleModule.forRoot(),
     CategoriesModule,
     DatabaseModule,

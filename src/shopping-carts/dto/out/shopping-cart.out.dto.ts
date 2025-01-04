@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import ProductOutDto from '../../../../products/dto/out/product.out.dto';
-import ProductComboOutDto from '../../../../product-combos/dto/out/product-combo.out.dto';
+import ProductOutDto from '../../../products/dto/out/product.out.dto';
+import ProductComboOutDto from '../../../product-combos/dto/out/product-combo.out.dto';
 
 export class ShoppingCartProductOutDto {
   @ApiProperty({ type: ProductOutDto })

@@ -5,7 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { OrderStatus } from '../../database/entities/constants';
 import ShoppingCartsService from '../../shopping-carts/services/shopping-carts.service';
-import { CartItem } from '../../shopping-carts/dto/in/shopping-cart/cart-item.enum';
+import { CartItem } from '../../shopping-carts/dto/in/cart-item.enum';
 import { LessThan, MoreThan } from 'typeorm';
 
 @Injectable()

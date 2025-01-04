@@ -25,10 +25,10 @@ import { RolesGuard } from '../../auth/guards/roles.guard';
 import AvailabilityService from '../services/availability.service';
 import { Role, Roles } from '../../auth/decorators/roles.decorator';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
-import { ProductAvailableByMunicipalityOutDto } from '../dto/out/availability/product-available-by-municipality.out..dto';
-import ProductAvailabilitySearchInDto from '../dto/in/availability/product-availability.search.in.dto';
-import { ProductComboAvailableByMunicipalityOutDto } from '../dto/out/availability/product-combo-available-by-municipality.out.dto';
-import ProductComboAvailabilitySearchInDto from '../dto/in/availability/product-combo-availability.search.in.dto';
+import { ProductAvailableByMunicipalityOutDto } from '../dto/out/product-available-by-municipality.out..dto';
+import ProductAvailabilitySearchInDto from '../dto/in/product-availability.search.in.dto';
+import { ProductComboAvailableByMunicipalityOutDto } from '../dto/out/product-combo-available-by-municipality.out.dto';
+import ProductComboAvailabilitySearchInDto from '../dto/in/product-combo-availability.search.in.dto';
 
 @Controller('v1/availability')
 @ApiTags('availability')

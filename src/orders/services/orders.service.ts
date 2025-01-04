@@ -16,7 +16,7 @@ import createPatchFields from '../../utils/dto/patch-fields.util';
 import OrderUpdateInDto from '../dto/in/order.update.in.dto';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
 import OrderSearchInDto from '../dto/in/order.search.in.dto';
-import { CartItem } from '../../shopping-carts/dto/in/shopping-cart/cart-item.enum';
+import { CartItem } from '../../shopping-carts/dto/in/cart-item.enum';
 import OrderMeOutDto from '../dto/out/order-me.out.dto';
 import Product from '../../database/entities/product.entity';
 import ProductOutDto from '../../products/dto/out/product.out.dto';

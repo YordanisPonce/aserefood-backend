@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import ProductOutDto from '../../../../products/dto/out/product.out.dto';
+import ProductOutDto from '../../../products/dto/out/product.out.dto';
 
 export class ProductAvailableByMunicipalityOutDto {
   @ApiProperty({ type: ProductOutDto })
