@@ -16,7 +16,7 @@ async function bootstrap() {
 
   const swaggerPassword = app.get(ConfigService).get('SWAGGER_PASSWORD');
   const nodeEnv = app.get(ConfigService).get('NODE_ENV');
-  if (nodeEnv !== 'development') {
+  if (nodeEnv !== 'development' && nodeEnv !== 'staging') {
     app.use(
       ['/swagger', '/swagger-json'],
       basicAuth({
