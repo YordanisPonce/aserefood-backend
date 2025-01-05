@@ -21,7 +21,7 @@ export default class UserSearchInDto extends PaginatedInDto {
   @IsOptional()
   @IsNotEmpty()
   @IsBoolean()
-  @Transform(({ value }) => Boolean(value))
+  @Transform(({ value }) => value == 'true')
   isActive?: boolean;
 
   @ApiProperty({ required: false })
