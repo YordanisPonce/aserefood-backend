@@ -21,6 +21,7 @@ export default class DeliveryMethodSearchInDto extends PaginatedInDto {
   @IsOptional()
   @IsNotEmpty()
   @IsBoolean()
+  @Transform(({ value }) => value == 'true')
   isFree?: boolean;
 
   @ApiProperty({ required: false })
