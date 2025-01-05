@@ -48,6 +48,9 @@ export default class OrderOutDto {
   paymentSelection: PaymentSelection;
 
   @ApiProperty()
+  paymentId: number;
+
+  @ApiProperty()
   totalAmount: number;
 
   @ApiProperty()

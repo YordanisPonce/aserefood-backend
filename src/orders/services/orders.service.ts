@@ -332,8 +332,6 @@ export default class OrdersService {
     await this.pgService.orders.save(newOrder);
 
     if (dto.paymentSelection === PaymentSelection.Online) {
-      // ToDo: Implement Payment in TropiPay
-
       const onlinePayment = this.pgService.onlinePayments.create({
         orderId: newOrder.id,
         address1: dto.onlinePaymentDto.address1,
@@ -367,7 +365,7 @@ export default class OrdersService {
     } else {
       const transferPayment = this.pgService.transferPayments.create({
         orderId: newOrder.id,
-        referencePayment: null,
+        referencePayment: generateUniqueCode(6),
       });
       await this.pgService.transferPayments.save(transferPayment);
       newOrder.transferPaymentId = transferPayment.id;
@@ -484,6 +482,9 @@ export default class OrdersService {
       order.onlinePayment !== null
         ? PaymentSelection.Online
         : PaymentSelection.Transfer;
+    dto.paymentId = order.onlinePayment !== null
+      ? order.onlinePaymentId
+      : order.transferPaymentId;
     dto.deliveryMethodId = order.deliveryMethodId;
     dto.orderItems =
       order.orderItems?.map((x) => ({
@@ -514,6 +515,9 @@ export default class OrdersService {
       order.onlinePayment !== null
         ? PaymentSelection.Online
         : PaymentSelection.Transfer;
+    dto.paymentId = order.onlinePayment !== null
+      ? order.onlinePaymentId
+      : order.transferPaymentId;
     dto.orderItems =
       order.orderItems?.map((x) => ({
         id: x.id,
