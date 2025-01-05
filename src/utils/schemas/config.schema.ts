@@ -27,4 +27,6 @@ export const configSchema = Joi.object({
   TROPIPAY_URL_NOTIFICATION: Joi.string().uri().required(),
   TROPIPAY_CLIENT_ID: Joi.string().required(),
   TROPIPAY_CLIENT_SECRET: Joi.string().required(),
+  SWAGGER_PASSWORD: Joi.string().required(),
+  NODE_ENV: Joi.string().required(),
 }).unknown();

@@ -6,15 +6,15 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import PgService from '../../database/services/pg.service';
-import AvailabilityService from './availability.service';
-import AddToCartInDto from '../dto/in/shopping-cart/add-to-cart.in.dto';
-import { CartItem } from '../dto/in/shopping-cart/cart-item.enum';
+import AvailabilityService from '../../availability/services/availability.service';
+import AddToCartInDto from '../dto/in/add-to-cart.in.dto';
+import { CartItem } from '../dto/in/cart-item.enum';
 import CartProduct from '../../database/entities/cart-product.entity';
 import { OrderDirection } from '../../utils/dto/in/paginated.in.dto';
 import ShoppingCartOutDto, {
   ShoppingCartProductComboOutDto,
   ShoppingCartProductOutDto,
-} from '../dto/out/shopping-cart/shopping-cart.out.dto';
+} from '../dto/out/shopping-cart.out.dto';
 import MunicipalityPOutDto from '../../provinces/dto/out/municipality-p.out.dto';
 
 @Injectable()

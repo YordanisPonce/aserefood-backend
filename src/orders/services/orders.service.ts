@@ -16,7 +16,7 @@ import createPatchFields from '../../utils/dto/patch-fields.util';
 import OrderUpdateInDto from '../dto/in/order.update.in.dto';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
 import OrderSearchInDto from '../dto/in/order.search.in.dto';
-import { CartItem } from '../../shopping-carts/dto/in/shopping-cart/cart-item.enum';
+import { CartItem } from '../../shopping-carts/dto/in/cart-item.enum';
 import OrderMeOutDto from '../dto/out/order-me.out.dto';
 import Product from '../../database/entities/product.entity';
 import ProductOutDto from '../../products/dto/out/product.out.dto';
@@ -25,7 +25,7 @@ import ProductComboOutDto from '../../product-combos/dto/out/product-combo.out.d
 import generateUniqueCode from '../../utils/generators/unique-code.generator';
 import ZellePaymentOutDto from '../dto/out/zelle-payment.out.dto';
 import { IsNull, Not } from 'typeorm';
-
+ 
 @Injectable()
 export default class OrdersService {
   private readonly logger = new Logger(OrdersService.name);
@@ -332,8 +332,6 @@ export default class OrdersService {
     await this.pgService.orders.save(newOrder);
 
     if (dto.paymentSelection === PaymentSelection.Online) {
-      // ToDo: Implement Payment in TropiPay
-
       const onlinePayment = this.pgService.onlinePayments.create({
         orderId: newOrder.id,
         address1: dto.onlinePaymentDto.address1,
@@ -367,7 +365,7 @@ export default class OrdersService {
     } else {
       const transferPayment = this.pgService.transferPayments.create({
         orderId: newOrder.id,
-        referencePayment: null,
+        referencePayment: generateUniqueCode(6),
       });
       await this.pgService.transferPayments.save(transferPayment);
       newOrder.transferPaymentId = transferPayment.id;
@@ -484,6 +482,9 @@ export default class OrdersService {
       order.onlinePayment !== null
         ? PaymentSelection.Online
         : PaymentSelection.Transfer;
+    dto.paymentId = order.onlinePayment !== null
+      ? order.onlinePaymentId
+      : order.transferPaymentId;
     dto.deliveryMethodId = order.deliveryMethodId;
     dto.orderItems =
       order.orderItems?.map((x) => ({
@@ -514,6 +515,9 @@ export default class OrdersService {
       order.onlinePayment !== null
         ? PaymentSelection.Online
         : PaymentSelection.Transfer;
+    dto.paymentId = order.onlinePayment !== null
+      ? order.onlinePaymentId
+      : order.transferPaymentId;
     dto.orderItems =
       order.orderItems?.map((x) => ({
         id: x.id,

@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { OrderStatus } from '../../../database/entities/constants';
 import {
   IsEmail,
   IsEnum,
@@ -51,18 +50,6 @@ export class OnlinePaymentDto {
   @ApiProperty()
   @IsNotEmpty()
   postalCode: string;
-
-  @ApiProperty()
-  @IsNotEmpty()
-  cardNumber: string;
-
-  @ApiProperty()
-  @IsNotEmpty()
-  expiryDate: string;
-
-  @ApiProperty()
-  @IsNotEmpty()
-  cvv: string;
 }
 
 export enum PaymentSelection {

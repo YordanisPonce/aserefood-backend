@@ -25,8 +25,8 @@ import {
 } from '@nestjs/swagger';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import ShoppingCartsService from '../services/shopping-carts.service';
-import ShoppingCartOutDto from '../dto/out/shopping-cart/shopping-cart.out.dto';
-import AddToCartInDto from '../dto/in/shopping-cart/add-to-cart.in.dto';
+import ShoppingCartOutDto from '../dto/out/shopping-cart.out.dto';
+import AddToCartInDto from '../dto/in/add-to-cart.in.dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Role, Roles } from '../../auth/decorators/roles.decorator';
