@@ -8,6 +8,7 @@ import {
 } from 'class-validator';
 import PaginatedInDto from '../../../utils/dto/in/paginated.in.dto';
 import { Role } from '../../../auth/decorators/roles.decorator';
+import { Transform } from 'class-transformer';
 
 export default class UserSearchInDto extends PaginatedInDto {
   @ApiProperty({ required: false })
@@ -20,6 +21,7 @@ export default class UserSearchInDto extends PaginatedInDto {
   @IsOptional()
   @IsNotEmpty()
   @IsBoolean()
+  @Transform(({ value }) => Boolean(value))
   isActive?: boolean;
 
   @ApiProperty({ required: false })
