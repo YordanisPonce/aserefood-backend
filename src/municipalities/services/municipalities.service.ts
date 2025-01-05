@@ -35,7 +35,7 @@ export default class MunicipalitiesService {
     }
 
     if (dto.provinceId) {
-      queryBuilder.andWhere('category.province.id = :provinceId', {
+      queryBuilder.andWhere('province.id = :provinceId', {
         provinceId: dto.provinceId,
       });
     }
