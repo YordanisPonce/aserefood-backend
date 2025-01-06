@@ -118,7 +118,7 @@ export default class V1OrdersController {
 
   @Post()
   @Roles(Role.Customer)
-  @ApiCreatedResponse({ description: 'Ok' })
+  @ApiCreatedResponse({ description: 'Ok', type: OrderOutDto })
   @ApiNotFoundResponse({ description: 'Not Found User' })
   @ApiConflictResponse({ description: 'Municipality not selected' })
   @ApiBadRequestResponse({ description: 'Bad Request' })
