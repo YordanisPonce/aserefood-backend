@@ -21,6 +21,7 @@ export default class PromotionSearchInDto extends PaginatedInDto {
   @IsOptional()
   @IsNotEmpty()
   @IsBoolean()
+  @Transform(({ value }) => value == 'true')
   isActive?: boolean;
 
   @ApiProperty({ required: false })
@@ -36,5 +37,6 @@ export default class PromotionSearchInDto extends PaginatedInDto {
   @IsNotEmpty()
   @IsInt()
   @Min(0)
+  @Transform(({ value }) => parseInt(value, 10))
   productId?: number;
 }
