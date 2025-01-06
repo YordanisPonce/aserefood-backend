@@ -41,7 +41,7 @@ export default class ProductCombosService {
     }
 
     if (dto.zoneId) {
-      queryBuilder.andWhere('zone.id = :zoneId', { provinceId: dto.zoneId });
+      queryBuilder.andWhere('zone.id = :zoneId', { zoneId: dto.zoneId });
     }
 
     if (dto.productId) {
