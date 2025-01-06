@@ -60,4 +60,9 @@ export default class UserUpdateInDto {
     message: 'phoneNumber must contain only digits.',
   })
   phoneNumber?: string;
+
+  @ApiProperty({ required: false, nullable: true })
+  @IsOptional()
+  @IsString()
+  image?: string;
 }

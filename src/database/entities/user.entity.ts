@@ -34,6 +34,9 @@ export default class User {
   @Index({ unique: true })
   email: string;
 
+  @Column({nullable: true})
+  image?: string;
+
   @Column('character varying', { length: 255 })
   phoneNumber: string;
 

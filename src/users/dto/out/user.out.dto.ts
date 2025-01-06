@@ -28,4 +28,7 @@ export default class UserOutDto {
 
   @ApiProperty()
   phoneNumber: string;
+
+  @ApiProperty({nullable: true})
+  image?: string;
 }

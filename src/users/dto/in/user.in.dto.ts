@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEmail,
   IsEnum,
-  IsNotEmpty,
+  IsNotEmpty, IsOptional,
   IsString,
   Matches,
   MaxLength,
@@ -59,4 +59,9 @@ export default class UserInDto {
     message: 'password must contain at least one uppercase letter.',
   })
   password: string;
+
+  @ApiProperty({nullable: true})
+  @IsOptional()
+  @IsString()
+  image?: string;
 }

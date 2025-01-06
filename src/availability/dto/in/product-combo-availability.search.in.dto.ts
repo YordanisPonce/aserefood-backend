@@ -21,6 +21,7 @@ export default class ProductComboAvailabilitySearchInDto extends PaginatedInDto 
   @IsOptional()
   @IsNotEmpty()
   @IsBoolean()
+  @Transform(({ value }) => value == 'true')
   isActive?: boolean;
 
   @ApiProperty({ required: false })
