@@ -143,6 +143,7 @@ export default class UsersService {
       isConfirmed: false,
       lastnames: dto.lastnames,
       phoneNumber: dto.phoneNumber,
+      image: dto.image,
     });
     await this.pgService.users.save(newUser);
 
@@ -202,7 +203,7 @@ export default class UsersService {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
-    let patchDto = createPatchFields(dto);
+    const patchDto = createPatchFields(dto);
 
     await this.pgService.users.update(id, patchDto);
     this.logger.log(`Updated user with ID ${id}`);
@@ -252,6 +253,7 @@ export default class UsersService {
       isConfirmed: user.isConfirmed,
       lastnames: user.lastnames,
       phoneNumber: user.phoneNumber,
+      image: user.image,
     };
   }
 }
