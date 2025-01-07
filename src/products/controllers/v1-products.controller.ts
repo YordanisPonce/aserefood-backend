@@ -7,14 +7,14 @@ import {
   ParseIntPipe,
   Patch,
   Post,
-  Query,
+  Query, UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
-  ApiConflictResponse,
+  ApiConflictResponse, ApiConsumes,
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiNotFoundResponse,
@@ -34,6 +34,8 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import ProductInDto from '../dto/in/product.in.dto';
 import ProductUpdateInDto from '../dto/in/product.update.in.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ImageFileValidationPipe } from '../../utils/pipes/image-file-validation.pipe';
 
 @Controller('v1/products')
 @ApiTags('products')
@@ -69,6 +71,8 @@ export default class V1ProductsController {
   }
 
   @Post('')
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('image'))
   @Roles(Role.Admin)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
@@ -78,12 +82,15 @@ export default class V1ProductsController {
   @ApiForbiddenResponse({ description: 'Forbidden' })
   @ApiConflictResponse({ description: 'Conflict (Other product with Name)' })
   @ApiOperation({ summary: 'Create a new Product if does not exist' })
-  async post(@Body() dto: ProductInDto) {
+  async post(@Body() dto: ProductInDto, @UploadedFile(new ImageFileValidationPipe()) image: Express.Multer.File) {
+    dto.image = image;
     return this.productsService.post(dto);
   }
 
   @Patch('/:id')
   @Roles(Role.Admin)
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('image'))
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Ok' })
@@ -96,7 +103,9 @@ export default class V1ProductsController {
   async put(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: ProductUpdateInDto,
+    @UploadedFile(new ImageFileValidationPipe()) image: Express.Multer.File
   ) {
+    dto.image = image;
     return this.productsService.patch(id, dto);
   }
 

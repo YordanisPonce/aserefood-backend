@@ -7,14 +7,14 @@ import {
   ParseIntPipe,
   Patch,
   Post,
-  Query,
+  Query, UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
-  ApiConflictResponse,
+  ApiConflictResponse, ApiConsumes,
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiNotFoundResponse,
@@ -33,6 +33,8 @@ import ProductComboSearchInDto from '../dto/in/product-combo.search.in.dto';
 import ProductComboOutDto from '../dto/out/product-combo.out.dto';
 import ProductComboInDto from '../dto/in/product-combo.in.dto';
 import ProductComboUpdateInDto from '../dto/in/product-combo.update.in.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ImageFileValidationPipe } from '../../utils/pipes/image-file-validation.pipe';
 
 @Controller('v1/product-combos')
 @ApiTags('product-combos')
@@ -73,6 +75,8 @@ export default class V1ProductCombosController {
   @Post('')
   @Roles(Role.Admin)
   @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('image'))
   @ApiBearerAuth()
   @ApiCreatedResponse({ description: 'Ok', type: ProductComboOutDto })
   @ApiBadRequestResponse({ description: 'Bad Request' })
@@ -82,12 +86,15 @@ export default class V1ProductCombosController {
     description: 'Conflict (Other product combo with Name)',
   })
   @ApiOperation({ summary: 'Create a new Product Combo if does not exist' })
-  async post(@Body() dto: ProductComboInDto) {
+  async post(@Body() dto: ProductComboInDto, @UploadedFile(new ImageFileValidationPipe()) image: Express.Multer.File) {
+    dto.image = image;
     return this.productCombosService.post(dto);
   }
 
   @Patch('/:id')
   @Roles(Role.Admin)
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('image'))
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Ok' })
@@ -102,7 +109,9 @@ export default class V1ProductCombosController {
   async put(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: ProductComboUpdateInDto,
+    @UploadedFile(new ImageFileValidationPipe()) image: Express.Multer.File
   ) {
+    dto.image = image;
     return this.productCombosService.patch(id, dto);
   }
 

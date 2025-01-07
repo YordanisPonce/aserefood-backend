@@ -52,4 +52,7 @@ export default class RegisterInDto {
     message: 'phoneNumber must contain only digits.',
   })
   phoneNumber: string;
+
+  @ApiProperty({type: 'string', format: 'binary' })
+  image: Express.Multer.File;
 }

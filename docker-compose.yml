@@ -43,6 +43,13 @@ services:
         DB_USERNAME: postgres
         DB_PASSWORD: fCXko33My1bFAkKX
 
+        MINIO_ENDPOINT: 181.225.255.61
+        MINIO_PORT: 9000
+        MINIO_ACCESS_KEY: asere-food
+        MINIO_SECRET_KEY: vaXKRzqk.4
+        MINIO_USE_SSL: false
+        MINIO_BUCKET_NAME: asere-food-dev
+
     networks:
       - asere-food
 

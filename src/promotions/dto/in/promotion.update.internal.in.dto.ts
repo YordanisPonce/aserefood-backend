@@ -14,7 +14,7 @@ import {
 import { DiscountOption } from '../../../database/entities/constants';
 import { Type } from 'class-transformer';
 
-export default class PromotionUpdateInDto {
+export default class PromotionUpdateInternalInDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsNotEmpty()
@@ -48,9 +48,10 @@ export default class PromotionUpdateInDto {
   @Min(0.001)
   discountValue?: number;
 
-  @ApiProperty({type: 'string', format: 'binary', required: false })
+  @ApiProperty({ nullable: true, required: false })
   @IsOptional()
-  image?: Express.Multer.File;
+  @IsString()
+  image?: string;
 
   @ApiProperty({ required: false })
   @IsOptional()

@@ -29,10 +29,9 @@ export default class ProductComboUpdateInDto {
   @IsString()
   description?: string;
 
-  @ApiProperty({ nullable: true, required: false })
+  @ApiProperty({type: 'string', format: 'binary', required: false })
   @IsOptional()
-  @IsString()
-  image?: string;
+  image?: Express.Multer.File;
 
   @ApiProperty({ required: false })
   @IsOptional()

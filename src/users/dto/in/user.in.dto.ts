@@ -60,8 +60,7 @@ export default class UserInDto {
   })
   password: string;
 
-  @ApiProperty({nullable: true})
+  @ApiProperty({type: 'string', format: 'binary', required: false })
   @IsOptional()
-  @IsString()
-  image?: string;
+  image?: Express.Multer.File;
 }

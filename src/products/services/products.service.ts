@@ -15,12 +15,16 @@ import ProductUpdateInDto from '../dto/in/product.update.in.dto';
 import ProductInDto from '../dto/in/product.in.dto';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
 import ProductSearchInDto from '../dto/in/product.search.in.dto';
+import MinioService from '../../minio/services/minio.service';
 
 @Injectable()
 export default class ProductsService {
   private readonly logger = new Logger(ProvidersService.name);
 
-  constructor(private readonly pgService: PgService) {}
+  constructor(
+    private readonly pgService: PgService,
+    private readonly minioService: MinioService,
+  ) {}
 
   async search(
     dto: ProductSearchInDto,
@@ -30,7 +34,7 @@ export default class ProductsService {
       .leftJoinAndSelect('product.providers', 'provider')
       .leftJoinAndSelect('product.category', 'category');
 
-    // Filterin g
+    // Filtering
     if (dto.search) {
       queryBuilder.where(
         'product.name ILIKE :search OR product.description ILIKE :search OR product.shortDescription ILIKE :search',
@@ -124,6 +128,13 @@ export default class ProductsService {
       throw new BadRequestException('Non Valid Associated Providers');
     }
 
+    const image = await this.minioService.uploadFile(
+      undefined,
+      dto.image.buffer,
+      dto.image.originalname.split('.').pop(),
+      dto.image.mimetype,
+    );
+
     const newProduct = this.pgService.products.create({
       name: dto.name,
       description: dto.description,
@@ -131,7 +142,7 @@ export default class ProductsService {
       isService: dto.isService,
       categoryId: dto.categoryId,
       providers: providers,
-      image: dto.image
+      image: image
     });
     await this.pgService.products.save(newProduct);
 
@@ -190,6 +201,20 @@ export default class ProductsService {
       ...patchDto,
       ...(dto.isService ? { isService: dto.isService } : {}),
     };
+
+    let image = undefined;
+    if (dto.image) {
+      image = await this.minioService.uploadFile(
+        product.image ?? undefined,
+        dto.image.buffer,
+        undefined,
+        dto.image.mimetype,
+      );
+    }
+    patchDto = {
+      ...patchDto,
+      ...(image && { image: image }),
+    }
     await this.pgService.products.update(id, patchDto);
 
     if (dto.providerIds) {
@@ -265,6 +290,12 @@ export default class ProductsService {
     const result = await this.pgService.products.delete(id);
     if (result.affected === 0) {
       throw new NotFoundException(`Product with ID ${id} not found`);
+    }
+
+    try {
+      await this.minioService.deleteFile(productToDelete?.image);
+    } catch (e) {
+      this.logger.error(e);
     }
     this.logger.log(`Deleted Product with ID ${id}`);
   }

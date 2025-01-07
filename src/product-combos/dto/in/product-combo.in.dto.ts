@@ -30,10 +30,9 @@ export default class ProductComboInDto {
   @IsString()
   description?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({type: 'string', format: 'binary', required: false })
   @IsOptional()
-  @IsString()
-  image?: string;
+  image?: Express.Multer.File;
 
   @ApiProperty()
   @IsNumber()

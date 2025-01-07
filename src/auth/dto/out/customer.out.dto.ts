@@ -28,4 +28,7 @@ export default class CustomerOutDto {
 
   @ApiProperty()
   isConfirmed: boolean;
+
+  @ApiProperty({nullable: true})
+  image?: string;
 }

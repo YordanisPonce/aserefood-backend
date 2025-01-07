@@ -1,7 +1,7 @@
-import { Body, Controller, Get, Put, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Put, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
-  ApiBearerAuth, ApiCreatedResponse,
+  ApiBearerAuth, ApiConsumes,
   ApiForbiddenResponse, ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
@@ -15,6 +15,8 @@ import { Role, Roles } from '../../auth/decorators/roles.decorator';
 import ZelleConfOutDto from '../dto/out/zelle-conf.out.dto';
 import ZelleConfService from '../services/zelle-conf.service';
 import ZelleConfInDto from '../dto/in/zelle-conf.in.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ImageFileValidationPipe } from '../../utils/pipes/image-file-validation.pipe';
 
 @Controller('v1/zelle-conf')
 @ApiTags('zelle-conf')
@@ -39,10 +41,13 @@ export default class V1ZelleConfController {
 
   @Put('')
   @Roles(Role.Admin)
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('qr'))
   @ApiOkResponse({ description: 'Ok', type: ZelleConfOutDto })
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiOperation({ summary: 'Create or Update Zelle Configuration' })
-  async post(@Body() dto: ZelleConfInDto) {
+  async post(@Body() dto: ZelleConfInDto, @UploadedFile(new ImageFileValidationPipe()) qr: Express.Multer.File): Promise<ZelleConfOutDto> {
+    dto.qr = qr;
     return this.zelleConfService.put(dto);
   }
 }

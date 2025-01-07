@@ -11,7 +11,7 @@ import {
 } from 'class-validator';
 import { Role } from '../../../auth/decorators/roles.decorator';
 
-export default class UserUpdateInDto {
+export default class UserUpdateInternalInDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsNotEmpty()
@@ -63,5 +63,5 @@ export default class UserUpdateInDto {
 
   @ApiProperty({type: 'string', format: 'binary', required: false })
   @IsOptional()
-  image?: Express.Multer.File;
+  image?: string;
 }

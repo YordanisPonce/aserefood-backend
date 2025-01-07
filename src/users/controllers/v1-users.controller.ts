@@ -8,7 +8,7 @@ import {
   Patch,
   Post,
   Query,
-  Request,
+  Request, UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -17,7 +17,7 @@ import { RolesGuard } from '../../auth/guards/roles.guard';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
-  ApiConflictResponse,
+  ApiConflictResponse, ApiConsumes,
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiNotFoundResponse,
@@ -34,6 +34,8 @@ import UserInDto from '../dto/in/user.in.dto';
 import UserUpdateInDto from '../dto/in/user.update.in.dto';
 import UserSearchInDto from '../dto/in/user.search.in.dto';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ImageFileValidationPipe } from '../../utils/pipes/image-file-validation.pipe';
 
 @Controller('v1/users')
 @ApiTags('users')
@@ -77,18 +79,23 @@ export default class V1UsersController {
 
   @Post('')
   @Roles(Role.Admin)
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('image'))
   @ApiCreatedResponse({ description: 'Ok', type: UserOutDto })
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiConflictResponse({
     description: 'Conflict (Other user with Username or Email)',
   })
   @ApiOperation({ summary: 'Create a new User if does not exist' })
-  async post(@Body() dto: UserInDto) {
+  async post(@Body() dto: UserInDto, @UploadedFile(new ImageFileValidationPipe()) image: Express.Multer.File) {
+    dto.image = image;
     return this.usersService.post(dto);
   }
 
   @Patch('/:id')
   @Roles(Role.Admin)
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('image'))
   @ApiOkResponse({ description: 'Ok' })
   @ApiNotFoundResponse({ description: 'Not Found' })
   @ApiBadRequestResponse({ description: 'Bad Request' })
@@ -99,7 +106,9 @@ export default class V1UsersController {
   async put(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UserUpdateInDto,
+    @UploadedFile(new ImageFileValidationPipe()) image: Express.Multer.File
   ) {
+    dto.image = image;
     return this.usersService.patch(id, dto);
   }
 
