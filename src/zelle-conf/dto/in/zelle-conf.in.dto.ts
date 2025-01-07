@@ -8,8 +8,6 @@ export default class ZelleConfInDto {
   @MaxLength(50)
   phoneNumber: string;
 
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsString()
-  qr: string;
+  @ApiProperty({type: 'string', format: 'binary' })
+  qr: Express.Multer.File;
 }

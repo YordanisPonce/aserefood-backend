@@ -16,12 +16,16 @@ import PromotionInDto from '../dto/in/promotion.in.dto';
 import Product from '../../database/entities/product.entity';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
 import PromotionSearchInDto from '../dto/in/promotion.search.in.dto';
+import MinioService from '../../minio/services/minio.service';
 
 @Injectable()
 export default class PromotionsService {
   private readonly logger = new Logger(PromotionsService.name);
 
-  constructor(private readonly pgService: PgService) {}
+  constructor(
+    private readonly pgService: PgService,
+    private readonly minioService: MinioService,
+  ) {}
 
   async search(
     dto: PromotionSearchInDto,
@@ -126,7 +130,10 @@ export default class PromotionsService {
       );
     }
 
-    if ((!dto.productIds || dto.productIds.length === 0) && (!dto.productComboIds || dto.productComboIds.length === 0)) {
+    if (
+      (!dto.productIds || dto.productIds.length === 0) &&
+      (!dto.productComboIds || dto.productComboIds.length === 0)
+    ) {
       throw new BadRequestException(
         'Promotion must have at least 1 product or 1 product combo',
       );
@@ -155,10 +162,18 @@ export default class PromotionsService {
       }
     }
 
+    const image = await this.minioService.uploadFile(
+      undefined,
+      dto.image.buffer,
+      dto.image.originalname.split('.').pop(),
+      dto.image.mimetype,
+    );
+
+
     const newPromotion = this.pgService.promotions.create({
       name: dto.name,
       description: dto.description,
-      image: dto.image,
+      image: image,
       isActive: dto.isActive,
       endDate: dto.endDate,
       productCombos: productCombos,
@@ -189,9 +204,13 @@ export default class PromotionsService {
     }
 
     const productIds = dto.productIds !== undefined ? dto.productIds : [1];
-    const productComboIds = dto.productComboIds !== undefined ? dto.productComboIds : [1];
+    const productComboIds =
+      dto.productComboIds !== undefined ? dto.productComboIds : [1];
 
-    if ((!productIds || productIds.length === 0) && (!productComboIds || productComboIds.length === 0)) {
+    if (
+      (!productIds || productIds.length === 0) &&
+      (!productComboIds || productComboIds.length === 0)
+    ) {
       throw new BadRequestException(
         'Promotion must have at least 1 product or 1 product combo',
       );
@@ -257,7 +276,7 @@ export default class PromotionsService {
 
     const p = await this.pgService.promotions.findOne({
       where: { id },
-      relations: ['products', 'productCombos']
+      relations: ['products', 'productCombos'],
     });
 
     if (dto.productIds) {
@@ -287,16 +306,35 @@ export default class PromotionsService {
       p.productCombos = [];
     }
 
+    if (dto.image) {
+      p.image = await this.minioService.uploadFile(
+        p.image ?? undefined,
+        dto.image.buffer,
+        undefined,
+        dto.image.mimetype,
+      );
+    }
+
     await this.pgService.promotions.save(p);
     this.logger.log(`Updated Promotion with ID ${id}`);
     this.logger.log({ ...patchDto });
   }
 
   async delete(id: number): Promise<void> {
+    const promotionToDelete = await this.pgService.promotions.findOne({
+      where: { id },
+    });
     const result = await this.pgService.promotions.delete(id);
     if (result.affected === 0) {
       throw new NotFoundException(`Promotion with ID ${id} not found`);
     }
+
+    try {
+      await this.minioService.deleteFile(promotionToDelete?.image);
+    } catch (e) {
+      this.logger.error(e);
+    }
+
     this.logger.log(`Deleted Promotion with ID ${id}`);
   }
 

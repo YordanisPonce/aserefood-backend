@@ -7,6 +7,7 @@ import OrdersService from './services/orders.service';
 import { ShoppingCartsModule } from '../shopping-carts/shopping-carts.module';
 import MailModule from '../mail/mail.module';
 import AutoCancelOrdersJob from './jobs/auto-cancel-orders.job';
+import { MinioModule } from '../minio/minio.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import AutoCancelOrdersJob from './jobs/auto-cancel-orders.job';
     PaymentsModule,
     ShoppingCartsModule,
     MailModule,
+    MinioModule
   ],
   controllers: [V1OrdersController],
   providers: [OrdersService, AutoCancelOrdersJob],

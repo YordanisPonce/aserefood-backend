@@ -25,6 +25,7 @@ import ProductComboOutDto from '../../product-combos/dto/out/product-combo.out.d
 import generateUniqueCode from '../../utils/generators/unique-code.generator';
 import ZellePaymentOutDto from '../dto/out/zelle-payment.out.dto';
 import { IsNull, Not } from 'typeorm';
+import MinioService from '../../minio/services/minio.service';
  
 @Injectable()
 export default class OrdersService {
@@ -34,6 +35,7 @@ export default class OrdersService {
     private readonly pgService: PgService,
     private readonly mailService: MailService,
     private readonly shoppingCartService: ShoppingCartsService,
+    private readonly minioService: MinioService,
   ) {}
 
   async search(dto: OrderSearchInDto): Promise<PaginatedOutDto<OrderOutDto>> {
@@ -245,13 +247,14 @@ export default class OrdersService {
 
     const zelleList = await this.pgService.zelleConfs.find({ take: 1 });
     const zelle = zelleList[0];
+    const qrUrl = await this.minioService.getPresignedUrl(zelle.qr);
 
     return {
       transferAmount: order.totalAmount,
       orderNumber: idFormatter(order.id),
       paymentCode: order.onlinePayment.paymentCode,
       phoneNumber: zelle?.phoneNumber ?? '',
-      qr: zelle?.qr ?? '',
+      qr: qrUrl,
     };
   }
 

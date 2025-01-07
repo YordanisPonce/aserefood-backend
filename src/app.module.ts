@@ -26,6 +26,9 @@ import { PaymentsModule } from './payments/payments.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ZelleConfModule } from './zelle-conf/zelle-conf.module';
 import { AvailabilityModule } from './availability/availability.module';
+import { MinioModule } from './minio/minio.module';
+import * as multer from 'multer';
+import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
   imports: [
@@ -42,6 +45,9 @@ import { AvailabilityModule } from './availability/availability.module';
         limit: 100,
       },
     ]),
+    MulterModule.register({
+      storage: multer.memoryStorage(),
+    }),
     AuthModule,
     AvailabilityModule,
     ScheduleModule.forRoot(),
@@ -65,6 +71,7 @@ import { AvailabilityModule } from './availability/availability.module';
     OrdersModule,
     PaymentsModule,
     ZelleConfModule,
+    MinioModule,
   ],
   controllers: [],
   providers: [],

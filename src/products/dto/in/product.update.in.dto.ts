@@ -18,10 +18,9 @@ export default class ProductUpdateInDto {
   @MaxLength(50)
   name?: string;
 
-  @ApiProperty({ nullable: true, required: false })
+  @ApiProperty({type: 'string', format: 'binary', required: false })
   @IsOptional()
-  @IsString()
-  image?: string;
+  image?: Express.Multer.File;
 
   @ApiProperty({ nullable: true, required: false })
   @IsOptional()

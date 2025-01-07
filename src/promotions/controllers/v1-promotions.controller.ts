@@ -7,14 +7,14 @@ import {
   ParseIntPipe,
   Patch,
   Post,
-  Query,
+  Query, UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
-  ApiConflictResponse,
+  ApiConflictResponse, ApiConsumes,
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiNotFoundResponse,
@@ -33,6 +33,8 @@ import PromotionOutDto from '../dto/out/promotion.out.dto';
 import PromotionSearchInDto from '../dto/in/promotion.search.in.dto';
 import PromotionInDto from '../dto/in/promotion.in.dto';
 import PromotionUpdateInDto from '../dto/in/promotion.update.in.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ImageFileValidationPipe } from '../../utils/pipes/image-file-validation.pipe';
 
 @Controller('v1/promotions')
 @ApiTags('promotions')
@@ -74,6 +76,8 @@ export default class V1PromotionsController {
   @Roles(Role.Admin)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('image'))
   @ApiCreatedResponse({ description: 'Ok', type: PromotionOutDto })
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
@@ -82,7 +86,8 @@ export default class V1PromotionsController {
     description: 'Conflict (Other promotions with Name)',
   })
   @ApiOperation({ summary: 'Create a new Promotion if does not exist' })
-  async post(@Body() dto: PromotionInDto) {
+  async post(@Body() dto: PromotionInDto, @UploadedFile(new ImageFileValidationPipe()) image: Express.Multer.File) {
+    dto.image = image;
     return this.promotionsService.post(dto);
   }
 
@@ -90,6 +95,8 @@ export default class V1PromotionsController {
   @Roles(Role.Admin)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('image'))
   @ApiOkResponse({ description: 'Ok' })
   @ApiNotFoundResponse({ description: 'Not Found' })
   @ApiBadRequestResponse({ description: 'Bad Request' })
@@ -102,7 +109,9 @@ export default class V1PromotionsController {
   async put(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: PromotionUpdateInDto,
+    @UploadedFile(new ImageFileValidationPipe()) image: Express.Multer.File
   ) {
+    dto.image = image;
     return this.promotionsService.patch(id, dto);
   }
 

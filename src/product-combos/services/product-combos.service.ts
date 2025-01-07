@@ -13,12 +13,16 @@ import ProductComboUpdateInDto from '../dto/in/product-combo.update.in.dto';
 import ProductComboInDto from '../dto/in/product-combo.in.dto';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
 import ProductComboSearchInDto from '../dto/in/product-combo.search.in.dto';
+import MinioService from '../../minio/services/minio.service';
 
 @Injectable()
 export default class ProductCombosService {
   private readonly logger = new Logger(ProductCombosService.name);
 
-  constructor(private readonly pgService: PgService) {}
+  constructor(
+    private readonly pgService: PgService,
+    private readonly minioService: MinioService,
+    ) {}
 
   async search(
     dto: ProductComboSearchInDto,
@@ -133,11 +137,18 @@ export default class ProductCombosService {
       throw new BadRequestException('Non Valid Associated Products');
     }
 
+    const image = await this.minioService.uploadFile(
+      undefined,
+      dto.image.buffer,
+      dto.image.originalname.split('.').pop(),
+      dto.image.mimetype,
+    );
+
     const newProductCombo = this.pgService.productCombos.create({
       name: dto.name,
       description: dto.description,
       productComboItems: [],
-      image: dto.image,
+      image: image,
       isActive: dto.isActive,
       price: dto.price,
       zoneId: zone.id,
@@ -224,6 +235,20 @@ export default class ProductCombosService {
         ? { isActive: dto.isActive }
         : {}),
     };
+
+    let image = undefined;
+    if (dto.image) {
+      image = await this.minioService.uploadFile(
+        productCombo.image ?? undefined,
+        dto.image.buffer,
+        undefined,
+        dto.image.mimetype,
+      );
+    }
+    patchDto = {
+      ...patchDto,
+      ...(image && { image: image }),
+    }
     await this.pgService.productCombos.update(id, patchDto);
 
     const pc = await this.pgService.productCombos.findOne({
@@ -280,6 +305,12 @@ export default class ProductCombosService {
     const result = await this.pgService.productCombos.delete(id);
     if (result.affected === 0) {
       throw new NotFoundException(`Product Combo with ID ${id} not found`);
+    }
+
+    try {
+      await this.minioService.deleteFile(productComboToDelete?.image);
+    } catch (e) {
+      this.logger.error(e);
     }
     this.logger.log(`Deleted Product Combo with ID ${id}`);
   }

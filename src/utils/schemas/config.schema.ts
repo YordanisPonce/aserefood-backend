@@ -29,4 +29,10 @@ export const configSchema = Joi.object({
   TROPIPAY_CLIENT_SECRET: Joi.string().required(),
   SWAGGER_PASSWORD: Joi.string().required(),
   NODE_ENV: Joi.string().required(),
+  MINIO_ENDPOINT: Joi.string().required(),
+  MINIO_PORT: Joi.number().required(),
+  MINIO_ACCESS_KEY: Joi.string().required(),
+  MINIO_SECRET_KEY: Joi.string().required(),
+  MINIO_USE_SSL: Joi.boolean().required(),
+  MINIO_BUCKET_NAME: Joi.string().required(),
 }).unknown();
