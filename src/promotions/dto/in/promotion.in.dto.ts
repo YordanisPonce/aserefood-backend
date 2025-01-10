@@ -12,7 +12,7 @@ import {
   Min,
 } from 'class-validator';
 import { DiscountOption } from '../../../database/entities/constants';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 
 export default class PromotionInDto {
   @ApiProperty()
@@ -36,11 +36,13 @@ export default class PromotionInDto {
   @ApiProperty({ enum: DiscountOption })
   @IsNotEmpty()
   @IsEnum(DiscountOption)
+  @Transform(({ value }) => value as DiscountOption)
   discountOption: DiscountOption;
 
   @ApiProperty()
   @IsNumber()
   @Min(0.001)
+  @Transform(({ value }) => parseFloat(value))
   discountValue: number;
 
   @ApiProperty({type: 'string', format: 'binary', required: false })
@@ -62,17 +64,20 @@ export default class PromotionInDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsBoolean()
+  @Transform(({ value }) => value == 'true')
   isActive: boolean;
 
   @ApiProperty({ type: [Number], nullable: true })
   @IsOptional()
   @IsArray()
   @IsNotEmpty()
+  @Transform(({ value }) => value?.split(',').map(Number))
   productComboIds?: number[];
 
   @ApiProperty({ type: [Number], nullable: true })
   @IsOptional()
   @IsArray()
   @IsNotEmpty()
+  @Transform(({ value }) => value?.split(',').map(Number))
   productIds?: number[];
 }

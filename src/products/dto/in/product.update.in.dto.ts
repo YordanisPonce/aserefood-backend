@@ -9,6 +9,7 @@ import {
   MaxLength,
   Min,
 } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export default class ProductUpdateInDto {
   @ApiProperty({ required: false })
@@ -39,17 +40,20 @@ export default class ProductUpdateInDto {
   @IsInt()
   @Min(0)
   @IsNotEmpty()
+  @Transform(({ value }) => value !== undefined ? parseInt(value, 10) : value)
   categoryId?: number;
 
   @ApiProperty({ type: [Number], required: false })
   @IsOptional()
   @IsArray()
   @IsNotEmpty()
+  @Transform(({ value }) => value !== undefined ? value?.split(',').map(Number) : value)
   providerIds?: number[];
 
   @ApiProperty({ required: false })
   @IsOptional()
   @IsNotEmpty()
   @IsBoolean()
+  @Transform(({ value }) => value !== undefined ? value == 'true' : value)
   isService?: boolean;
 }

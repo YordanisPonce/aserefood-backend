@@ -10,6 +10,7 @@ import {
   MaxLength,
 } from 'class-validator';
 import { Role } from '../../../auth/decorators/roles.decorator';
+import { Transform } from 'class-transformer';
 
 export default class UserUpdateInternalInDto {
   @ApiProperty({ required: false })
@@ -30,6 +31,7 @@ export default class UserUpdateInternalInDto {
   @IsOptional()
   @IsNotEmpty()
   @IsEnum(Role)
+  @Transform(({ value }) => value !== undefined ? value as Role : value)
   role?: Role;
 
   @ApiProperty({ required: false })
@@ -50,6 +52,7 @@ export default class UserUpdateInternalInDto {
   @IsOptional()
   @IsNotEmpty()
   @IsBoolean()
+  @Transform(({ value }) => value !== undefined ? value == 'true' : value)
   isActive?: boolean;
 
   @ApiProperty({ required: false })

@@ -11,6 +11,7 @@ import {
   Min,
 } from 'class-validator';
 import ProductComboItemInDto from './product-combo-item.in.dto';
+import { Transform } from 'class-transformer';
 
 export default class ProductComboInDto {
   @ApiProperty()
@@ -37,17 +38,20 @@ export default class ProductComboInDto {
   @ApiProperty()
   @IsNumber()
   @Min(0.001)
+  @Transform(({ value }) => parseFloat(value))
   price: number;
 
   @ApiProperty()
   @IsInt()
   @IsNotEmpty()
   @Min(0)
+  @Transform(({ value }) => parseInt(value, 10))
   zoneId: number;
 
   @ApiProperty()
   @IsNotEmpty()
   @IsBoolean()
+  @Transform(({ value }) => value == 'true')
   isActive: boolean;
 
   @ApiProperty({ type: [ProductComboItemInDto] })

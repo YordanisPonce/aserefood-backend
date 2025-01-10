@@ -12,7 +12,7 @@ import {
   Min,
 } from 'class-validator';
 import { DiscountOption } from '../../../database/entities/constants';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 
 export default class PromotionUpdateInDto {
   @ApiProperty({ required: false })
@@ -40,12 +40,14 @@ export default class PromotionUpdateInDto {
   @IsOptional()
   @IsNotEmpty()
   @IsEnum(DiscountOption)
+  @Transform(({ value }) => value !== undefined ? value as DiscountOption : value)
   discountOption?: DiscountOption;
 
   @ApiProperty({ required: false })
   @IsOptional()
   @IsNumber()
   @Min(0.001)
+  @Transform(({ value }) => value !== undefined ? parseFloat(value) : value)
   discountValue?: number;
 
   @ApiProperty({type: 'string', format: 'binary', required: false })
@@ -56,18 +58,21 @@ export default class PromotionUpdateInDto {
   @IsOptional()
   @IsNotEmpty()
   @IsBoolean()
+  @Transform(({ value }) => value !== undefined ? value == 'true' : value)
   isActive?: boolean;
 
   @ApiProperty({ type: [Number], nullable: true, required: false })
   @IsOptional()
   @IsArray()
   @IsNotEmpty()
+  @Transform(({ value }) => value !== undefined ? value?.split(',').map(Number) : value)
   productComboIds?: number[];
 
   @ApiProperty({ type: [Number], nullable: true, required: false })
   @IsOptional()
   @IsArray()
   @IsNotEmpty()
+  @Transform(({ value }) => value !== undefined ? value?.split(',').map(Number) : value)
   productIds?: number[];
 
   @ApiProperty({ required: false })
