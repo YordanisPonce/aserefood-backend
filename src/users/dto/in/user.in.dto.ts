@@ -9,6 +9,7 @@ import {
   MinLength,
 } from 'class-validator';
 import { Role } from '../../../auth/decorators/roles.decorator';
+import { Transform } from 'class-transformer';
 
 export default class UserInDto {
   @ApiProperty()
@@ -32,6 +33,7 @@ export default class UserInDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsEnum(Role)
+  @Transform(({ value }) => value as Role)
   role: Role;
 
   @ApiProperty()
