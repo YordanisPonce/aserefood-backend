@@ -37,13 +37,19 @@ export default class Product {
   @Column('boolean')
   isService: boolean;
 
-  @Column()
-  categoryId: number;
-
-  @ManyToOne(() => Category, (category) => category.products, {
-    onDelete: 'CASCADE',
+  @ManyToMany(() => Category, (category) => category.products)
+  @JoinTable({
+    name: 'product_categories',
+    joinColumn: {
+      name: 'product_id',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'category_id',
+      referencedColumnName: 'id',
+    },
   })
-  category: Category;
+  categories: Category[];
 
   @ManyToMany(() => Provider, (provider) => provider.products)
   @JoinTable({

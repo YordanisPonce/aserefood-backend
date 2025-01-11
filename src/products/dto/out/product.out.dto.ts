@@ -1,5 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+export class CategoryProductOutDto {
+  @ApiProperty()
+  id: number;
+
+  @ApiProperty()
+  name: string;
+}
+
 export default class ProductOutDto {
   @ApiProperty()
   id: number;
@@ -16,11 +24,8 @@ export default class ProductOutDto {
   @ApiProperty()
   description: string;
 
-  @ApiProperty()
-  categoryId: number;
-
-  @ApiProperty()
-  categoryName: string;
+  @ApiProperty({ type: [CategoryProductOutDto] })
+  categories: CategoryProductOutDto[];
 
   @ApiProperty()
   isService: boolean;

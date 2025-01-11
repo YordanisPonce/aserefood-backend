@@ -100,7 +100,7 @@ export default class AvailabilityService {
       .leftJoinAndSelect('product.inventoryEntries', 'inventoryEntry')
       .leftJoinAndSelect('inventoryEntry.zone', 'zone')
       .leftJoinAndSelect('zone.municipalities', 'municipality')
-      .leftJoinAndSelect('product.category', 'category')
+      .leftJoinAndSelect('product.categories', 'category')
       .where('municipality.id = :municipalityId', {
         municipalityId: municipalityId,
       });
@@ -120,7 +120,7 @@ export default class AvailabilityService {
     }
 
     if (dto.categoryIds && dto.categoryIds.length > 0) {
-      queryBuilder.andWhere('product.categoryId IN (:...categoryIds)', {
+      queryBuilder.andWhere('category.id IN (:...categoryIds)', {
         categoryIds: dto.categoryIds,
       });
     }
@@ -299,7 +299,7 @@ export default class AvailabilityService {
       .leftJoinAndSelect('product.inventoryEntries', 'inventoryEntry')
       .leftJoinAndSelect('inventoryEntry.zone', 'zone')
       .leftJoinAndSelect('zone.municipalities', 'municipality')
-      .leftJoinAndSelect('product.category', 'category')
+      .leftJoinAndSelect('product.categories', 'category')
       .where('municipality.id = :municipalityId', {
         municipalityId: municipalityId,
       })
@@ -374,9 +374,11 @@ export default class AvailabilityService {
       name: product.name,
       image: product.image,
       isService: product.isService,
-      categoryId: product.categoryId,
+      categories: product.categories?.map(x => ({
+        id: x.id,
+        name: x.name,
+      })) ?? [],
       shortDescription: product.shortDescription,
-      categoryName: product.category.name,
       description: product.description,
     };
     dto.inventoryAmount = product.inventoryEntries.reduce(

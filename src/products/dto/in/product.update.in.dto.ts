@@ -35,13 +35,12 @@ export default class ProductUpdateInDto {
   @MaxLength(100)
   shortDescription?: string;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ type: [Number], required: false })
   @IsOptional()
-  @IsInt()
-  @Min(0)
+  @IsArray()
   @IsNotEmpty()
-  @Transform(({ value }) => value !== undefined ? parseInt(value, 10) : value)
-  categoryId?: number;
+  @Transform(({ value }) => value !== undefined ? value?.split(',').map(Number) : value)
+  categoryIds?: number[];
 
   @ApiProperty({ type: [Number], required: false })
   @IsOptional()

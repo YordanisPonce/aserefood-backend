@@ -117,7 +117,7 @@ export default class OrdersService {
       .leftJoinAndSelect('order.orderItems', 'orderItem')
       .leftJoinAndSelect('order.municipality', 'municipality')
       .leftJoinAndSelect('orderItem.product', 'product')
-      .leftJoinAndSelect('product.category', 'category')
+      .leftJoinAndSelect('product.categories', 'category')
       .leftJoinAndSelect('orderItem.productCombo', 'productCombo')
       .leftJoinAndSelect('productCombo.zone', 'zone')
       .leftJoinAndSelect('zone.inventoryEntries', 'inventoryEntry')
@@ -191,7 +191,7 @@ export default class OrdersService {
       relations: [
         'orderItems',
         'municipality',
-        'orderItems.product.category',
+        'orderItems.product.categories',
         'orderItems.productCombo.zone.inventoryEntries',
         'orderItems.productCombo.productComboItems.product',
       ],
@@ -550,8 +550,10 @@ export default class OrdersService {
     dto.description = product.description;
     dto.shortDescription = product.shortDescription;
     dto.isService = product.isService;
-    dto.categoryId = product.categoryId;
-    dto.categoryName = product.category?.name ?? '';
+    dto.categories = product.categories?.map(x => ({
+      id: x.id,
+      name: x.name,
+    })) ?? [];
     dto.image = product.image ? await this.minioService.getPresignedUrl(product.image) : null;
 
     return dto;
