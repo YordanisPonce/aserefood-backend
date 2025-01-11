@@ -13,7 +13,6 @@ import UserSearchInDto from '../dto/in/user.search.in.dto';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
 import MailService from '../../mail/services/mail.service';
 import { JwtService } from '@nestjs/jwt';
-import createPatchFields from '../../utils/dto/patch-fields.util';
 import { OrderStatus } from '../../database/entities/constants';
 import MinioService from '../../minio/services/minio.service';
 import UserUpdateInternalInDto from '../dto/in/user.update.internal.in.dto';
@@ -69,10 +68,13 @@ export default class UsersService {
       .take(dto.pageSize)
       .getManyAndCount();
 
-    const usersOut = result.map((user) => this.toOutDto(user));
+    const data: UserOutDto[] = []
+    for (const item of result) {
+      data.push(await this.toOutDto(item));
+    }
 
     return {
-      data: usersOut,
+      data: data,
       total,
       page: dto.page,
       pageSize: dto.pageSize,
@@ -84,7 +86,12 @@ export default class UsersService {
   public async getAll(): Promise<UserOutDto[]> {
     const users = await this.pgService.users.find({});
 
-    return users.map((user) => this.toOutDto(user));
+    const data: UserOutDto[] = []
+    for (const user of users) {
+      data.push(await this.toOutDto(user));
+    }
+
+    return data;
   }
 
   public async getById(id: number): Promise<UserOutDto> {
@@ -278,7 +285,7 @@ export default class UsersService {
     this.logger.log(`Deleted user with ID ${id}`);
   }
 
-  private toOutDto(user: User): UserOutDto {
+  private async toOutDto(user: User): Promise<UserOutDto> {
     return {
       id: user.id,
       username: user.username,
@@ -289,7 +296,7 @@ export default class UsersService {
       isConfirmed: user.isConfirmed,
       lastnames: user.lastnames,
       phoneNumber: user.phoneNumber,
-      image: user.image,
+      image: user.image ? await this.minioService.getPresignedUrl(user.image) : null,
     };
   }
 }

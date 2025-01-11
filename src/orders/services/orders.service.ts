@@ -17,7 +17,7 @@ import OrderUpdateInDto from '../dto/in/order.update.in.dto';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
 import OrderSearchInDto from '../dto/in/order.search.in.dto';
 import { CartItem } from '../../shopping-carts/dto/in/cart-item.enum';
-import OrderMeOutDto from '../dto/out/order-me.out.dto';
+import OrderMeOutDto, { OrderItemMeOutDto } from '../dto/out/order-me.out.dto';
 import Product from '../../database/entities/product.entity';
 import ProductOutDto from '../../products/dto/out/product.out.dto';
 import ProductCombo from '../../database/entities/product-combo.entity';
@@ -165,8 +165,13 @@ export default class OrdersService {
       .take(dto.pageSize)
       .getManyAndCount();
 
+    const data: OrderMeOutDto[] = []
+    for (const item of result) {
+      data.push(await this.toOutMeDto(item));
+    }
+
     return {
-      data: result.map((p) => this.toOutMeDto(p)),
+      data: data,
       total,
       page: dto.page,
       pageSize: dto.pageSize,
@@ -470,7 +475,7 @@ export default class OrdersService {
     this.logger.log(`Deleted order with ID ${id}`);
   }
 
-  private toOutMeDto(order: Order): OrderMeOutDto {
+  private async toOutMeDto(order: Order): Promise<OrderMeOutDto> {
     const dto = new OrderMeOutDto();
     dto.id = order.id;
     dto.code = idFormatter(order.id);
@@ -489,16 +494,20 @@ export default class OrdersService {
       ? order.onlinePaymentId
       : order.transferPaymentId;
     dto.deliveryMethodId = order.deliveryMethodId;
-    dto.orderItems =
-      order.orderItems?.map((x) => ({
-        id: x.id,
-        product: x.productId ? this.productToOutDto(x.product) : null,
-        productCombo: x.productComboId
-          ? this.productComboToOutDto(x.productCombo)
+
+    const data: OrderItemMeOutDto[] = []
+    for (const item of (order.orderItems ? order.orderItems : [])) {
+      data.push({
+        id: item.id,
+        product: item.productId ? await this.productToOutDto(item.product) : null,
+        productCombo: item.productComboId
+          ? await this.productComboToOutDto(item.productCombo)
           : null,
-        amount: x.amount,
-        price: parseFloat(x.price.toString()),
-      })) ?? [];
+        amount: item.amount,
+        price: parseFloat(item.price.toString()),
+      });
+    }
+    dto.orderItems = data;
 
     return dto;
   }
@@ -534,7 +543,7 @@ export default class OrdersService {
     return dto;
   }
 
-  private productToOutDto(product: Product): ProductOutDto {
+  private async productToOutDto(product: Product): Promise<ProductOutDto> {
     const dto = new ProductOutDto();
     dto.id = product.id;
     dto.name = product.name;
@@ -543,17 +552,17 @@ export default class OrdersService {
     dto.isService = product.isService;
     dto.categoryId = product.categoryId;
     dto.categoryName = product.category?.name ?? '';
-    dto.image = product.image;
+    dto.image = product.image ? await this.minioService.getPresignedUrl(product.image) : null;
 
     return dto;
   }
 
-  private productComboToOutDto(productCombo: ProductCombo): ProductComboOutDto {
+  private async productComboToOutDto(productCombo: ProductCombo): Promise<ProductComboOutDto> {
     const dto = new ProductComboOutDto();
     dto.id = productCombo.id;
     dto.description = productCombo.description;
     dto.name = productCombo.name;
-    dto.image = productCombo.image;
+    dto.image = productCombo.image ? await this.minioService.getPresignedUrl(productCombo.image) : null;
     dto.isActive = productCombo.isActive;
     dto.price = parseFloat(productCombo.price.toString());
     dto.shortDescription = productCombo.shortDescription;
