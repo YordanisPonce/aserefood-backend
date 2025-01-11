@@ -32,7 +32,7 @@ export default class ProductsService {
     const queryBuilder = this.pgService.products
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.providers', 'provider')
-      .leftJoinAndSelect('product.category', 'category');
+      .leftJoinAndSelect('product.categories', 'category');
 
     // Filtering
     if (dto.search) {
@@ -45,7 +45,7 @@ export default class ProductsService {
     }
 
     if (dto.categoryIds && dto.categoryIds.length > 0) {
-      queryBuilder.andWhere('product.categoryId IN (:...categoryIds)', {
+      queryBuilder.andWhere('category.id IN (:...categoryIds)', {
         categoryIds: dto.categoryIds,
       });
     }
@@ -93,7 +93,7 @@ export default class ProductsService {
     const products = await this.pgService.products
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.providers', 'provider')
-      .leftJoinAndSelect('product.category', 'category')
+      .leftJoinAndSelect('product.categories', 'category')
       .getMany();
 
     const data: ProductWithProvidersOutDto[] = []
@@ -108,7 +108,7 @@ export default class ProductsService {
     const product = await this.pgService.products
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.providers', 'provider')
-      .leftJoinAndSelect('product.category', 'category')
+      .leftJoinAndSelect('product.categories', 'category')
       .where('product.id = :id', { id })
       .getOne();
 
@@ -138,6 +138,14 @@ export default class ProductsService {
       throw new BadRequestException('Non Valid Associated Providers');
     }
 
+    const categories = await this.pgService.categories.findBy({
+      id: In(dto.categoryIds),
+    });
+
+    if(categories.length === 0) {
+      throw new BadRequestException('Non Valid Associated Categories');
+    }
+
     const image = await this.minioService.uploadFile(
       undefined,
       dto.image.buffer,
@@ -150,7 +158,7 @@ export default class ProductsService {
       description: dto.description,
       shortDescription: dto.shortDescription,
       isService: dto.isService,
-      categoryId: dto.categoryId,
+      categories: categories,
       providers: providers,
       image: image
     });
@@ -205,10 +213,6 @@ export default class ProductsService {
     };
     patchDto = {
       ...patchDto,
-      ...(dto.categoryId ? { categoryId: dto.categoryId } : {}),
-    };
-    patchDto = {
-      ...patchDto,
       ...(dto.isService ? { isService: dto.isService } : {}),
     };
 
@@ -241,6 +245,23 @@ export default class ProductsService {
       }
 
       product.providers = providers;
+      await this.pgService.products.save(product);
+    }
+
+    if (dto.categoryIds) {
+      const product = await this.pgService.products.findOne({
+        where: { id },
+      });
+
+      const categories = await this.pgService.categories.findBy({
+        id: In(dto.categoryIds),
+      });
+
+      if (categories.length === 0) {
+        throw new BadRequestException('Non Valid Associated Categories');
+      }
+
+      product.categories = categories;
       await this.pgService.products.save(product);
     }
 
@@ -317,8 +338,10 @@ export default class ProductsService {
     dto.description = product.description;
     dto.shortDescription = product.shortDescription;
     dto.isService = product.isService;
-    dto.categoryId = product.categoryId;
-    dto.categoryName = product.category?.name ?? '';
+    dto.categories = product.categories?.map(x => ({
+      id: x.id,
+      name: x.name,
+    })) ?? [];
     dto.image = product.image ? await this.minioService.getPresignedUrl(product.image) : null;
 
     return dto;
@@ -331,8 +354,10 @@ export default class ProductsService {
     dto.description = product.description;
     dto.shortDescription = product.shortDescription;
     dto.isService = product.isService;
-    dto.categoryId = product.categoryId;
-    dto.categoryName = product.category.name;
+    dto.categories = product.categories?.map(x => ({
+      id: x.id,
+      name: x.name,
+    })) ?? [];
     dto.providers = product.providers.map((x) => ({
       id: x.id,
       name: x.name,

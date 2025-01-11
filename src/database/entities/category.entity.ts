@@ -2,7 +2,7 @@ import {
   Column,
   Entity,
   Index,
-  JoinColumn,
+  JoinColumn, ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -21,7 +21,7 @@ export default class Category {
   @Column('character varying', { length: 255, nullable: true })
   description?: string;
 
-  @OneToMany(() => Product, (product) => product.category)
+  @ManyToMany(() => Product, (product) => product.categories)
   products: Product[];
 
   @Column({ name: 'parentId', nullable: true })

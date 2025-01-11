@@ -33,12 +33,11 @@ export default class ProductInDto {
   @MaxLength(100)
   shortDescription: string;
 
-  @ApiProperty()
-  @IsInt()
-  @Min(0)
+  @ApiProperty({ type: [Number] })
+  @IsArray()
   @IsNotEmpty()
-  @Transform(({ value }) => parseInt(value, 10))
-  categoryId: number;
+  @Transform(({ value }) => value?.split(',').map(Number))
+  categoryIds: number[];
 
   @ApiProperty({ type: [Number] })
   @IsArray()
