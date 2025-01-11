@@ -59,7 +59,7 @@ export default class MinioService {
       );
     } catch (error) {
       this.logger.error(error);
-      throw new NotFoundException();
+      return null;
     }
   }
 
