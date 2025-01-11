@@ -140,4 +140,25 @@ export default class V1UsersController {
     const username = req.user.username;
     return this.usersService.getByUsername(username);
   }
+
+  @Patch('/me')
+  @Roles(Role.Admin)
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiOkResponse({ description: 'Ok' })
+  @ApiNotFoundResponse({ description: 'Not Found' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiConflictResponse({
+    description: 'Conflict (Other user with Username or Email)',
+  })
+  @ApiOperation({ summary: 'Update current User' })
+  async putMe(
+    @Request() req,
+    @Body() dto: UserUpdateInDto,
+    @UploadedFile(new ImageFileValidationPipe()) image: Express.Multer.File
+  ) {
+    const userId = req.user.userId;
+    dto.image = image;
+    return this.usersService.patch(userId, dto);
+  }
 }
