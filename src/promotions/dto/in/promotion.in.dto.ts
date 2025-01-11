@@ -36,7 +36,7 @@ export default class PromotionInDto {
   @ApiProperty({ enum: DiscountOption })
   @IsNotEmpty()
   @IsEnum(DiscountOption)
-  @Transform(({ value }) => value as DiscountOption)
+  @Transform(({ value }) => parseInt(value) as DiscountOption)
   discountOption: DiscountOption;
 
   @ApiProperty()

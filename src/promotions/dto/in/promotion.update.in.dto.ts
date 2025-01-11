@@ -40,7 +40,7 @@ export default class PromotionUpdateInDto {
   @IsOptional()
   @IsNotEmpty()
   @IsEnum(DiscountOption)
-  @Transform(({ value }) => value !== undefined ? value as DiscountOption : value)
+  @Transform(({ value }) => value !== undefined ? parseInt(value) as DiscountOption : value)
   discountOption?: DiscountOption;
 
   @ApiProperty({ required: false })
