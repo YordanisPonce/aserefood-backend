@@ -72,8 +72,13 @@ export default class ProductCombosService {
       .take(dto.pageSize)
       .getManyAndCount();
 
+    const data: ProductComboOutDto[] = []
+    for (const item of result) {
+      data.push(await this.toOutDto(item));
+    }
+
     return {
-      data: result.map((m) => this.toOutDto(m)),
+      data: data,
       total,
       page: dto.page,
       pageSize: dto.pageSize,
@@ -91,7 +96,12 @@ export default class ProductCombosService {
       .leftJoinAndSelect('zone.inventoryEntries', 'inventoryEntry')
       .getMany();
 
-    return productCombos.map((pc) => this.toOutDto(pc));
+    const data: ProductComboOutDto[] = []
+    for (const item of productCombos) {
+      data.push(await this.toOutDto(item));
+    }
+
+    return data;
   }
 
   async getById(id: number): Promise<ProductComboOutDto> {
@@ -315,12 +325,12 @@ export default class ProductCombosService {
     this.logger.log(`Deleted Product Combo with ID ${id}`);
   }
 
-  private toOutDto(productCombo: ProductCombo): ProductComboOutDto {
+  private async toOutDto(productCombo: ProductCombo): Promise<ProductComboOutDto> {
     const dto = new ProductComboOutDto();
     dto.id = productCombo.id;
     dto.description = productCombo.description;
     dto.name = productCombo.name;
-    dto.image = productCombo.image;
+    dto.image = productCombo.image ? await this.minioService.getPresignedUrl(productCombo.image) : null;
     dto.isActive = productCombo.isActive;
     dto.price = parseFloat(productCombo.price.toString());
     dto.shortDescription = productCombo.shortDescription;

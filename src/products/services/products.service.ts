@@ -74,8 +74,13 @@ export default class ProductsService {
       .take(dto.pageSize)
       .getManyAndCount();
 
+    const data: ProductOutDto[] = []
+    for (const item of result) {
+      data.push(await this.toOutDto(item));
+    }
+
     return {
-      data: result.map((m) => this.toOutDto(m)),
+      data: data,
       total,
       page: dto.page,
       pageSize: dto.pageSize,
@@ -91,7 +96,12 @@ export default class ProductsService {
       .leftJoinAndSelect('product.category', 'category')
       .getMany();
 
-    return products.map((x) => this.toOutWithProvidersDto(x));
+    const data: ProductWithProvidersOutDto[] = []
+    for (const item of products) {
+      data.push(await this.toOutWithProvidersDto(item));
+    }
+
+    return data;
   }
 
   async getById(id: number): Promise<ProductWithProvidersOutDto> {
@@ -300,7 +310,7 @@ export default class ProductsService {
     this.logger.log(`Deleted Product with ID ${id}`);
   }
 
-  private toOutDto(product: Product): ProductOutDto {
+  private async toOutDto(product: Product): Promise<ProductOutDto> {
     const dto = new ProductOutDto();
     dto.id = product.id;
     dto.name = product.name;
@@ -309,12 +319,12 @@ export default class ProductsService {
     dto.isService = product.isService;
     dto.categoryId = product.categoryId;
     dto.categoryName = product.category?.name ?? '';
-    dto.image = product.image;
+    dto.image = product.image ? await this.minioService.getPresignedUrl(product.image) : null;
 
     return dto;
   }
 
-  private toOutWithProvidersDto(product: Product): ProductWithProvidersOutDto {
+  private async toOutWithProvidersDto(product: Product): Promise<ProductWithProvidersOutDto> {
     const dto = new ProductWithProvidersOutDto();
     dto.id = product.id;
     dto.name = product.name;
@@ -327,7 +337,7 @@ export default class ProductsService {
       id: x.id,
       name: x.name,
     }));
-    dto.image = product.image;
+    dto.image = product.image ? await this.minioService.getPresignedUrl(product.image) : null;
 
     return dto;
   }

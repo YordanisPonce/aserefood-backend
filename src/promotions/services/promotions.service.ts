@@ -75,8 +75,13 @@ export default class PromotionsService {
       .take(dto.pageSize)
       .getManyAndCount();
 
+    const data: PromotionOutDto[] = []
+    for (const item of result) {
+      data.push(await this.toOutDto(item));
+    }
+
     return {
-      data: result.map((m) => this.toOutDto(m)),
+      data: data,
       total,
       page: dto.page,
       pageSize: dto.pageSize,
@@ -92,7 +97,12 @@ export default class PromotionsService {
       .leftJoinAndSelect('promotion.products', 'product')
       .getMany();
 
-    return promotions.map((p) => this.toOutDto(p));
+    const data: PromotionOutDto[] = []
+    for (const item of promotions) {
+      data.push(await this.toOutDto(item));
+    }
+
+    return data;
   }
 
   async getById(id: number): Promise<PromotionOutDto> {
@@ -338,7 +348,7 @@ export default class PromotionsService {
     this.logger.log(`Deleted Promotion with ID ${id}`);
   }
 
-  private toOutDto(promotion: Promotion): PromotionOutDto {
+  private async toOutDto(promotion: Promotion): Promise<PromotionOutDto> {
     const dto = new PromotionOutDto();
     dto.id = promotion.id;
     dto.name = promotion.name;
@@ -349,7 +359,7 @@ export default class PromotionsService {
     dto.description = promotion.description;
     dto.discountOption = promotion.discountOption;
     dto.discountValue = parseFloat(promotion.discountValue.toString());
-    dto.image = promotion.image;
+    dto.image = promotion.image ? await this.minioService.getPresignedUrl(promotion.image) : null;
     dto.isActive = promotion.isActive;
     dto.productCombos =
       promotion.productCombos?.map((x) => ({
