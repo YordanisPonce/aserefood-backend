@@ -60,5 +60,6 @@ export default class ProductComboUpdateInDto {
   @IsOptional()
   @IsArray()
   @IsNotEmpty()
+  @Transform(({ value }) => value !== undefined ? value ? JSON.parse(`[${value}]`) as ProductComboItemInDto: null : value)
   productComboItems?: ProductComboItemInDto[];
 }

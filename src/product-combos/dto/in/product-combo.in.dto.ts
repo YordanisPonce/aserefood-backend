@@ -57,5 +57,6 @@ export default class ProductComboInDto {
   @ApiProperty({ type: [ProductComboItemInDto] })
   @IsArray()
   @IsNotEmpty()
+  @Transform(({ value }) => value ? JSON.parse(`[${value}]`) as ProductComboItemInDto: null)
   productComboItems: ProductComboItemInDto[];
 }
