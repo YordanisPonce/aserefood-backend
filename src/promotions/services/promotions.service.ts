@@ -242,7 +242,15 @@ export default class PromotionsService {
       );
     }
 
-    const imageName = dto.image ? dto.image.originalname.split('.').pop() : undefined;
+    let image = undefined;
+    if (dto.image) {
+      image = await this.minioService.uploadFile(
+        promotion.image ?? undefined,
+        dto.image.buffer,
+        undefined,
+        dto.image.mimetype,
+      );
+    }
 
     let patchDto = {
       ...(dto.code ? { code: dto.code } : {}),
@@ -263,7 +271,7 @@ export default class PromotionsService {
     };
     patchDto = {
       ...patchDto,
-      ...(dto.image !== undefined ? { image: imageName } : {}),
+      ...(dto.image !== undefined ? { image: image } : {}),
     };
     patchDto = {
       ...patchDto,
@@ -315,15 +323,6 @@ export default class PromotionsService {
       p.productCombos = productCombos;
     } else if (dto.productComboIds === null) {
       p.productCombos = [];
-    }
-
-    if (dto.image) {
-      p.image = await this.minioService.uploadFile(
-        p.image ?? undefined,
-        dto.image.buffer,
-        undefined,
-        dto.image.mimetype,
-      );
     }
 
     await this.pgService.promotions.save(p);

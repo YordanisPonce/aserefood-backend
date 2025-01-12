@@ -196,8 +196,6 @@ export default class ProductCombosService {
       }
     }
 
-    const imageName = dto.image ? dto.image.originalname.split('.').pop() : undefined;
-
     const productCombo = await this.pgService.productCombos.findOne({
       where: { id },
     });
@@ -220,10 +218,6 @@ export default class ProductCombosService {
       ...(dto.shortDescription
         ? { shortDescription: dto.shortDescription }
         : {}),
-    };
-    patchDto = {
-      ...patchDto,
-      ...(dto.image !== undefined ? { image: imageName } : {}),
     };
     patchDto = {
       ...patchDto,
