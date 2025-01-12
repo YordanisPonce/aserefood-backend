@@ -190,9 +190,6 @@ export default class ProductsService {
       throw new NotFoundException(`Product with ID ${id} not found`);
     }
 
-    const imageName = dto.image ? dto.image.originalname.split('.').pop() : undefined;
-
-
     let patchDto = {
       ...(dto.name ? { name: dto.name } : {}),
     };
@@ -200,12 +197,6 @@ export default class ProductsService {
       ...patchDto,
       ...(dto.description !== undefined
         ? { description: dto.description }
-        : {}),
-    };
-    patchDto = {
-      ...patchDto,
-      ...(dto.image !== undefined
-        ? { image: imageName }
         : {}),
     };
     patchDto = {
