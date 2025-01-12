@@ -240,12 +240,15 @@ export default class AuthService {
       );
     }
 
-    const image = await this.minioService.uploadFile(
-      undefined,
-      dto.image.buffer,
-      dto.image.originalname.split('.').pop(),
-      dto.image.mimetype,
-    );
+    let image = null;
+    if(dto.image){
+      image = await this.minioService.uploadFile(
+        undefined,
+        dto.image.buffer,
+        dto.image.originalname.split('.').pop(),
+        dto.image.mimetype,
+      );
+    }
 
     const newUser = this.pgService.users.create({
       username: dto.username,
