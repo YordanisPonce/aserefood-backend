@@ -65,14 +65,14 @@ export default class PromotionUpdateInDto {
   @IsOptional()
   @IsArray()
   @IsNotEmpty()
-  @Transform(({ value }) => value !== undefined ? value?.split(',').map(Number) : value)
+  @Transform(({ value }) => value !== '' ? value?.split(',').map(Number) : undefined)
   productComboIds?: number[];
 
   @ApiProperty({ type: [Number], nullable: true, required: false })
   @IsOptional()
   @IsArray()
   @IsNotEmpty()
-  @Transform(({ value }) => value !== undefined ? value?.split(',').map(Number) : value)
+  @Transform(({ value }) => value !== '' ? value?.split(',').map(Number) : undefined)
   productIds?: number[];
 
   @ApiProperty({ required: false })

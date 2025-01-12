@@ -179,7 +179,6 @@ export default class PromotionsService {
       dto.image.mimetype,
     );
 
-
     const newPromotion = this.pgService.promotions.create({
       name: dto.name,
       description: dto.description,
@@ -243,6 +242,8 @@ export default class PromotionsService {
       );
     }
 
+    const imageName = dto.image ? dto.image.originalname.split('.').pop() : undefined;
+
     let patchDto = {
       ...(dto.code ? { code: dto.code } : {}),
     };
@@ -262,7 +263,7 @@ export default class PromotionsService {
     };
     patchDto = {
       ...patchDto,
-      ...(dto.image !== undefined ? { image: dto.image } : {}),
+      ...(dto.image !== undefined ? { image: imageName } : {}),
     };
     patchDto = {
       ...patchDto,
