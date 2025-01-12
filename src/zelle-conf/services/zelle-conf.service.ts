@@ -36,15 +36,22 @@ export default class ZelleConfService {
     const mimeType = dto.qr.mimetype;
 
     if (!zelle) {
-      const qrName = await this.minioService.uploadFile('1', dto.qr.buffer, fileExtension, mimeType);
+      const qrName = await this.minioService.uploadFile(undefined, dto.qr.buffer, fileExtension, mimeType);
       zelle = this.pgService.zelleConfs.create({
         phoneNumber: dto.phoneNumber,
         qr: qrName,
       });
     } else {
-      const qrName = await this.minioService.uploadFile(zelle.qr, dto.qr.buffer, undefined, mimeType);
-      zelle.phoneNumber = dto.phoneNumber;
-      zelle.qr = qrName;
+      if(zelle.qr){
+        const qrName = await this.minioService.uploadFile(zelle.qr, dto.qr.buffer, undefined, mimeType);
+        zelle.phoneNumber = dto.phoneNumber;
+        zelle.qr = qrName;
+      } else {
+        const qrName = await this.minioService.uploadFile(undefined, dto.qr.buffer, fileExtension, mimeType);
+        zelle.phoneNumber = dto.phoneNumber;
+        zelle.qr = qrName;
+      }
+
     }
 
     await this.pgService.zelleConfs.save(zelle);
