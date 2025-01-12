@@ -15,6 +15,9 @@ export class ImageFileValidationPipe implements PipeTransform {
   }
 
   async transform(file: Express.Multer.File) {
+    if (!file) {
+      return undefined;
+    }
     try {
       return await this.parseFilePipe.transform(file);
     } catch (error) {
