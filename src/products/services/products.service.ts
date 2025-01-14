@@ -207,7 +207,7 @@ export default class ProductsService {
     };
     patchDto = {
       ...patchDto,
-      ...(dto.isService ? { isService: dto.isService } : {}),
+      ...((dto.isService !== undefined && dto.isService !== null) ? { isService: dto.isService } : {}),
     };
 
     let image = undefined;
