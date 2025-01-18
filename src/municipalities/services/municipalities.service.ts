@@ -13,6 +13,7 @@ import MunicipalityInDto from '../dto/in/municipality.in.dto';
 import createPatchFields from '../../utils/dto/patch-fields.util';
 import MunicipalityUpdateInDto from '../dto/in/municipality.update.in.dto';
 import { IsNull, Not } from 'typeorm';
+import MunicipalityAvailableSearchInDto from '../dto/in/municipality-available.search.in.dto';
 
 @Injectable()
 export default class MunicipalitiesService {
@@ -185,12 +186,16 @@ export default class MunicipalitiesService {
     this.logger.log(`Deleted municipality with ID ${id}`);
   }
 
-  async getAvailableMunicipalities(): Promise<MunicipalityOutDto[]> {
-    const data = await this.pgService.municipalities.find({
+  async getAvailableMunicipalities(dto: MunicipalityAvailableSearchInDto): Promise<MunicipalityOutDto[]> {
+    let data = await this.pgService.municipalities.find({
       where: { zone: { id: IsNull() } },
       relations: ['zone', 'province'],
       order: { id: 'ASC' },
     });
+
+    if(dto.provinceId){
+      data = data.filter(x => x.provinceId === dto.provinceId);
+    }
 
     return data.map((x) => this.toOutDto(x));
   }

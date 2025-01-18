@@ -33,6 +33,7 @@ import { Role, Roles } from '../../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import MunicipalityUpdateInDto from '../dto/in/municipality.update.in.dto';
+import MunicipalityAvailableSearchInDto from '../dto/in/municipality-available.search.in.dto';
 
 @Controller('v1/municipalities')
 @ApiTags('municipalities')
@@ -48,8 +49,8 @@ export default class V1MunicipalitiesController {
   @ApiOperation({
     summary: 'Get all Available Municipalities for Zone Creation',
   })
-  async getAllAvailable() {
-    return this.municipalitiesService.getAvailableMunicipalities();
+  async getAllAvailable(@Query() dto: MunicipalityAvailableSearchInDto) {
+    return this.municipalitiesService.getAvailableMunicipalities(dto);
   }
 
   @Get('')
