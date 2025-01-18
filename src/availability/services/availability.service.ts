@@ -13,12 +13,16 @@ import { ProductComboAvailableByMunicipalityOutDto } from '../dto/out/product-co
 import { MoreThan } from 'typeorm';
 import Product from '../../database/entities/product.entity';
 import ProductCombo from '../../database/entities/product-combo.entity';
+import MinioService from '../../minio/services/minio.service';
 
 @Injectable()
 export default class AvailabilityService {
   private readonly logger = new Logger(AvailabilityService.name);
 
-  constructor(private readonly pgService: PgService) {}
+  constructor(
+    private readonly pgService: PgService,
+    private readonly minioService: MinioService,
+    ) {}
 
   async getAvailableProductsByMunicipality(
     userId: number,
@@ -144,7 +148,11 @@ export default class AvailabilityService {
     queryBuilder.orderBy(`product.${orderBy}`, orderDirection);
 
     const data = await queryBuilder.getMany();
-    let products = data.map((x) => this.mapToProductDto(x));
+
+    let products = [];
+    for (const x of data) {
+      products.push(this.mapToProductDto(x))
+    }
 
     // Filtering
     if (dto.minimumPrice) {
@@ -182,7 +190,7 @@ export default class AvailabilityService {
           ...(quantityCheck ? { quantity: MoreThan(0) } : {}),
         },
       },
-      relations: ['inventoryEntries', 'category'],
+      relations: ['inventoryEntries', 'categories'],
     });
 
     const productIds = products.map((product) => product.id);
@@ -260,9 +268,10 @@ export default class AvailabilityService {
       productInventoryMap.set(product.id, totalQuantity);
     });
 
-    let productCombos = data.map((x) =>
-      this.mapToProductCombo(x, products, productInventoryMap),
-    );
+    let productCombos = [];
+    for (const d of data) {
+      productCombos.push(this.mapToProductCombo(d, products, productInventoryMap),);
+    }
 
     // Filtering
     if (dto.minimumPrice) {
@@ -324,7 +333,7 @@ export default class AvailabilityService {
           quantity: MoreThan(0),
         },
       },
-      relations: ['inventoryEntries', 'category'],
+      relations: ['inventoryEntries', 'categories'],
     });
 
     const productIds = products.map((product) => product.id);
@@ -365,14 +374,14 @@ export default class AvailabilityService {
     return this.mapToProductCombo(productCombo, products, productInventoryMap);
   }
 
-  private mapToProductDto(
+  private async mapToProductDto(
     product: Product,
-  ): ProductAvailableByMunicipalityOutDto {
+  ): Promise<ProductAvailableByMunicipalityOutDto> {
     const dto = new ProductAvailableByMunicipalityOutDto();
     dto.product = {
       id: product.id,
       name: product.name,
-      image: product.image,
+      image: product.image ? await this.minioService.getPresignedUrl(product.image) : null,
       isService: product.isService,
       categories: product.categories?.map(x => ({
         id: x.id,
@@ -392,11 +401,11 @@ export default class AvailabilityService {
     return dto;
   }
 
-  private mapToProductCombo(
+  private async mapToProductCombo(
     productCombo: ProductCombo,
     products: Product[],
     productInventoryMap: Map<number, number>,
-  ): ProductComboAvailableByMunicipalityOutDto {
+  ): Promise<ProductComboAvailableByMunicipalityOutDto> {
     const dto = new ProductComboAvailableByMunicipalityOutDto();
 
     let maxCombos = Infinity;
@@ -416,7 +425,7 @@ export default class AvailabilityService {
       description: productCombo.description,
       shortDescription: productCombo.shortDescription,
       isActive: productCombo.isActive,
-      image: productCombo.image,
+      image: productCombo.image ? await this.minioService.getPresignedUrl(productCombo.image) : null,
       price: parseFloat(productCombo.price.toString()),
       zoneId: productCombo.zoneId,
       zoneName: productCombo.zone.name,
