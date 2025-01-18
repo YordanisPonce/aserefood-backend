@@ -151,7 +151,7 @@ export default class AvailabilityService {
 
     let products = [];
     for (const x of data) {
-      products.push(this.mapToProductDto(x))
+      products.push(await this.mapToProductDto(x))
     }
 
     // Filtering
@@ -270,7 +270,7 @@ export default class AvailabilityService {
 
     let productCombos = [];
     for (const d of data) {
-      productCombos.push(this.mapToProductCombo(d, products, productInventoryMap),);
+      productCombos.push(await this.mapToProductCombo(d, products, productInventoryMap),);
     }
 
     // Filtering
