@@ -32,6 +32,7 @@ import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Role, Roles } from '../../auth/decorators/roles.decorator';
 import MunicipalityPOutDto from '../../provinces/dto/out/municipality-p.out.dto';
 import AutoDeleteShoppingCartsJob from '../jobs/auto-delete-shopping-carts.job';
+import ItemIdOutDto from '../dto/out/item-id.out.dto';
 
 @Controller('v1/shopping-carts')
 @ApiTags('shopping-carts')
@@ -78,7 +79,7 @@ export default class V1ShoppingCartsController {
 
   @Post('')
   @Roles(Role.Customer)
-  @ApiCreatedResponse({ description: 'Ok' })
+  @ApiCreatedResponse({ description: 'Ok', type: ItemIdOutDto })
   @ApiNotFoundResponse({ description: 'Not Found User' })
   @ApiConflictResponse({ description: 'Municipality not selected' })
   @ApiBadRequestResponse({ description: 'Bad Request' })
