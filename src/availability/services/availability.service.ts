@@ -130,7 +130,7 @@ export default class AvailabilityService {
     }
 
     if (dto.isService !== undefined && dto.isService !== null) {
-      queryBuilder.andWhere('provider.isService = :isService', {
+      queryBuilder.andWhere('product.isService = :isService', {
         isService: dto.isService,
       });
     }
