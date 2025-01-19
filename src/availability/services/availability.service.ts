@@ -22,7 +22,7 @@ export default class AvailabilityService {
   constructor(
     private readonly pgService: PgService,
     private readonly minioService: MinioService,
-    ) {}
+  ) {}
 
   async getAvailableProductsByMunicipality(
     userId: number,
@@ -31,7 +31,7 @@ export default class AvailabilityService {
     quantityCheck: boolean = true,
   ): Promise<PaginatedOutDto<ProductAvailableByMunicipalityOutDto>> {
     return this.getAvailableProductsInMunicipality(
-      (await this.getUserMunicipalityId(userId)),
+      await this.getUserMunicipalityId(userId),
       dto,
       productIds,
       quantityCheck,
@@ -45,10 +45,11 @@ export default class AvailabilityService {
     quantityCheck: boolean = true,
   ): Promise<PaginatedOutDto<ProductComboAvailableByMunicipalityOutDto>> {
     return this.getAvailableProductCombosInMunicipality(
-      (await this.getUserMunicipalityId(userId)),
+      await this.getUserMunicipalityId(userId),
       dto,
       productComboIds,
-      quantityCheck);
+      quantityCheck,
+    );
   }
 
   async getAvailableProductsByMunicipalityId(
@@ -69,21 +70,27 @@ export default class AvailabilityService {
     id: number,
     municipalityId: number,
   ): Promise<ProductAvailableByMunicipalityOutDto> {
-   return this.getAvailableProduct(id, municipalityId);
+    return this.getAvailableProduct(id, municipalityId);
   }
 
   async getAvailableProductByIdCustomer(
     id: number,
     userId: number,
   ): Promise<ProductAvailableByMunicipalityOutDto> {
-    return this.getAvailableProduct(id, (await this.getUserMunicipalityId(userId)))
+    return this.getAvailableProduct(
+      id,
+      await this.getUserMunicipalityId(userId),
+    );
   }
 
   async getAvailableProductComboByMunicipalityCustomer(
     id: number,
     userId: number,
   ): Promise<ProductComboAvailableByMunicipalityOutDto> {
-    return this.getAvailableProductCombo(id, (await this.getUserMunicipalityId(userId)))
+    return this.getAvailableProductCombo(
+      id,
+      await this.getUserMunicipalityId(userId),
+    );
   }
 
   async getAvailableProductComboByMunicipality(
@@ -151,7 +158,7 @@ export default class AvailabilityService {
 
     let products = [];
     for (const x of data) {
-      products.push(await this.mapToProductDto(x))
+      products.push(await this.mapToProductDto(x));
     }
 
     // Filtering
@@ -165,7 +172,9 @@ export default class AvailabilityService {
 
     // Pagination
     const total = products.length;
-    products = products.slice((dto.page - 1) * dto.pageSize, dto.pageSize);
+    const start = (dto.page - 1) * dto.pageSize;
+    const end = start + dto.pageSize;
+    products = products.slice(start, end);
 
     return {
       data: products,
@@ -270,7 +279,9 @@ export default class AvailabilityService {
 
     let productCombos = [];
     for (const d of data) {
-      productCombos.push(await this.mapToProductCombo(d, products, productInventoryMap),);
+      productCombos.push(
+        await this.mapToProductCombo(d, products, productInventoryMap),
+      );
     }
 
     // Filtering
@@ -284,10 +295,9 @@ export default class AvailabilityService {
 
     // Pagination
     const total = productCombos.length;
-    productCombos = productCombos.slice(
-      (dto.page - 1) * dto.pageSize,
-      dto.pageSize,
-    );
+    const start = (dto.page - 1) * dto.pageSize;
+    const end = start + dto.pageSize;
+    productCombos = productCombos.slice(start, end);
 
     return {
       data: productCombos,
@@ -299,10 +309,7 @@ export default class AvailabilityService {
     };
   }
 
-  private async getAvailableProduct(
-    id: number,
-    municipalityId: number,
-  ) {
+  private async getAvailableProduct(id: number, municipalityId: number) {
     const product = await this.pgService.products
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.inventoryEntries', 'inventoryEntry')
@@ -322,10 +329,7 @@ export default class AvailabilityService {
     return this.mapToProductDto(product);
   }
 
-  private async getAvailableProductCombo(
-    id: number,
-    municipalityId: number,
-  ) {
+  private async getAvailableProductCombo(id: number, municipalityId: number) {
     const products = await this.pgService.products.find({
       where: {
         inventoryEntries: {
@@ -381,12 +385,15 @@ export default class AvailabilityService {
     dto.product = {
       id: product.id,
       name: product.name,
-      image: product.image ? await this.minioService.getPresignedUrl(product.image) : null,
+      image: product.image
+        ? await this.minioService.getPresignedUrl(product.image)
+        : null,
       isService: product.isService,
-      categories: product.categories?.map(x => ({
-        id: x.id,
-        name: x.name,
-      })) ?? [],
+      categories:
+        product.categories?.map((x) => ({
+          id: x.id,
+          name: x.name,
+        })) ?? [],
       shortDescription: product.shortDescription,
       description: product.description,
     };
@@ -425,7 +432,9 @@ export default class AvailabilityService {
       description: productCombo.description,
       shortDescription: productCombo.shortDescription,
       isActive: productCombo.isActive,
-      image: productCombo.image ? await this.minioService.getPresignedUrl(productCombo.image) : null,
+      image: productCombo.image
+        ? await this.minioService.getPresignedUrl(productCombo.image)
+        : null,
       price: parseFloat(productCombo.price.toString()),
       zoneId: productCombo.zoneId,
       zoneName: productCombo.zone.name,
@@ -468,6 +477,6 @@ export default class AvailabilityService {
       );
     }
 
-    return identityCart.municipalityId
+    return identityCart.municipalityId;
   }
 }
