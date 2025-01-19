@@ -36,6 +36,7 @@ import UserSearchInDto from '../dto/in/user.search.in.dto';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ImageFileValidationPipe } from '../../utils/pipes/image-file-validation.pipe';
+import UserMeUpdateInDto from '../dto/in/user-me.update.in.dto';
 
 @Controller('v1/users')
 @ApiTags('users')
@@ -154,7 +155,7 @@ export default class V1UsersController {
   @ApiOperation({ summary: 'Update current User' })
   async putMe(
     @Request() req,
-    @Body() dto: UserUpdateInDto,
+    @Body() dto: UserMeUpdateInDto,
     @UploadedFile(new ImageFileValidationPipe()) image: Express.Multer.File
   ) {
     const userId = req.user.userId;

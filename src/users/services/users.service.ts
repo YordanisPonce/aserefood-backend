@@ -238,6 +238,7 @@ export default class UsersService {
       ...(dto.username && { username: dto.username }),
       ...(image && { image: image }),
       ...(dto.isActive !== undefined && { isActive: dto.isActive }),
+      ...(dto.isConfirmed !== undefined && { isConfirmed: dto.isConfirmed }),
       ...(dto.name && { name: dto.name }),
       ...(dto.role && { role: dto.role }),
       ...(dto.phoneNumber && { phoneNumber: dto.phoneNumber }),

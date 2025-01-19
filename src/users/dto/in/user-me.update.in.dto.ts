@@ -12,7 +12,7 @@ import {
 import { Role } from '../../../auth/decorators/roles.decorator';
 import { Transform } from 'class-transformer';
 
-export default class UserUpdateInDto {
+export default class UserMeUpdateInDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsNotEmpty()
@@ -54,13 +54,6 @@ export default class UserUpdateInDto {
   @IsBoolean()
   @Transform(({ value }) => value !== undefined ? value == 'true' : value)
   isActive?: boolean;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsNotEmpty()
-  @IsBoolean()
-  @Transform(({ value }) => value !== undefined ? value == 'true' : value)
-  isConfirmed?: boolean;
 
   @ApiProperty({ required: false })
   @IsOptional()
