@@ -12,6 +12,7 @@ import CategoryInDto from '../dto/in/category.in.dto';
 import Category from '../../database/entities/category.entity';
 import createPatchFields from '../../utils/dto/patch-fields.util';
 import CategoryUpdateInDto from '../dto/in/category.update.in.dto';
+import { Brackets } from 'typeorm';
 
 @Injectable()
 export default class CategoriesService {
@@ -33,7 +34,16 @@ export default class CategoriesService {
       .leftJoinAndSelect('children1.children', 'children2')
       .leftJoinAndSelect('children2.children', 'children3')
       .leftJoinAndSelect('children3.children', 'children4')
-      .leftJoinAndSelect('children4.children', 'children5');
+      .leftJoinAndSelect('children4.children', 'children5')
+      .leftJoinAndSelect('category.products', 'product')
+      .leftJoinAndSelect('parent1.products', 'productP1')
+      .leftJoinAndSelect('parent2.products', 'productP2')
+      .leftJoinAndSelect('parent3.products', 'productP3')
+      .leftJoinAndSelect('parent4.products', 'productP4')
+      .leftJoinAndSelect('children1.products', 'productC1')
+      .leftJoinAndSelect('children2.products', 'productC2')
+      .leftJoinAndSelect('children3.products', 'productC3')
+      .leftJoinAndSelect('children4.products', 'productC4');
 
     if (dto.search) {
       queryBuilder.where(
@@ -55,6 +65,22 @@ export default class CategoriesService {
 
     if (dto.isFlat.valueOf()) {
       queryBuilder.andWhere('category.parentId IS NULL');
+    }
+
+    if (dto.isService !== undefined && dto.isService !== null) {
+      queryBuilder.andWhere(
+        new Brackets(qb => {
+          qb.where('product.isService = :isService', { isService: dto.isService })
+            .orWhere('productP1.isService = :isService', { isService: dto.isService })
+            .orWhere('productP2.isService = :isService', { isService: dto.isService })
+            .orWhere('productP3.isService = :isService', { isService: dto.isService })
+            .orWhere('productP4.isService = :isService', { isService: dto.isService })
+            .orWhere('productC1.isService = :isService', { isService: dto.isService })
+            .orWhere('productC2.isService = :isService', { isService: dto.isService })
+            .orWhere('productC3.isService = :isService', { isService: dto.isService })
+            .orWhere('productC4.isService = :isService', { isService: dto.isService });
+        }),
+      );
     }
 
     // Ordering

@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsBoolean,
   IsBooleanString,
   IsInt,
   IsNotEmpty,
@@ -28,4 +29,10 @@ export default class CategorySearchInDto extends PaginatedInDto {
   @IsOptional()
   @IsBooleanString()
   isFlat?: boolean;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsBoolean()
+  @Transform(({ value }) => value !== undefined ? value == 'true' : value)
+  isService?: boolean;
 }
