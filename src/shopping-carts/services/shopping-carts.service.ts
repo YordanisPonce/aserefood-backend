@@ -224,6 +224,7 @@ export default class ShoppingCartsService {
       price: x.price,
       amount: carts.find((y) => y.productId === x.product.id).amount,
       product: x.product,
+      id: carts.find(y => y.productId === x.product.id).id,
     }));
     const productCombos: ShoppingCartProductComboOutDto[] = aProductCombos.map(
       (x) => ({
@@ -231,6 +232,7 @@ export default class ShoppingCartsService {
         amount: carts.find((y) => y.productComboId === x.productCombo.id)
           .amount,
         price: x.price,
+        id: carts.find(y => y.productComboId === x.productCombo.id).id,
       }),
     );
 
