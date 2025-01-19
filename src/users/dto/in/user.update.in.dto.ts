@@ -58,6 +58,13 @@ export default class UserUpdateInDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsNotEmpty()
+  @IsBoolean()
+  @Transform(({ value }) => value !== undefined ? value == 'true' : value)
+  isConfirmed?: boolean;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNotEmpty()
   @IsString()
   @Matches(/^\d+$/, {
     message: 'phoneNumber must contain only digits.',
