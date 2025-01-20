@@ -16,47 +16,47 @@ jobs:
 
     - name: Add vars
       run: |
-        echo "APP_PORT=${{ vars.APP_PORT }}" > .env
-        echo "UI_URL=${{ vars.UI_URL_DEV }}" > .env
-        echo "EMAIL_CONFIRMATION_URL=${{ vars.EMAIL_CONFIRMATION_URL_DEV }}" > .env
-        echo "EMAIL_RESET_PASSWORD_URL=${{ vars.EMAIL_RESET_PASSWORD_URL_DEV }}" > .env
+        echo "APP_PORT=${{ vars.APP_PORT }}" >> .env
+        echo "UI_URL=${{ vars.UI_URL_DEV }}" >> .env
+        echo "EMAIL_CONFIRMATION_URL=${{ vars.EMAIL_CONFIRMATION_URL_DEV }}" >> .env
+        echo "EMAIL_RESET_PASSWORD_URL=${{ vars.EMAIL_RESET_PASSWORD_URL_DEV }}" >> .env
         
-        echo "TROPIPAY_URL_SUCCESS=${{ vars.TROPIPAY_URL_SUCCESS }}" > .env
-        echo "TROPIPAY_URL_FAILURE=${{ vars.TROPIPAY_URL_FAILURE }}" > .env
-        echo "TROPIPAY_URL_NOTIFICATION=${{ vars.TROPIPAY_URL_NOTIFICATION }}" > .env
+        echo "TROPIPAY_URL_SUCCESS=${{ vars.TROPIPAY_URL_SUCCESS }}" >> .env
+        echo "TROPIPAY_URL_FAILURE=${{ vars.TROPIPAY_URL_FAILURE }}" >> .env
+        echo "TROPIPAY_URL_NOTIFICATION=${{ vars.TROPIPAY_URL_NOTIFICATION }}" >> .env
         
-        echo "MAX_HOURS_TO_AUTO_CANCEL_ORDER=${{ vars.MAX_HOURS_TO_AUTO_CANCEL_ORDER }}" > .env
-        echo "MAX_HOURS_TO_DELETE_SHOPPING_CART=${{ vars.MAX_HOURS_TO_DELETE_SHOPPING_CART }}" > .env
+        echo "MAX_HOURS_TO_AUTO_CANCEL_ORDER=${{ vars.MAX_HOURS_TO_AUTO_CANCEL_ORDER }}" >> .env
+        echo "MAX_HOURS_TO_DELETE_SHOPPING_CART=${{ vars.MAX_HOURS_TO_DELETE_SHOPPING_CART }}" >> .env
         
-        echo "NODE_ENV=${{ vars.NODE_ENV_DEV }}" > .env
-        echo "SWAGGER_PASSWORD=${{ vars.SWAGGER_PASSWORD }}" > .env
+        echo "NODE_ENV=${{ vars.NODE_ENV_DEV }}" >> .env
+        echo "SWAGGER_PASSWORD=${{ vars.SWAGGER_PASSWORD }}" >> .env
         
-        echo "SECRET_KEY=${{ vars.SECRET_KEY }}" > .env
-        echo "SEED_ADMIN_EMAIL=${{ vars.SEED_ADMIN_EMAIL }}" > .env
-        echo "SEED_ADMIN_PASSWORD=${{ vars.SEED_ADMIN_PASSWORD }}" > .env
-        echo "TROPIPAY_CLIENT_ID=${{ vars.TROPIPAY_CLIENT_ID }}" > .env
-        echo "TROPIPAY_CLIENT_SECRET=${{ vars.TROPIPAY_CLIENT_SECRET }}" > .env
+        echo "SECRET_KEY=${{ vars.SECRET_KEY }}" >> .env
+        echo "SEED_ADMIN_EMAIL=${{ vars.SEED_ADMIN_EMAIL }}" >> .env
+        echo "SEED_ADMIN_PASSWORD=${{ vars.SEED_ADMIN_PASSWORD }}" >> .env
+        echo "TROPIPAY_CLIENT_ID=${{ vars.TROPIPAY_CLIENT_ID }}" >> .env
+        echo "TROPIPAY_CLIENT_SECRET=${{ vars.TROPIPAY_CLIENT_SECRET }}" >> .env
         
-        echo "MAIL_HOST=${{ vars.MAIL_HOST }}" > .env
-        echo "MAIL_PORT=${{ vars.MAIL_PORT }}" > .env
-        echo "MAIL_USER=${{ vars.MAIL_USER }}" > .env
-        echo "MAIL_PASSWORD=${{ vars.MAIL_PASSWORD }}" > .env
-        echo "MAIL_SECURE=${{ vars.MAIL_SECURE }}" > .env
-        echo "SENDER_EMAIL=${{ vars.SENDER_EMAIL }}" > .env
-        echo "SENDER_NAME=${{ vars.SENDER_NAME }}" > .env
+        echo "MAIL_HOST=${{ vars.MAIL_HOST }}" >> .env
+        echo "MAIL_PORT=${{ vars.MAIL_PORT }}" >> .env
+        echo "MAIL_USER=${{ vars.MAIL_USER }}" >> .env
+        echo "MAIL_PASSWORD=${{ vars.MAIL_PASSWORD }}" >> .env
+        echo "MAIL_SECURE=${{ vars.MAIL_SECURE }}" >> .env
+        echo "SENDER_EMAIL=${{ vars.SENDER_EMAIL }}" >> .env
+        echo "SENDER_NAME=${{ vars.SENDER_NAME }}" >> .env
         
-        echo "DB_HOST=${{ vars.DB_HOST }}" > .env
-        echo "DB_PORT=${{ vars.DB_PORT }}" > .env
-        echo "DB_DATABASE=${{ vars.DB_DATABASE }}" > .env
-        echo "DB_USERNAME=${{ vars.DB_USERNAME }}" > .env
-        echo "DB_PASSWORD=${{ vars.DB_PASSWORD }}" > .env
+        echo "DB_HOST=${{ vars.DB_HOST }}" >> .env
+        echo "DB_PORT=${{ vars.DB_PORT }}" >> .env
+        echo "DB_DATABASE=${{ vars.DB_DATABASE }}" >> .env
+        echo "DB_USERNAME=${{ vars.DB_USERNAME }}" >> .env
+        echo "DB_PASSWORD=${{ vars.DB_PASSWORD }}" >> .env
         
-        echo "MINIO_ENDPOINT=${{ vars.MINIO_ENDPOINT }}" > .env
-        echo "MINIO_PORT=${{ vars.MINIO_PORT }}" > .env
-        echo "MINIO_ACCESS_KEY=${{ vars.MINIO_SECRET_KEY_DEV }}" > .env
-        echo "MINIO_SECRET_KEY=${{ vars.MINIO_SECRET_KEY_DEV }}" > .env
-        echo "MINIO_USE_SSL=${{ vars.MINIO_USE_SSL }}" > .env
-        echo "MINIO_BUCKET_NAME=${{ vars.MINIO_BUCKET_NAME_DEV }}" > .env
+        echo "MINIO_ENDPOINT=${{ vars.MINIO_ENDPOINT }}" >> .env
+        echo "MINIO_PORT=${{ vars.MINIO_PORT }}" >> .env
+        echo "MINIO_ACCESS_KEY=${{ vars.MINIO_SECRET_KEY_DEV }}" >> .env
+        echo "MINIO_SECRET_KEY=${{ vars.MINIO_SECRET_KEY_DEV }}" >> .env
+        echo "MINIO_USE_SSL=${{ vars.MINIO_USE_SSL }}" >> .env
+        echo "MINIO_BUCKET_NAME=${{ vars.MINIO_BUCKET_NAME_DEV }}" >> .env
         
     
     - name: Stop running container if exists
