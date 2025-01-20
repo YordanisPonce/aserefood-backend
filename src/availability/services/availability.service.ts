@@ -426,6 +426,9 @@ export default class AvailabilityService {
       }
     });
 
+    console.log(productCombo.productComboItems)
+    console.log(products)
+
     dto.productCombo = {
       id: productCombo.id,
       name: productCombo.name,
@@ -438,18 +441,15 @@ export default class AvailabilityService {
       price: parseFloat(productCombo.price.toString()),
       zoneId: productCombo.zoneId,
       zoneName: productCombo.zone.name,
-      referencePrice: productCombo.productComboItems.reduce(
-        (a, b) =>
-          a +
-          products
-            .find((p) => p.id === b.productId)
-            .inventoryEntries.reduce(
-              (a, b) => a + parseFloat(b.price.toString()),
-              0,
-            ) *
-            b.amount,
-        0,
-      ),
+      referencePrice: productCombo.productComboItems.reduce((total, item) => {
+        const product = products.find((p) => p.id === item.productId);
+        const inventoryPrice = product?.inventoryEntries?.reduce(
+          (sum, entry) => sum + parseFloat(entry.price.toString()),
+          0
+        ) ?? 0;
+
+        return total + (inventoryPrice * item.amount);
+      }, 0),
       productComboItems: productCombo.productComboItems.map((y) => ({
         id: y.id,
         productId: y.productId,
