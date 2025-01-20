@@ -26,7 +26,7 @@ async function bootstrap() {
         },
       }),
     );
-  }
+  } 
 
   const options = new DocumentBuilder()
     .setTitle('Asere Food API')
