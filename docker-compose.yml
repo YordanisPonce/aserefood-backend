@@ -8,47 +8,47 @@ services:
       - "0.0.0.0:4001:4001"
 
     environment:
-        APP_PORT: 4001
-        UI_URL: https://asere-food.com
-        EMAIL_CONFIRMATION_URL: https://asere-food.com/auth/verifyEmail
-        EMAIL_RESET_PASSWORD_URL: https://asere-food.com/auth/resetPassword
+        APP_PORT: $APP_PORT
+        UI_URL: $UI_URL
+        EMAIL_CONFIRMATION_URL: $EMAIL_CONFIRMATION_URL
+        EMAIL_RESET_PASSWORD_URL: $EMAIL_RESET_PASSWORD_URL
 
-        TROPIPAY_URL_SUCCESS: https://asere-food.com/payment/success
-        TROPIPAY_URL_FAILURE: https://asere-food.com/payment/failure
-        TROPIPAY_URL_NOTIFICATION: https://asere-food-api.mdialityc.com/v1/payments/charging
+        TROPIPAY_URL_SUCCESS: $TROPIPAY_URL_SUCCESS
+        TROPIPAY_URL_FAILURE: $TROPIPAY_URL_FAILURE
+        TROPIPAY_URL_NOTIFICATION: $TROPIPAY_URL_NOTIFICATION
 
-        MAX_HOURS_TO_AUTO_CANCEL_ORDER: 48
-        MAX_HOURS_TO_DELETE_SHOPPING_CART: 24
+        MAX_HOURS_TO_AUTO_CANCEL_ORDER: $MAX_HOURS_TO_AUTO_CANCEL_ORDER
+        MAX_HOURS_TO_DELETE_SHOPPING_CART: $MAX_HOURS_TO_DELETE_SHOPPING_CART
 
-        NODE_ENV: staging
-        SWAGGER_PASSWORD: admin
+        NODE_ENV: $NODE_ENV
+        SWAGGER_PASSWORD: $SWAGGER_PASSWORD
         
-        SECRET_KEY: ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789JANDDAFOFAOINAIEEFAD
-        SEED_ADMIN_EMAIL: admin@admin.admin
-        SEED_ADMIN_PASSWORD: Admin2024.
-        TROPIPAY_CLIENT_ID: ABC
-        TROPIPAY_CLIENT_SECRET: ABC
+        SECRET_KEY: $SECRET_KEY
+        SEED_ADMIN_EMAIL: $SEED_ADMIN_EMAIL
+        SEED_ADMIN_PASSWORD: $SEED_ADMIN_PASSWORD
+        TROPIPAY_CLIENT_ID: $TROPIPAY_CLIENT_ID
+        TROPIPAY_CLIENT_SECRET: $TROPIPAY_CLIENT_SECRET
         
-        MAIL_HOST: smtp.gmail.com
-        MAIL_PORT: 587
-        MAIL_USER: eduardoglez64377@gmail.com
-        MAIL_PASSWORD: pnei wfzu bbwb ufsz
-        MAIL_SECURE: false
-        SENDER_EMAIL: asere-food@gmail.com
-        SENDER_NAME: Asere Food Admin
+        MAIL_HOST: $MAIL_HOST
+        MAIL_PORT: $MAIL_PORT
+        MAIL_USER: $MAIL_USER
+        MAIL_PASSWORD: $MAIL_PASSWORD
+        MAIL_SECURE: $MAIL_SECURE
+        SENDER_EMAIL: $SENDER_EMAIL
+        SENDER_NAME: $SENDER_NAME
         
-        DB_HOST: asere-food-db
-        DB_PORT: 5432
-        DB_DATABASE: asere-food-db
-        DB_USERNAME: postgres
-        DB_PASSWORD: fCXko33My1bFAkKX
+        DB_HOST: $DB_HOST
+        DB_PORT: $DB_PORT
+        DB_DATABASE: $DB_DATABASE
+        DB_USERNAME: $DB_USERNAME
+        DB_PASSWORD: $DB_PASSWORD
 
-        MINIO_ENDPOINT: 181.225.255.61
-        MINIO_PORT: 9000
-        MINIO_ACCESS_KEY: asere-food
-        MINIO_SECRET_KEY: vaXKRzqk.4
-        MINIO_USE_SSL: false
-        MINIO_BUCKET_NAME: asere-food-dev
+        MINIO_ENDPOINT: $MINIO_ENDPOINT
+        MINIO_PORT: $MINIO_PORT
+        MINIO_ACCESS_KEY: $MINIO_ACCESS_KEY
+        MINIO_SECRET_KEY: $MINIO_SECRET_KEY
+        MINIO_USE_SSL: $MINIO_USE_SSL
+        MINIO_BUCKET_NAME: $MINIO_BUCKET_NAME
 
     networks:
       - asere-food
