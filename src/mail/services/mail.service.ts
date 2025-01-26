@@ -47,7 +47,7 @@ export default class MailService {
       supportPhone: this.SUPPORT_PHONE,
       supportEmail: this.SUPPORT_EMAIL,
       uiUrl: this.configService.get('UI_URL'),
-      confirmAccountUrl: `${this.configService.get('EMAIL_CONFIRMATION_URL')}?token=${confirmAccountToken}`,
+      confirmAccountUrl: `${this.configService.get('EMAIL_CONFIRMATION_URL')}/${confirmAccountToken}`,
     }).getEmail();
     await this.sendMail(email, this.CONFIRM_ACCOUNT_SUBJECT, message);
   }
