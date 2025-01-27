@@ -47,7 +47,7 @@ export default class V1ContactInfosController {
   constructor(private readonly contactInfosService: ContactInfosService) {}
 
   @Get('')
-  @Roles(Role.Customer)
+  @Roles(Role.Customer, Role.Admin)
   @ApiOkResponse({
     description: 'Ok',
     type: PaginatedOutDto<ContactInfoWithMunicipalityOutDto>,
@@ -97,7 +97,7 @@ export default class V1ContactInfosController {
   }
 
   @Get('/all')
-  @Roles(Role.Customer)
+  @Roles(Role.Customer, Role.Admin)
   @ApiOkResponse({ description: 'Ok', type: [ContactInfoOutDto] })
   @ApiOperation({
     summary: 'Get all Contact Infos of current customer. Only for Customers',
@@ -117,7 +117,7 @@ export default class V1ContactInfosController {
   }
 
   @Get('/:id')
-  @Roles(Role.Customer)
+  @Roles(Role.Customer, Role.Admin)
   @ApiOkResponse({ description: 'Ok', type: ContactInfoOutDto })
   @ApiNotFoundResponse({ description: 'Not Found' })
   @ApiBadRequestResponse({ description: 'Bad Request' })
@@ -127,7 +127,7 @@ export default class V1ContactInfosController {
   }
 
   @Post('')
-  @Roles(Role.Customer)
+  @Roles(Role.Customer, Role.Admin)
   @ApiCreatedResponse({ description: 'Ok', type: ContactInfoOutDto })
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiConflictResponse({
@@ -142,7 +142,7 @@ export default class V1ContactInfosController {
   }
 
   @Patch('/:id')
-  @Roles(Role.Customer)
+  @Roles(Role.Customer, Role.Admin)
   @ApiOkResponse({ description: 'Ok' })
   @ApiNotFoundResponse({ description: 'Not Found' })
   @ApiBadRequestResponse({ description: 'Bad Request' })
@@ -161,7 +161,7 @@ export default class V1ContactInfosController {
   }
 
   @Delete('/:id')
-  @Roles(Role.Customer)
+  @Roles(Role.Customer, Role.Admin)
   @ApiOkResponse({ description: 'Ok' })
   @ApiConflictResponse({
     description:

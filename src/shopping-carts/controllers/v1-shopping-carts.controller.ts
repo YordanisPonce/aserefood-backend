@@ -48,7 +48,7 @@ export default class V1ShoppingCartsController {
   ) {}
 
   @Get('')
-  @Roles(Role.Customer)
+  @Roles(Role.Customer, Role.Admin)
   @ApiOkResponse({ description: 'Ok', type: ShoppingCartOutDto })
   @ApiNotFoundResponse({ description: 'Not Found User' })
   @ApiConflictResponse({ description: 'Municipality not selected' })
@@ -63,7 +63,7 @@ export default class V1ShoppingCartsController {
   }
 
   @Get('/municipality')
-  @Roles(Role.Customer)
+  @Roles(Role.Customer, Role.Admin)
   @ApiOkResponse({ description: 'Ok', type: MunicipalityPOutDto })
   @ApiNotFoundResponse({ description: 'Not Found User' })
   @ApiConflictResponse({ description: 'Municipality not selected' })
@@ -78,7 +78,7 @@ export default class V1ShoppingCartsController {
   }
 
   @Post('')
-  @Roles(Role.Customer)
+  @Roles(Role.Customer, Role.Admin)
   @ApiCreatedResponse({ description: 'Ok', type: ItemIdOutDto })
   @ApiNotFoundResponse({ description: 'Not Found User' })
   @ApiConflictResponse({ description: 'Municipality not selected' })
@@ -104,7 +104,7 @@ export default class V1ShoppingCartsController {
   }
 
   @Put('/municipality/:municipalityId')
-  @Roles(Role.Customer)
+  @Roles(Role.Customer, Role.Admin)
   @ApiOkResponse({
     description: 'Ok',
   })
@@ -124,7 +124,7 @@ export default class V1ShoppingCartsController {
   }
 
   @Delete('/all')
-  @Roles(Role.Customer)
+  @Roles(Role.Customer, Role.Admin)
   @ApiOkResponse({
     description: 'Ok',
   })
@@ -140,7 +140,7 @@ export default class V1ShoppingCartsController {
   }
 
   @Delete('/:id')
-  @Roles(Role.Customer)
+  @Roles(Role.Customer, Role.Admin)
   @ApiOkResponse({
     description: 'Ok',
   })
