@@ -60,7 +60,7 @@ export default class V1OrdersController {
   }
 
   @Get('/me')
-  @Roles(Role.Customer)
+  @Roles(Role.Customer, Role.Admin)
   @ApiOkResponse({ description: 'Ok', type: PaginatedOutDto<OrderMeOutDto> })
   @ApiOperation({ summary: 'Get all Orders of current Customer with Filtering, Ordering and Pagination' })
   async getAllCustomer(@Query() dto: OrderSearchInDto, @Request() req) {
@@ -69,7 +69,7 @@ export default class V1OrdersController {
   }
 
   @Get('/me/:id')
-  @Roles(Role.Customer)
+  @Roles(Role.Customer, Role.Admin)
   @ApiOkResponse({ description: 'Ok', type: OrderMeOutDto })
   @ApiNotFoundResponse({ description: 'Not Found' })
   @ApiOperation({ summary: 'Get an specific Order of current Customer' })
@@ -79,7 +79,7 @@ export default class V1OrdersController {
   }
 
   @Put('/me/:id/zelle')
-  @Roles(Role.Customer)
+  @Roles(Role.Customer, Role.Admin)
   @ApiOkResponse({ description: 'Ok'})
   @ApiNotFoundResponse({ description: 'Not Found' })
   @ApiOperation({ summary: 'Current Customer already paid via Zelle' })
@@ -89,7 +89,7 @@ export default class V1OrdersController {
   }
 
   @Get('/me/:id/zelle')
-  @Roles(Role.Customer)
+  @Roles(Role.Customer, Role.Admin)
   @ApiOkResponse({ description: 'Ok', type: ZellePaymentOutDto })
   @ApiNotFoundResponse({ description: 'Not Found' })
   @ApiOperation({ summary: 'Get an specific Order Zelle Payment data of current Customer' })
@@ -117,7 +117,7 @@ export default class V1OrdersController {
   }
 
   @Post()
-  @Roles(Role.Customer)
+  @Roles(Role.Customer, Role.Admin)
   @ApiCreatedResponse({ description: 'Ok', type: OrderOutDto })
   @ApiNotFoundResponse({ description: 'Not Found User' })
   @ApiConflictResponse({ description: 'Municipality not selected' })

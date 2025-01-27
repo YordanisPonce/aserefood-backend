@@ -36,7 +36,7 @@ export class V1AvailabilityController {
   constructor(private readonly availabilityService: AvailabilityService) {}
 
   @Get('/products')
-  @Roles(Role.Customer)
+  @Roles(Role.Customer, Role.Admin)
   @ApiOkResponse({
     description: 'Ok',
     type: PaginatedOutDto<ProductAvailableByMunicipalityOutDto>,
@@ -65,7 +65,7 @@ export class V1AvailabilityController {
   }
 
   @Get('/product/:id')
-  @Roles(Role.Customer)
+  @Roles(Role.Customer, Role.Admin)
   @ApiOkResponse({
     description: 'Ok',
     type: ProductAvailableByMunicipalityOutDto,
@@ -132,7 +132,7 @@ export class V1AvailabilityController {
   }
 
   @Get('/product-combos')
-  @Roles(Role.Customer)
+  @Roles(Role.Customer, Role.Admin)
   @ApiOkResponse({
     description: 'Ok',
     type: PaginatedOutDto<ProductComboAvailableByMunicipalityOutDto>,
@@ -161,7 +161,7 @@ export class V1AvailabilityController {
   }
 
   @Get('/product-combo/:id')
-  @Roles(Role.Customer)
+  @Roles(Role.Customer, Role.Admin)
   @ApiOkResponse({
     description: 'Ok',
     type: ProductComboAvailableByMunicipalityOutDto,
