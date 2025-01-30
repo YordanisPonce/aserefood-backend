@@ -25,4 +25,7 @@ export default class ContactInfoWithMunicipalityOutDto {
 
   @ApiProperty()
   userId: number;
+
+  @ApiProperty()
+  isActive: boolean;
 }

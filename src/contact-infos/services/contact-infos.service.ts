@@ -263,6 +263,7 @@ export default class ContactInfosService {
     dto.observations = contactInfo.observations;
     dto.phoneNumber = contactInfo.phoneNumber;
     dto.userId = contactInfo.userId;
+    dto.isActive = contactInfo.isActive;
 
     return dto;
   }
