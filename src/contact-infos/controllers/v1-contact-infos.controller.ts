@@ -60,7 +60,7 @@ export default class V1ContactInfosController {
     @Query() dto: ContactInfoSearchInDto,
     @Request() req,
   ): Promise<PaginatedOutDto<ContactInfoWithMunicipalityOutDto>> {
-    return this.contactInfosService.search(dto, req.user.userId);
+    return this.contactInfosService.search(dto, req.user.userId, true);
   }
 
   @Get('/search/backoffice/:userId')
@@ -77,7 +77,7 @@ export default class V1ContactInfosController {
     @Query() dto: ContactInfoSearchInDto,
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<PaginatedOutDto<ContactInfoWithMunicipalityOutDto>> {
-    return this.contactInfosService.search(dto, userId);
+    return this.contactInfosService.search(dto, userId, false);
   }
 
   @Get('/backoffice/:id')
@@ -93,7 +93,7 @@ export default class V1ContactInfosController {
   async getBackOfficeById(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ContactInfoWithMunicipalityOutDto> {
-    return this.contactInfosService.getById(id);
+    return this.contactInfosService.getById(id, false);
   }
 
   @Get('/all')
@@ -103,7 +103,7 @@ export default class V1ContactInfosController {
     summary: 'Get all Contact Infos of current customer. Only for Customers',
   })
   async getAll(@Request() req) {
-    return this.contactInfosService.getAll(req.user.userId);
+    return this.contactInfosService.getAll(req.user.userId, true);
   }
 
   @Get('/all/backoffice/:userId')
@@ -113,7 +113,7 @@ export default class V1ContactInfosController {
     summary: 'Get all Contact Infos of given customer. Only for Admins',
   })
   async getAllBackoffice(@Param('userId', ParseIntPipe) userId: number) {
-    return this.contactInfosService.getAll(userId);
+    return this.contactInfosService.getAll(userId, false);
   }
 
   @Get('/:id')
@@ -123,7 +123,7 @@ export default class V1ContactInfosController {
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiOperation({ summary: 'Get a Contact Info by its id. Only for Customers' })
   async getById(@Param('id', ParseIntPipe) id: number) {
-    return this.contactInfosService.getById(id);
+    return this.contactInfosService.getById(id, true);
   }
 
   @Post('')
