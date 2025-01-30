@@ -113,7 +113,7 @@ export default class V1ZonesController {
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  @ApiOperation({ summary: 'Delete PERMANENTLY a Zone by its id.' })
+  @ApiOperation({ summary: 'Delete PERMANENTLY a Zone by its id. For better integrity change isActive in PATCH' })
   async delete(@Param('id', ParseIntPipe) id: number) {
     return this.zonesService.delete(id);
   }

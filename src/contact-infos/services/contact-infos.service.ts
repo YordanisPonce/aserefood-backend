@@ -14,6 +14,7 @@ import createPatchFields from '../../utils/dto/patch-fields.util';
 import ContactInfoInDto from '../dto/in/contact-info.in.dto';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
 import ContactInfoSearchInDto from '../dto/in/contact-info.search.in.dto';
+import ContactInfoBackofficeSearchInDto from '../dto/in/contact-info-backoffice.search.in.dto';
 
 @Injectable()
 export default class ContactInfosService {
@@ -22,8 +23,9 @@ export default class ContactInfosService {
   constructor(private readonly pgService: PgService) {}
 
   async search(
-    dto: ContactInfoSearchInDto,
+    dto: ContactInfoBackofficeSearchInDto,
     userId: number,
+    isCustomer: boolean
   ): Promise<PaginatedOutDto<ContactInfoWithMunicipalityOutDto>> {
     const queryBuilder = this.pgService.contactInfos
       .createQueryBuilder('contactInfo')
@@ -47,6 +49,14 @@ export default class ContactInfosService {
     if (dto.provinceId) {
       queryBuilder.andWhere('province.id = :provinceId', {
         provinceId: dto.provinceId,
+      });
+    }
+
+    if(isCustomer){
+      queryBuilder.andWhere('contactInfo.isActive = true')
+    } else if(dto.isActive !== undefined && dto.isActive !== null){
+      queryBuilder.andWhere('contactInfo.isActive = :isActive', {
+        isActive: dto.isActive,
       });
     }
 
@@ -78,24 +88,34 @@ export default class ContactInfosService {
     };
   }
 
-  async getAll(userId: number): Promise<ContactInfoWithMunicipalityOutDto[]> {
-    const contactInfos = await this.pgService.contactInfos
+  async getAll(userId: number, isCustomer: boolean): Promise<ContactInfoWithMunicipalityOutDto[]> {
+    const contactInfosQuery = this.pgService.contactInfos
       .createQueryBuilder('contactInfo')
       .leftJoinAndSelect('contactInfo.municipality', 'municipality')
       .leftJoinAndSelect('municipality.province', 'province')
-      .where('contactInfo.userId = :userId', { userId: userId })
-      .getMany();
+      .where('contactInfo.userId = :userId', { userId: userId });
+
+    if(isCustomer){
+      contactInfosQuery.andWhere('contactInfo.isActive = true')
+    }
+
+    const contactInfos = await contactInfosQuery.getMany();
 
     return contactInfos.map((ci) => this.toOutWithMunicipalitiesDto(ci));
   }
 
-  async getById(id: number): Promise<ContactInfoWithMunicipalityOutDto> {
-    const contactInfo = await this.pgService.contactInfos
+  async getById(id: number, isCustomer: boolean): Promise<ContactInfoWithMunicipalityOutDto> {
+    const contactInfoQuery = this.pgService.contactInfos
       .createQueryBuilder('contactInfo')
       .leftJoinAndSelect('contactInfo.municipality', 'municipality')
       .leftJoinAndSelect('municipality.province', 'province')
-      .where('contactInfo.id = :id', { id })
-      .getOne();
+      .where('contactInfo.id = :id', { id });
+
+    if(isCustomer){
+      contactInfoQuery.andWhere('contactInfo.isActive = true')
+    }
+
+    const contactInfo = await contactInfoQuery.getOne();
 
     if (!contactInfo) {
       throw new NotFoundException(`Contact Info with ID ${id} not found`);
@@ -110,7 +130,7 @@ export default class ContactInfosService {
   ): Promise<ContactInfoOutDto> {
     const existingContactInfoByName = await this.pgService.contactInfos.findOne(
       {
-        where: { name: dto.name },
+        where: { name: dto.name, userId: userId },
       },
     );
 
@@ -155,7 +175,7 @@ export default class ContactInfosService {
   async patch(id: number, dto: ContactInfoUpdateInDto, userId: number): Promise<void> {
     if (dto.name) {
       const contactInfo = await this.pgService.contactInfos.findOne({
-        where: { name: dto.name },
+        where: { name: dto.name, userId: userId },
       });
 
       if (contactInfo && contactInfo.id !== id) {

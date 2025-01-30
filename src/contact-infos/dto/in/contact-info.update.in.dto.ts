@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsBoolean,
   IsInt,
   IsNotEmpty,
   IsOptional,
@@ -7,6 +8,7 @@ import {
   MaxLength,
   Min,
 } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
 
 export default class ContactInfoUpdateInDto {
   @ApiProperty({ required: false })
@@ -48,4 +50,11 @@ export default class ContactInfoUpdateInDto {
   @IsInt()
   @Min(0)
   municipalityId?: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNotEmpty()
+  @IsBoolean()
+  @Type(() => Boolean)
+  isActive?: boolean;
 }

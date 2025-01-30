@@ -45,4 +45,7 @@ export default class ContactInfo {
 
   @OneToMany(() => Order, (order) => order.contactInfo)
   orders: Order[];
+
+  @Column('boolean', { default: true})
+  isActive: boolean;
 }
