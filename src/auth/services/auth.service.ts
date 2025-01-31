@@ -50,7 +50,7 @@ export default class AuthService {
     const accessToken = this.jwtService.sign(payload);
     const refreshToken = this.jwtService.sign(
       { sub: user.id },
-      { expiresIn: '30d' },
+      { expiresIn: '400y' },
     );
 
     const rt = await this.pgService.refreshTokens.findOne({
@@ -108,7 +108,7 @@ export default class AuthService {
       const accessToken = this.jwtService.sign(newPayload);
       const refreshToken = this.jwtService.sign(
         { sub: user.id },
-        { expiresIn: '30d' },
+        { expiresIn: '400y' },
       );
 
       if (!rt) {
