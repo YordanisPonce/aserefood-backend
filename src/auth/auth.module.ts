@@ -21,7 +21,7 @@ import { MinioModule } from '../minio/minio.module';
       global: true,
       useFactory: (config: ConfigService) => ({
         secret: config.get<string>('SECRET_KEY'),
-        signOptions: { expiresIn: '2h' },
+        signOptions: { expiresIn: '400y' },
       }),
       inject: [ConfigService],
     }),
