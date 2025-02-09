@@ -130,7 +130,7 @@ export default class ContactInfosService {
   ): Promise<ContactInfoOutDto> {
     const existingContactInfoByName = await this.pgService.contactInfos.findOne(
       {
-        where: { name: dto.name, userId: userId },
+        where: { name: dto.name, userId: userId, isActive: true },
       },
     );
 
@@ -175,7 +175,7 @@ export default class ContactInfosService {
   async patch(id: number, dto: ContactInfoUpdateInDto, userId: number): Promise<void> {
     if (dto.name) {
       const contactInfo = await this.pgService.contactInfos.findOne({
-        where: { name: dto.name, userId: userId },
+        where: { name: dto.name, userId: userId, isActive: true },
       });
 
       if (contactInfo && contactInfo.id !== id) {
