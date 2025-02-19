@@ -39,4 +39,8 @@ export default class OnlinePaymentOutDto {
 
   @ApiProperty()
   postalCode: string;
+
+  @ApiProperty({nullable: true})
+  screenshot?: string;
+  
 }

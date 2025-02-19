@@ -6,9 +6,10 @@ import V1OnlinePaymentsController from './controllers/v1-online-payments.control
 import V1TransferPaymentsController from './controllers/v1-transfer-payments.controller';
 import OnlinePaymentsService from './services/online-payments.service';
 import TransferPaymentsService from './services/transfer-payments.service';
+import { MinioModule } from '../minio/minio.module';
 
 @Module({
-  imports: [AuthModule, DatabaseModule, MailModule],
+  imports: [AuthModule, DatabaseModule, MailModule, MinioModule],
   controllers: [V1OnlinePaymentsController, V1TransferPaymentsController],
   providers: [OnlinePaymentsService, TransferPaymentsService],
 })

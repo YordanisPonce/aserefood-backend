@@ -26,7 +26,8 @@ import generateUniqueCode from '../../utils/generators/unique-code.generator';
 import ZellePaymentOutDto from '../dto/out/zelle-payment.out.dto';
 import { IsNull, Not } from 'typeorm';
 import MinioService from '../../minio/services/minio.service';
- 
+import ZelleScreenshotInDto from '../dto/in/zelle-screenshot.in.dto';
+
 @Injectable()
 export default class OrdersService {
   private readonly logger = new Logger(OrdersService.name);
@@ -165,7 +166,7 @@ export default class OrdersService {
       .take(dto.pageSize)
       .getManyAndCount();
 
-    const data: OrderMeOutDto[] = []
+    const data: OrderMeOutDto[] = [];
     for (const item of result) {
       data.push(await this.toOutMeDto(item));
     }
@@ -217,7 +218,11 @@ export default class OrdersService {
     return this.toOutDto(order);
   }
 
-  async updateOrderZelle(id: number, userId: number) {
+  async updateOrderZelle(
+    id: number,
+    userId: number,
+    dto: ZelleScreenshotInDto,
+  ) {
     const order = await this.pgService.orders.findOne({
       where: { id, userId, onlinePayment: Not(IsNull()) },
       relations: ['onlinePayment'],
@@ -229,9 +234,26 @@ export default class OrdersService {
       );
     }
 
-    if (order.status == OrderStatus.PAYMENT_PENDING){
+    if (order.status == OrderStatus.PAYMENT_PENDING) {
       order.status = OrderStatus.PROCESSING_PAYMENT;
       await this.pgService.orders.save(order);
+
+      if (dto.screenshot) {
+        const onlinePayment = await this.pgService.onlinePayments.findOne({
+          where: { orderId: order.id },
+        });
+        const fileExtension = dto.screenshot.originalname.split('.').pop();
+        const mimeType = dto.screenshot.mimetype;
+        onlinePayment.screenshot = await this.minioService.uploadFile(
+          order.onlinePayment.screenshot
+            ? order.onlinePayment.screenshot
+            : undefined,
+          dto.screenshot.buffer,
+          order.onlinePayment.screenshot ? undefined : fileExtension,
+          mimeType,
+        );
+        await this.pgService.onlinePayments.save(onlinePayment);
+      }
     }
   }
 
@@ -490,16 +512,19 @@ export default class OrdersService {
       order.onlinePayment !== null
         ? PaymentSelection.Online
         : PaymentSelection.Transfer;
-    dto.paymentId = order.onlinePayment !== null
-      ? order.onlinePaymentId
-      : order.transferPaymentId;
+    dto.paymentId =
+      order.onlinePayment !== null
+        ? order.onlinePaymentId
+        : order.transferPaymentId;
     dto.deliveryMethodId = order.deliveryMethodId;
 
-    const data: OrderItemMeOutDto[] = []
-    for (const item of (order.orderItems ? order.orderItems : [])) {
+    const data: OrderItemMeOutDto[] = [];
+    for (const item of order.orderItems ? order.orderItems : []) {
       data.push({
         id: item.id,
-        product: item.productId ? await this.productToOutDto(item.product) : null,
+        product: item.productId
+          ? await this.productToOutDto(item.product)
+          : null,
         productCombo: item.productComboId
           ? await this.productComboToOutDto(item.productCombo)
           : null,
@@ -527,9 +552,10 @@ export default class OrdersService {
       order.onlinePayment !== null
         ? PaymentSelection.Online
         : PaymentSelection.Transfer;
-    dto.paymentId = order.onlinePayment !== null
-      ? order.onlinePaymentId
-      : order.transferPaymentId;
+    dto.paymentId =
+      order.onlinePayment !== null
+        ? order.onlinePaymentId
+        : order.transferPaymentId;
     dto.orderItems =
       order.orderItems?.map((x) => ({
         id: x.id,
@@ -550,21 +576,28 @@ export default class OrdersService {
     dto.description = product.description;
     dto.shortDescription = product.shortDescription;
     dto.isService = product.isService;
-    dto.categories = product.categories?.map(x => ({
-      id: x.id,
-      name: x.name,
-    })) ?? [];
-    dto.image = product.image ? await this.minioService.getPresignedUrl(product.image) : null;
+    dto.categories =
+      product.categories?.map((x) => ({
+        id: x.id,
+        name: x.name,
+      })) ?? [];
+    dto.image = product.image
+      ? await this.minioService.getPresignedUrl(product.image)
+      : null;
 
     return dto;
   }
 
-  private async productComboToOutDto(productCombo: ProductCombo): Promise<ProductComboOutDto> {
+  private async productComboToOutDto(
+    productCombo: ProductCombo,
+  ): Promise<ProductComboOutDto> {
     const dto = new ProductComboOutDto();
     dto.id = productCombo.id;
     dto.description = productCombo.description;
     dto.name = productCombo.name;
-    dto.image = productCombo.image ? await this.minioService.getPresignedUrl(productCombo.image) : null;
+    dto.image = productCombo.image
+      ? await this.minioService.getPresignedUrl(productCombo.image)
+      : null;
     dto.isActive = productCombo.isActive;
     dto.price = parseFloat(productCombo.price.toString());
     dto.shortDescription = productCombo.shortDescription;
