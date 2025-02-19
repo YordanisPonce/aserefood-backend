@@ -1,8 +1,16 @@
 import {
   Body,
-  Controller, Delete, Get, Param, ParseIntPipe, Patch,
-  Post, Put, Query,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Put,
+  Query,
   Request,
+  UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -10,9 +18,11 @@ import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiConflictResponse,
+  ApiConsumes,
   ApiCreatedResponse,
   ApiForbiddenResponse,
-  ApiNotFoundResponse, ApiOkResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiTags,
   ApiUnauthorizedResponse,
@@ -30,6 +40,10 @@ import OrderSearchInDto from '../dto/in/order.search.in.dto';
 import OrderUpdateInDto from '../dto/in/order.update.in.dto';
 import OrderMeOutDto from '../dto/out/order-me.out.dto';
 import ZellePaymentOutDto from '../dto/out/zelle-payment.out.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ImageFileValidationPipe } from '../../utils/pipes/image-file-validation.pipe';
+import ProductInDto from '../../products/dto/in/product.in.dto';
+import ZelleScreenshotInDto from '../dto/in/zelle-screenshot.in.dto';
 
 @Controller('v1/orders')
 @ApiTags('orders')
@@ -62,10 +76,13 @@ export default class V1OrdersController {
   @Get('/me')
   @Roles(Role.Customer, Role.Admin)
   @ApiOkResponse({ description: 'Ok', type: PaginatedOutDto<OrderMeOutDto> })
-  @ApiOperation({ summary: 'Get all Orders of current Customer with Filtering, Ordering and Pagination' })
+  @ApiOperation({
+    summary:
+      'Get all Orders of current Customer with Filtering, Ordering and Pagination',
+  })
   async getAllCustomer(@Query() dto: OrderSearchInDto, @Request() req) {
     const userId = req.user.userId;
-    return this.ordersService.getByUserId(dto,userId);
+    return this.ordersService.getByUserId(dto, userId);
   }
 
   @Get('/me/:id')
@@ -79,21 +96,34 @@ export default class V1OrdersController {
   }
 
   @Put('/me/:id/zelle')
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('screenshot'))
   @Roles(Role.Customer, Role.Admin)
-  @ApiOkResponse({ description: 'Ok'})
+  @ApiOkResponse({ description: 'Ok' })
   @ApiNotFoundResponse({ description: 'Not Found' })
   @ApiOperation({ summary: 'Current Customer already paid via Zelle' })
-  async putOneCustomerZelle(@Param('id', ParseIntPipe) id: number, @Request() req) {
+  async putOneCustomerZelle(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req,
+    @UploadedFile(new ImageFileValidationPipe()) screenshot: Express.Multer.File,
+    @Body() dto: ZelleScreenshotInDto,
+  ) {
     const userId = req.user.userId;
-    return this.ordersService.updateOrderZelle(id, userId);
+    dto.screenshot = screenshot;
+    return this.ordersService.updateOrderZelle(id, userId, dto);
   }
 
   @Get('/me/:id/zelle')
   @Roles(Role.Customer, Role.Admin)
   @ApiOkResponse({ description: 'Ok', type: ZellePaymentOutDto })
   @ApiNotFoundResponse({ description: 'Not Found' })
-  @ApiOperation({ summary: 'Get an specific Order Zelle Payment data of current Customer' })
-  async getOneCustomerZelle(@Param('id', ParseIntPipe) id: number, @Request() req) {
+  @ApiOperation({
+    summary: 'Get an specific Order Zelle Payment data of current Customer',
+  })
+  async getOneCustomerZelle(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req,
+  ) {
     const userId = req.user.userId;
     return this.ordersService.getZellePayment(id, userId);
   }

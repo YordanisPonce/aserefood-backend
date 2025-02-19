@@ -3,6 +3,7 @@ import PgService from '../../database/services/pg.service';
 import MailService from '../../mail/services/mail.service';
 import OnlinePayment from '../../database/entities/online-payment.entity';
 import OnlinePaymentOutDto from '../dto/out/online-payment.out.dto';
+import MinioService from '../../minio/services/minio.service';
 
 @Injectable()
 export default class OnlinePaymentsService {
@@ -10,7 +11,7 @@ export default class OnlinePaymentsService {
 
   constructor(
     private readonly pgService: PgService,
-    private readonly mailService: MailService,
+    private readonly minioService: MinioService,
   ) {}
 
   async getPaymentByOrderId(orderId: number): Promise<OnlinePaymentOutDto> {
@@ -49,6 +50,7 @@ export default class OnlinePaymentsService {
     dto.phoneNumber = payment.phoneNumber;
     dto.postalCode = payment.postalCode;
     dto.state = payment.state;
+    dto.screenshot =  payment.screenshot ? (await this.minioService.getPresignedUrl(payment.screenshot)) : null;
     return dto;
   }
 }

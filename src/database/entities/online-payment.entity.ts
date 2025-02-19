@@ -49,4 +49,7 @@ export default class OnlinePayment {
 
   @Column({nullable: true})
   paymentCode?: string;
+
+  @Column({nullable: true, default: null})
+  screenshot?: string;
 }
