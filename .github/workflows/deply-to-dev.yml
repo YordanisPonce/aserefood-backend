@@ -53,7 +53,7 @@ jobs:
         
         echo "MINIO_ENDPOINT=${{ vars.MINIO_ENDPOINT }}" >> .env
         echo "MINIO_PORT=${{ vars.MINIO_PORT }}" >> .env
-        echo "MINIO_ACCESS_KEY=${{ vars.MINIO_SECRET_KEY_DEV }}" >> .env
+        echo "MINIO_ACCESS_KEY=${{ vars.MINIO_ACCESS_KEY_DEV }}" >> .env
         echo "MINIO_SECRET_KEY=${{ vars.MINIO_SECRET_KEY_DEV }}" >> .env
         echo "MINIO_USE_SSL=${{ vars.MINIO_USE_SSL }}" >> .env
         echo "MINIO_BUCKET_NAME=${{ vars.MINIO_BUCKET_NAME_DEV }}" >> .env
