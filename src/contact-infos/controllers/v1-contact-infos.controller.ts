@@ -93,7 +93,7 @@ export default class V1ContactInfosController {
   async getBackOfficeById(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ContactInfoWithMunicipalityOutDto> {
-    return this.contactInfosService.getById(id, false);
+    return this.contactInfosService.getById(id);
   }
 
   @Get('/all')
@@ -123,7 +123,7 @@ export default class V1ContactInfosController {
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiOperation({ summary: 'Get a Contact Info by its id. Only for Customers' })
   async getById(@Param('id', ParseIntPipe) id: number) {
-    return this.contactInfosService.getById(id, true);
+    return this.contactInfosService.getById(id);
   }
 
   @Post('')

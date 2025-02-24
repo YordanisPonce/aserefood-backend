@@ -104,16 +104,12 @@ export default class ContactInfosService {
     return contactInfos.map((ci) => this.toOutWithMunicipalitiesDto(ci));
   }
 
-  async getById(id: number, isCustomer: boolean): Promise<ContactInfoWithMunicipalityOutDto> {
+  async getById(id: number): Promise<ContactInfoWithMunicipalityOutDto> {
     const contactInfoQuery = this.pgService.contactInfos
       .createQueryBuilder('contactInfo')
       .leftJoinAndSelect('contactInfo.municipality', 'municipality')
       .leftJoinAndSelect('municipality.province', 'province')
       .where('contactInfo.id = :id', { id });
-
-    if(isCustomer){
-      contactInfoQuery.andWhere('contactInfo.isActive = true')
-    }
 
     const contactInfo = await contactInfoQuery.getOne();
 
