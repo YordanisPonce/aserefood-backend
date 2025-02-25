@@ -1,4 +1,4 @@
-import { Controller, Get, Param, ParseIntPipe, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Request, UseGuards, UseInterceptors } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -28,22 +28,22 @@ export default class V1OnlinePaymentsController {
   ) {}
 
   @Get('/order/:orderId')
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.Customer)
   @ApiOkResponse({ description: 'Ok', type: OnlinePaymentOutDto })
   @ApiNotFoundResponse({ description: 'Not Found' })
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiOperation({ summary: 'Get a Online Payment by the orders id' })
-  async getByOrderId(@Param('orderId', ParseIntPipe) orderId: number) {
-    return this.onlineService.getPaymentByOrderId(orderId);
+  async getByOrderId(@Param('orderId', ParseIntPipe) orderId: number, @Request() req) {
+    return this.onlineService.getPaymentByOrderId(orderId, req.user.userId);
   }
 
   @Get('/:id')
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.Customer)
   @ApiOkResponse({ description: 'Ok', type: OnlinePaymentOutDto })
   @ApiNotFoundResponse({ description: 'Not Found' })
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiOperation({ summary: 'Get a Online Payment by its id' })
-  async getById(@Param('id', ParseIntPipe) id: number) {
-    return this.onlineService.getPaymentById(id);
+  async getById(@Param('id', ParseIntPipe) id: number, @Request() req) {
+    return this.onlineService.getPaymentById(id, req.user.userId);
   }
 }
