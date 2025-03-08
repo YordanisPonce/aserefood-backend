@@ -29,6 +29,7 @@ import { AvailabilityModule } from './availability/availability.module';
 import { MinioModule } from './minio/minio.module';
 import * as multer from 'multer';
 import { MulterModule } from '@nestjs/platform-express';
+import ReportsModule from './reports/reports.module';
 
 @Module({
   imports: [
@@ -72,6 +73,7 @@ import { MulterModule } from '@nestjs/platform-express';
     PaymentsModule,
     ZelleConfModule,
     MinioModule,
+    ReportsModule
   ],
   controllers: [],
   providers: [],
