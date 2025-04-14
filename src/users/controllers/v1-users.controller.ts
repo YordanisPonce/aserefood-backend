@@ -143,7 +143,7 @@ export default class V1UsersController {
   }
 
   @Patch('/me')
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.Customer)
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('image'))
   @ApiOkResponse({ description: 'Ok' })
