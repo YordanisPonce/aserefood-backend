@@ -14,6 +14,7 @@ import { MoreThan } from 'typeorm';
 import Product from '../../database/entities/product.entity';
 import ProductCombo from '../../database/entities/product-combo.entity';
 import MinioService from '../../minio/services/minio.service';
+import { ProductAvailableByZoneOutDto } from '../dto/out/product-available-by-zone.out.dto';
 
 @Injectable()
 export default class AvailabilityService {
@@ -98,6 +99,30 @@ export default class AvailabilityService {
     municipalityId: number,
   ): Promise<ProductComboAvailableByMunicipalityOutDto> {
     return this.getAvailableProductCombo(id, municipalityId);
+  }
+
+  public async getAvailableProductsInZone(
+    zoneId: number,
+  ): Promise<ProductAvailableByZoneOutDto[]> {
+    const queryBuilder = this.pgService.products
+      .createQueryBuilder('product')
+      .leftJoinAndSelect('product.inventoryEntries', 'inventoryEntry')
+      .leftJoinAndSelect('inventoryEntry.zone', 'zone')
+      .leftJoinAndSelect('product.categories', 'category')
+      .where('zone.id = :zoneId', {
+        zoneId: zoneId,
+      });
+
+    queryBuilder.orderBy(`product.name`, 'ASC');
+
+    const data = await queryBuilder.getMany();
+
+    let products: ProductAvailableByZoneOutDto[] = [];
+    for (const x of data) {
+      products.push(await this.mapToProductDtoZone(x));
+    }
+
+    return products;
   }
 
   private async getAvailableProductsInMunicipality(
@@ -405,6 +430,37 @@ export default class AvailabilityService {
       (a, b) => a + parseFloat(b.price.toString()),
       0,
     );
+    return dto;
+  }
+
+  private async mapToProductDtoZone(
+    product: Product,
+  ): Promise<ProductAvailableByZoneOutDto> {
+    const dto = new ProductAvailableByZoneOutDto();
+    dto.product = {
+      id: product.id,
+      name: product.name,
+      image: product.image
+        ? await this.minioService.getPresignedUrl(product.image)
+        : null,
+      isService: product.isService,
+      categories:
+        product.categories?.map((x) => ({
+          id: x.id,
+          name: x.name,
+        })) ?? [],
+      shortDescription: product.shortDescription,
+      description: product.description,
+    };
+    dto.inventoryAmount = product.inventoryEntries.reduce(
+      (sum, entry) => sum + entry.quantity,
+      0,
+    );
+    dto.price = product.inventoryEntries.reduce(
+      (a, b) => a + parseFloat(b.price.toString()),
+      0,
+    );
+    dto.isAvailable = dto.inventoryAmount !== 0;
     return dto;
   }
 

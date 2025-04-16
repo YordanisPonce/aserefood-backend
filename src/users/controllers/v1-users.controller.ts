@@ -68,6 +68,38 @@ export default class V1UsersController {
     return this.usersService.getAll();
   }
 
+  @Post('/me')
+  @Roles(Role.Admin, Role.Customer)
+  @ApiCreatedResponse({ description: 'Current user', type: UserOutDto })
+  @ApiNotFoundResponse({ description: 'Not Found' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiOperation({ summary: 'Get the current user by username from JWT' })
+  async getMe(@Request() req): Promise<UserOutDto> {
+    const username = req.user.username;
+    return this.usersService.getByUsername(username);
+  }
+
+  @Patch('/me')
+  @Roles(Role.Admin, Role.Customer)
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiOkResponse({ description: 'Ok' })
+  @ApiNotFoundResponse({ description: 'Not Found' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiConflictResponse({
+    description: 'Conflict (Other user with Username or Email)',
+  })
+  @ApiOperation({ summary: 'Update current User' })
+  async putMe(
+    @Request() req,
+    @Body() dto: UserMeUpdateInDto,
+    @UploadedFile(new ImageFileValidationPipe()) image: Express.Multer.File
+  ) {
+    const userId = req.user.userId;
+    dto.image = image;
+    return this.usersService.patch(userId, dto);
+  }
+
   @Get('/:id')
   @Roles(Role.Admin)
   @ApiOkResponse({ description: 'Ok', type: UserOutDto })
@@ -129,37 +161,5 @@ export default class V1UsersController {
   async delete(@Param('id', ParseIntPipe) id: number, @Request() req) {
     const username = req.user.username;
     return this.usersService.delete(id, username);
-  }
-
-  @Post('/me')
-  @Roles(Role.Admin, Role.Customer)
-  @ApiCreatedResponse({ description: 'Current user', type: UserOutDto })
-  @ApiNotFoundResponse({ description: 'Not Found' })
-  @ApiBadRequestResponse({ description: 'Bad Request' })
-  @ApiOperation({ summary: 'Get the current user by username from JWT' })
-  async getMe(@Request() req): Promise<UserOutDto> {
-    const username = req.user.username;
-    return this.usersService.getByUsername(username);
-  }
-
-  @Patch('/me')
-  @Roles(Role.Admin, Role.Customer)
-  @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FileInterceptor('image'))
-  @ApiOkResponse({ description: 'Ok' })
-  @ApiNotFoundResponse({ description: 'Not Found' })
-  @ApiBadRequestResponse({ description: 'Bad Request' })
-  @ApiConflictResponse({
-    description: 'Conflict (Other user with Username or Email)',
-  })
-  @ApiOperation({ summary: 'Update current User' })
-  async putMe(
-    @Request() req,
-    @Body() dto: UserMeUpdateInDto,
-    @UploadedFile(new ImageFileValidationPipe()) image: Express.Multer.File
-  ) {
-    const userId = req.user.userId;
-    dto.image = image;
-    return this.usersService.patch(userId, dto);
   }
 }
