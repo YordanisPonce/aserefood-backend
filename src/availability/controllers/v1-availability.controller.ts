@@ -29,6 +29,7 @@ import { ProductAvailableByMunicipalityOutDto } from '../dto/out/product-availab
 import ProductAvailabilitySearchInDto from '../dto/in/product-availability.search.in.dto';
 import { ProductComboAvailableByMunicipalityOutDto } from '../dto/out/product-combo-available-by-municipality.out.dto';
 import ProductComboAvailabilitySearchInDto from '../dto/in/product-combo-availability.search.in.dto';
+import { ProductAvailableByZoneOutDto } from '../dto/out/product-available-by-zone.out.dto';
 
 @Controller('v1/availability')
 @ApiTags('availability')
@@ -61,6 +62,31 @@ export class V1AvailabilityController {
     return this.availabilityService.getAvailableProductsByMunicipality(
       userId,
       dto,
+    );
+  }
+
+  @Get('/products/zone/:zoneId')
+  @Roles(Role.Admin)
+  @UseInterceptors(CacheInterceptor)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
+  @ApiOkResponse({
+    description: 'Ok',
+    type: [ProductAvailableByZoneOutDto],
+  })
+  @ApiNotFoundResponse({ description: 'Not Found Zone' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiOperation({
+    summary:
+      'Get availability of products by zone. Only for Admin',
+  })
+  async getAvailableProductsByZone(
+    @Param('zoneId', ParseIntPipe) zoneId: number,
+  ) {
+    return this.availabilityService.getAvailableProductsInZone(
+      zoneId,
     );
   }
 
