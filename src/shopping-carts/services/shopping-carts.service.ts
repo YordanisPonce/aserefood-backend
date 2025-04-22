@@ -217,11 +217,13 @@ export default class ShoppingCartsService {
                 orderDirection: OrderDirection.ASC,
                 orderBy: 'id',
               },
-              productIds,
+              productComboIds,
               false,
             )
           ).data
         : [];
+
+    console.log(carts)
 
     const products: ShoppingCartProductOutDto[] = aProducts.map((x) => ({
       price: x.price,
@@ -229,6 +231,7 @@ export default class ShoppingCartsService {
       product: x.product,
       id: carts.find(y => y.productId === x.product.id).id,
     }));
+
     const productCombos: ShoppingCartProductComboOutDto[] = aProductCombos.map(
       (x) => ({
         productCombo: x.productCombo,

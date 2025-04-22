@@ -482,9 +482,6 @@ export default class AvailabilityService {
       }
     });
 
-    console.log(productCombo.productComboItems)
-    console.log(products)
-
     dto.productCombo = {
       id: productCombo.id,
       name: productCombo.name,
