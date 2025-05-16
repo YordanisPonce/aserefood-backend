@@ -124,18 +124,6 @@ export default class ContactInfosService {
     userId: number,
     dto: ContactInfoInDto,
   ): Promise<ContactInfoOutDto> {
-    const existingContactInfoByName = await this.pgService.contactInfos.findOne(
-      {
-        where: { name: dto.name, userId: userId, isActive: true },
-      },
-    );
-
-    if (existingContactInfoByName) {
-      throw new ConflictException(
-        `Contact Info with name "${dto.name}" already exists`,
-      );
-    }
-
     const municipality = await this.pgService.municipalities.findOne({
       where: { id: dto.municipalityId },
     });
@@ -169,18 +157,6 @@ export default class ContactInfosService {
   }
 
   async patch(id: number, dto: ContactInfoUpdateInDto, userId: number): Promise<void> {
-    if (dto.name) {
-      const contactInfo = await this.pgService.contactInfos.findOne({
-        where: { name: dto.name, userId: userId, isActive: true },
-      });
-
-      if (contactInfo && contactInfo.id !== id) {
-        throw new ConflictException(
-          `Contact Info with name "${dto.name}" already exists`,
-        );
-      }
-    }
-
     const contactInfo = await this.pgService.contactInfos.findOne({
       where: { id, userId },
     });

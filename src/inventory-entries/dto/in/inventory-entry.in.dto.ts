@@ -9,7 +9,7 @@ export default class InventoryEntryInDto {
 
   @ApiProperty()
   @IsNumber()
-  @Min(0.001)
+  @Min(0)
   price: number;
 
   @ApiProperty()
