@@ -37,7 +37,7 @@ export default class ProductsService {
     // Filtering
     if (dto.search) {
       queryBuilder.where(
-        'product.name ILIKE :search OR product.description ILIKE :search OR product.shortDescription ILIKE :search',
+        'unaccent(product.name) ILIKE unaccent(:search) OR unaccent(product.description) ILIKE unaccent(:search) OR unaccent(product.shortDescription) ILIKE unaccent(:search)',
         {
           search: `%${dto.search}%`,
         },

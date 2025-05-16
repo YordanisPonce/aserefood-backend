@@ -27,7 +27,7 @@ export default class CurrenciesService {
 
     if (dto.search) {
       queryBuilder.where(
-        'currency.name ILIKE :search OR currency.code ILIKE :search',
+        'unaccent(currency.name) ILIKE unaccent(:search) OR unaccent(currency.code) ILIKE unaccent(:search)',
         {
           search: `%${dto.search}%`,
         },

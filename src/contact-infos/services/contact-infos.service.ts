@@ -13,7 +13,6 @@ import ContactInfoUpdateInDto from '../dto/in/contact-info.update.in.dto';
 import createPatchFields from '../../utils/dto/patch-fields.util';
 import ContactInfoInDto from '../dto/in/contact-info.in.dto';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
-import ContactInfoSearchInDto from '../dto/in/contact-info.search.in.dto';
 import ContactInfoBackofficeSearchInDto from '../dto/in/contact-info-backoffice.search.in.dto';
 
 @Injectable()
@@ -39,7 +38,7 @@ export default class ContactInfosService {
     // Filtering
     if (dto.search) {
       queryBuilder.andWhere(
-        'contactInfo.name ILIKE :search OR contactInfo.phoneNumber ILIKE :search OR contactInfo.identificationNumber ILIKE :search  OR contactInfo.address ILIKE :search OR contactInfo.observations ILIKE :search',
+        'unaccent(contactInfo.name) ILIKE unaccent(:search) OR unaccent(contactInfo.phoneNumber) ILIKE unaccent(:search) OR unaccent(contactInfo.identificationNumber) ILIKE unaccent(:search)  OR unaccent(contactInfo.address) ILIKE unaccent(:search) OR unaccent(contactInfo.observations) ILIKE unaccent(:search)',
         {
           search: `%${dto.search}%`,
         },

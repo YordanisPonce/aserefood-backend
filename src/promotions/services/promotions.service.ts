@@ -38,7 +38,7 @@ export default class PromotionsService {
     // Filtering
     if (dto.search) {
       queryBuilder.where(
-        'promotion.name ILIKE :search OR promotion.code ILIKE :search',
+        'unaccent(promotion.name) ILIKE unaccent(:search) OR unaccent(promotion.code) ILIKE unaccent(:search)',
         {
           search: `%${dto.search}%`,
         },
