@@ -117,7 +117,7 @@ export default class AvailabilityService {
 
     const data = await queryBuilder.getMany();
 
-    let products: ProductAvailableByZoneOutDto[] = [];
+    const products: ProductAvailableByZoneOutDto[] = [];
     for (const x of data) {
       products.push(await this.mapToProductDtoZone(x));
     }
@@ -148,7 +148,9 @@ export default class AvailabilityService {
     // Filtering
     if (dto.search) {
       queryBuilder.andWhere(
-        'product.name ILIKE :search OR product.description ILIKE :search OR product.shortDescription ILIKE :search',
+        `unaccent(product.name) ILIKE unaccent(:search) 
+     OR unaccent(product.description) ILIKE unaccent(:search) 
+     OR unaccent(product.shortDescription) ILIKE unaccent(:search)`,
         {
           search: `%${dto.search}%`,
         },
@@ -256,12 +258,15 @@ export default class AvailabilityService {
     // Filtering
     if (dto.search) {
       queryBuilder.where(
-        'productCombo.name ILIKE :search OR productCombo.description ILIKE :search OR productCombo.shortDescription ILIKE :search',
+        `unaccent(productCombo.name) ILIKE unaccent(:search) 
+     OR unaccent(productCombo.description) ILIKE unaccent(:search) 
+     OR unaccent(productCombo.shortDescription) ILIKE unaccent(:search)`,
         {
           search: `%${dto.search}%`,
         },
       );
     }
+
 
     if (dto.zoneId) {
       queryBuilder.andWhere('zone.id = :zoneId', { provinceId: dto.zoneId });
@@ -496,12 +501,13 @@ export default class AvailabilityService {
       zoneName: productCombo.zone.name,
       referencePrice: productCombo.productComboItems.reduce((total, item) => {
         const product = products.find((p) => p.id === item.productId);
-        const inventoryPrice = product?.inventoryEntries?.reduce(
-          (sum, entry) => sum + parseFloat(entry.price.toString()),
-          0
-        ) ?? 0;
+        const inventoryPrice =
+          product?.inventoryEntries?.reduce(
+            (sum, entry) => sum + parseFloat(entry.price.toString()),
+            0,
+          ) ?? 0;
 
-        return total + (inventoryPrice * item.amount);
+        return total + inventoryPrice * item.amount;
       }, 0),
       productComboItems: productCombo.productComboItems.map((y) => ({
         id: y.id,

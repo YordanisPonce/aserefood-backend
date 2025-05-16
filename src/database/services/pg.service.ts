@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import User from '../entities/user.entity';
@@ -25,7 +25,7 @@ import Order from '../entities/order.entity';
 import ZelleConf from '../entities/zelle-conf.entity';
 
 @Injectable()
-export default class PgService {
+export default class PgService implements OnModuleInit {
   constructor(
     @InjectEntityManager() public readonly em: EntityManager,
     @InjectRepository(User) public readonly users: Repository<User>,
@@ -65,4 +65,13 @@ export default class PgService {
     @InjectRepository(Order) public readonly orders: Repository<Order>,
     @InjectRepository(ZelleConf) public readonly zelleConfs: Repository<ZelleConf>,
   ) {}
+
+  async onModuleInit() {
+    try {
+      await this.em.query(`CREATE EXTENSION IF NOT EXISTS unaccent;`);
+      console.log('Extension unaccent creada o ya existe.');
+    } catch (error) {
+      console.error('Error creando extensión unaccent:', error);
+    }
+  }
 }

@@ -32,7 +32,7 @@ export default class DeliveryMethodsService {
     // Filtering
     if (dto.search) {
       queryBuilder.where(
-        'deliveryMethod.name ILIKE :search OR deliveryMethod.estimatedArrivalTime ILIKE :search OR deliveryMethod.pickUpDirection ILIKE :search',
+        'unaccent(deliveryMethod.name) ILIKE unaccent(:search) OR unaccent(deliveryMethod.estimatedArrivalTime) ILIKE unaccent(:search) OR unaccent(deliveryMethod.pickUpDirection) ILIKE unaccent(:search)',
         {
           search: `%${dto.search}%`,
         },
@@ -177,7 +177,7 @@ export default class DeliveryMethodsService {
       );
     }
 
-    let patchDto = createPatchFields(dto);
+    const patchDto = createPatchFields(dto);
 
     await this.pgService.deliveryMethods.update(id, patchDto);
     this.logger.log(`Updated delivery method with ID ${id}`);

@@ -13,7 +13,6 @@ import ContactInfoUpdateInDto from '../dto/in/contact-info.update.in.dto';
 import createPatchFields from '../../utils/dto/patch-fields.util';
 import ContactInfoInDto from '../dto/in/contact-info.in.dto';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
-import ContactInfoSearchInDto from '../dto/in/contact-info.search.in.dto';
 import ContactInfoBackofficeSearchInDto from '../dto/in/contact-info-backoffice.search.in.dto';
 
 @Injectable()
@@ -39,7 +38,7 @@ export default class ContactInfosService {
     // Filtering
     if (dto.search) {
       queryBuilder.andWhere(
-        'contactInfo.name ILIKE :search OR contactInfo.phoneNumber ILIKE :search OR contactInfo.identificationNumber ILIKE :search  OR contactInfo.address ILIKE :search OR contactInfo.observations ILIKE :search',
+        'unaccent(contactInfo.name) ILIKE unaccent(:search) OR unaccent(contactInfo.phoneNumber) ILIKE unaccent(:search) OR unaccent(contactInfo.identificationNumber) ILIKE unaccent(:search)  OR unaccent(contactInfo.address) ILIKE unaccent(:search) OR unaccent(contactInfo.observations) ILIKE unaccent(:search)',
         {
           search: `%${dto.search}%`,
         },
@@ -124,18 +123,6 @@ export default class ContactInfosService {
     userId: number,
     dto: ContactInfoInDto,
   ): Promise<ContactInfoOutDto> {
-    const existingContactInfoByName = await this.pgService.contactInfos.findOne(
-      {
-        where: { name: dto.name, userId: userId, isActive: true },
-      },
-    );
-
-    if (existingContactInfoByName) {
-      throw new ConflictException(
-        `Contact Info with name "${dto.name}" already exists`,
-      );
-    }
-
     const municipality = await this.pgService.municipalities.findOne({
       where: { id: dto.municipalityId },
     });
@@ -169,18 +156,6 @@ export default class ContactInfosService {
   }
 
   async patch(id: number, dto: ContactInfoUpdateInDto, userId: number): Promise<void> {
-    if (dto.name) {
-      const contactInfo = await this.pgService.contactInfos.findOne({
-        where: { name: dto.name, userId: userId, isActive: true },
-      });
-
-      if (contactInfo && contactInfo.id !== id) {
-        throw new ConflictException(
-          `Contact Info with name "${dto.name}" already exists`,
-        );
-      }
-    }
-
     const contactInfo = await this.pgService.contactInfos.findOne({
       where: { id, userId },
     });

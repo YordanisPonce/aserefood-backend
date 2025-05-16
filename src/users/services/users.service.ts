@@ -36,7 +36,7 @@ export default class UsersService {
     // Filtering
     if (dto.search) {
       queryBuilder.where(
-        'user.username ILIKE :search OR user.email ILIKE :search OR user.lastnames ILIKE :search OR user.name ILIKE :search',
+        'unaccent(user.username) ILIKE unaccent(:search) OR unaccent(user.email) ILIKE unaccent(:search) OR unaccent(user.lastnames) ILIKE unaccent(:search) OR unaccent(user.name) ILIKE unaccent(:search)',
         {
           search: `%${dto.search}%`,
         },

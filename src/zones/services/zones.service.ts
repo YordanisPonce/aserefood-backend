@@ -30,7 +30,7 @@ export default class ZonesService {
     // Filtering
     if (dto.search) {
       queryBuilder.where(
-        'zone.name ILIKE :search OR zone.description ILIKE :search',
+        'unaccent(zone.name) ILIKE unaccent(:search) OR unaccent(zone.description) ILIKE unaccent(:search)',
         {
           search: `%${dto.search}%`,
         },
