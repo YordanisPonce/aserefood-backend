@@ -263,7 +263,7 @@ export default class OrdersService {
   ): Promise<ZellePaymentOutDto> {
     const order = await this.pgService.orders.findOne({
       where: { id, userId, onlinePayment: Not(IsNull()) },
-      relations: ['onlinePayment'],
+      relations: ['onlinePayment', 'deliveryMethod'],
     });
 
     if (!order) {
@@ -272,12 +272,14 @@ export default class OrdersService {
       );
     }
 
+    const delivery = order.deliveryMethod.isFree ? 0 : order.deliveryMethod.cost;
+
     const zelleList = await this.pgService.zelleConfs.find({ take: 1 });
     const zelle = zelleList[0];
     const qrUrl = await this.minioService.getPresignedUrl(zelle.qr);
 
     return {
-      transferAmount: order.totalAmount,
+      transferAmount: order.totalAmount + delivery,
       orderNumber: idFormatter(order.id),
       paymentCode: order.onlinePayment.paymentCode,
       phoneNumber: zelle?.phoneNumber ?? '',
@@ -323,6 +325,8 @@ export default class OrdersService {
         `Delivery Method with id ${userId} does not exist`,
       );
     }
+
+    const deliveryPrice = deliveryMethod.isFree ? 0 : deliveryMethod.cost;
 
     const contactInfo = await this.pgService.contactInfos.findOneBy({
       id: dto.contactInfoId,
@@ -409,7 +413,7 @@ export default class OrdersService {
       user.email,
       user.username,
       newOrder.id,
-      newOrder.totalAmount,
+      newOrder.totalAmount + deliveryPrice,
       'USD',
       36,
       newOrder.createdDate,
