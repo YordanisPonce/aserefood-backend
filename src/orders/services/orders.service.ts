@@ -279,7 +279,7 @@ export default class OrdersService {
     const qrUrl = await this.minioService.getPresignedUrl(zelle.qr);
 
     return {
-      transferAmount: order.totalAmount + delivery,
+      transferAmount: Number(Number(order.totalAmount) + Number(delivery)),
       orderNumber: idFormatter(order.id),
       paymentCode: order.onlinePayment.paymentCode,
       phoneNumber: zelle?.phoneNumber ?? '',
