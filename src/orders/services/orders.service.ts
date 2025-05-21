@@ -413,7 +413,7 @@ export default class OrdersService {
       user.email,
       user.username,
       newOrder.id,
-      newOrder.totalAmount + deliveryPrice,
+      Number(Number(newOrder.totalAmount) + Number(deliveryPrice)),
       'USD',
       36,
       newOrder.createdDate,
