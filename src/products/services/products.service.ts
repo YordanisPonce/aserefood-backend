@@ -297,18 +297,18 @@ export default class ProductsService {
           `Product with ID ${id} has Associated Product Combo Items`,
         );
       }
-      if (
-        productToDelete.shoppingCartItems &&
-        productToDelete.shoppingCartItems.length > 0
-      ) {
-        throw new ConflictException(
-          `Product with ID ${id} has Associated Shopping Cart Items`,
-        );
-      }
       if (productToDelete.orderItems && productToDelete.orderItems.length > 0) {
         throw new ConflictException(
           `Product with ID ${id} has Associated Order Items`,
         );
+      }
+      if (
+        productToDelete.shoppingCartItems &&
+        productToDelete.shoppingCartItems.length > 0
+      ) {
+        await this.pgService.shoppingCarts.delete({
+          productId: productToDelete.id
+        });
       }
     }
 
