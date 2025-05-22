@@ -115,6 +115,7 @@ export default class OrdersService {
   ): Promise<PaginatedOutDto<OrderMeOutDto>> {
     const queryBuilder = this.pgService.orders
       .createQueryBuilder('order')
+      .leftJoinAndSelect('order.deliveryMethod', 'deliveryMethod')
       .leftJoinAndSelect('order.orderItems', 'orderItem')
       .leftJoinAndSelect('order.municipality', 'municipality')
       .leftJoinAndSelect('orderItem.product', 'product')
@@ -191,6 +192,7 @@ export default class OrdersService {
       where: { userId, id },
       relations: [
         'orderItems',
+        'deliveryMethod',
         'municipality',
         'orderItems.product.categories',
         'orderItems.productCombo.zone.inventoryEntries',
@@ -502,6 +504,8 @@ export default class OrdersService {
   }
 
   private async toOutMeDto(order: Order): Promise<OrderMeOutDto> {
+    const delivery = Number(order.deliveryMethod.isFree ? 0 : order.deliveryMethod.cost);
+
     const dto = new OrderMeOutDto();
     dto.id = order.id;
     dto.code = idFormatter(order.id);
@@ -509,7 +513,7 @@ export default class OrdersService {
     dto.createdDate = order.createdDate;
     dto.updatedDate = order.updatedDate;
     dto.contactInfoId = order.contactInfoId;
-    dto.totalAmount = order.totalAmount;
+    dto.totalAmount = Number(Number(order.totalAmount) + delivery);
     dto.municipalityId = order.municipalityId;
     dto.municipalityName = order.municipality?.name ?? '';
     dto.paymentSelection =
