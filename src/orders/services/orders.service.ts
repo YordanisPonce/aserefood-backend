@@ -461,7 +461,7 @@ export default class OrdersService {
                     : orderItem.productComboId,
                 amount: 0,
               },
-              orderItem.amount,
+              -Number(orderItem.amount),
               order.userId,
             );
           }
