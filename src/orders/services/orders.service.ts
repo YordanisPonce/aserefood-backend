@@ -465,6 +465,7 @@ export default class OrdersService {
               },
               Number(orderItem.amount),
               order.userId,
+              true
             );
           }
 

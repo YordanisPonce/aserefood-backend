@@ -396,6 +396,7 @@ export default class ShoppingCartsService {
     dto: AddToCartInDto,
     existingAmount: number,
     userId: number,
+    isRestoring: boolean = false
   ) {
     if (dto.cartItemType === CartItem.Product) {
       await this.manageInventoryEntryProduct(
@@ -417,8 +418,8 @@ export default class ShoppingCartsService {
         );
 
       if (
-        availability.total !== 1 ||
-        availability.data[0].inventoryAmount - dto.amount < 0
+        (availability.total !== 1 ||
+        availability.data[0].inventoryAmount - dto.amount < 0) && !isRestoring
       ) {
         this.logger.log(`Product Combo with id ${dto.itemId} is exhausted`);
         throw new BadRequestException(
