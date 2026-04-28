@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { ScheduleModule } from '@nestjs/schedule'; // 👈 AGREGAR ESTA LÍNEA
 import { configSchema } from './utils/schemas/config.schema';
 import AuthModule from './auth/auth.module';
 import DatabaseModule from './database/database.module';
@@ -23,6 +24,7 @@ import { ContactInfosModule } from './contact-infos/contact-infos.module';
 import { ShoppingCartsModule } from './shopping-carts/shopping-carts.module';
 import { OrdersModule } from './orders/orders.module';
 import { PaymentsModule } from './payments/payments.module';
+import { RemindersModule } from './reminders/reminders.module';
 
 @Module({
   imports: [
@@ -37,6 +39,7 @@ import { PaymentsModule } from './payments/payments.module';
       ttl: 60,
       limit: 100,
     }]),
+    ScheduleModule.forRoot(),
     AuthModule,
     CategoriesModule,
     DatabaseModule,
@@ -57,6 +60,7 @@ import { PaymentsModule } from './payments/payments.module';
     ShoppingCartsModule,
     OrdersModule,
     PaymentsModule,
+    RemindersModule,
   ],
   controllers: [],
   providers: [],
