@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDecimal, IsInt, IsNumber, Min } from 'class-validator';
+import { IsInt, IsNumber, Min } from 'class-validator';
 
-export default class InventoryEntryInDto{
+export default class InventoryEntryInDto {
   @ApiProperty()
   @IsInt()
   @Min(0)
@@ -9,7 +9,7 @@ export default class InventoryEntryInDto{
 
   @ApiProperty()
   @IsNumber()
-  @Min(0.001)
+  @Min(0)
   price: number;
 
   @ApiProperty()

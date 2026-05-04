@@ -1,4 +1,11 @@
-import { IsEmail, IsNotEmpty, IsString, Matches, MaxLength, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  Matches,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export default class RegisterInDto {
@@ -45,4 +52,7 @@ export default class RegisterInDto {
     message: 'phoneNumber must contain only digits.',
   })
   phoneNumber: string;
+
+  @ApiProperty({type: 'string', format: 'binary' })
+  image: Express.Multer.File;
 }

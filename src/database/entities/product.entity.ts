@@ -1,35 +1,55 @@
-import { Column, Entity, Index, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import Category from './category.entity';
 import Provider from './provider.entity';
 import { InventoryEntry } from './inventory-entry.entity';
 import ProductComboItem from './product-combo-item.entity';
 import Promotion from './promotion.entity';
-import OrderProducts from './order-product.entity';
+import OrderItems from './order-item.entity';
 import CartProduct from './cart-product.entity';
 
 @Entity({ name: 'products' })
-export default class Product{
+export default class Product {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column('character varying', {length: 255})
-  @Index({unique: true})
+  @Column('character varying', { length: 255 })
+  @Index({ unique: true })
   name: string;
 
-  @Column('character varying', {length: 255})
+  @Column('character varying', { length: 255 })
   shortDescription: string;
 
-  @Column({nullable: true})
+  @Column({ nullable: true })
+  image?: string;
+
+  @Column({ nullable: true })
   description?: string;
 
   @Column('boolean')
   isService: boolean;
 
-  @Column()
-  categoryId: number;
-
-  @ManyToOne(() => Category, (category) => category.products, {onDelete: 'CASCADE'})
-  category: Category;
+  @ManyToMany(() => Category, (category) => category.products)
+  @JoinTable({
+    name: 'product_categories',
+    joinColumn: {
+      name: 'product_id',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'category_id',
+      referencedColumnName: 'id',
+    },
+  })
+  categories: Category[];
 
   @ManyToMany(() => Provider, (provider) => provider.products)
   @JoinTable({
@@ -48,7 +68,10 @@ export default class Product{
   @OneToMany(() => InventoryEntry, (entry) => entry.product)
   inventoryEntries: InventoryEntry[];
 
-  @OneToMany(() => ProductComboItem, (productComboItem) => productComboItem.product)
+  @OneToMany(
+    () => ProductComboItem,
+    (productComboItem) => productComboItem.product,
+  )
   productComboItems: ProductComboItem[];
 
   @ManyToMany(() => Promotion, (promotion) => promotion.products)
@@ -57,6 +80,6 @@ export default class Product{
   @OneToMany(() => CartProduct, (shoppingCartItem) => shoppingCartItem.product)
   shoppingCartItems: CartProduct[];
 
-  @OneToMany(() => OrderProducts, (orderItem) => orderItem.product)
-  orderItems: OrderProducts[];
+  @OneToMany(() => OrderItems, (orderItem) => orderItem.product)
+  orderItems: OrderItems[];
 }

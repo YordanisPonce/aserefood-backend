@@ -5,12 +5,9 @@ import V1LanguagesController from './controllers/v1-languages.controller';
 import LanguagesService from './services/languages.service';
 
 @Module({
-  imports: [
-    AuthModule,
-    DatabaseModule,
-  ],
-  controllers: [V1LanguagesController],
+  imports: [AuthModule, DatabaseModule],
+  // controllers: [V1LanguagesController],
   providers: [LanguagesService],
-  exports: [LanguagesService]
+  exports: [LanguagesService],
 })
 export class LanguagesModule {}

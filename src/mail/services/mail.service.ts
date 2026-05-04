@@ -1,8 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
-import ResetPasswordTemplate from '../templates/reset-password.template';
-import ConfirmAccountTemplate from '../templates/confirm-account.template';
+import ResetPasswordTemplate from '../templates/auth/reset-password.template';
+import ConfirmAccountTemplate from '../templates/auth/confirm-account.template';
+import PendingOrderTemplate from '../templates/orders/pending-order.template';
+import PaidOrderTemplate from '../templates/orders/paid-order.template';
+import CancelledOrderTemplate from '../templates/orders/cancelled-order.template';
 
 @Injectable()
 export default class MailService {
@@ -19,6 +22,16 @@ export default class MailService {
     'Restablecer Contraseña en Asere Food';
   private readonly CONFIRM_ACCOUNT_SUBJECT: string =
     'Confirmar Cuenta en Asere Food';
+  private readonly PENDING_ORDER: string =
+    'Notificación de Orden Pendiente en Asere Food';
+  private readonly PAID_ORDER: string =
+    'Notificación de Orden Pagada en Asere Food';
+  private readonly CANCELLED_EXPIRED_ORDER: string =
+    'Notificación de Orden Expirada o Cancelada Manualmente en Asere Food';
+  private readonly CANCELLED_WITHOUT_REFUND_ORDER: string =
+    'Notificación de Orden Cancelada sin Reembolso en Asere Food';
+  private readonly REFUNDED_ORDER: string =
+    'Notificación de Orden Reembolso en Asere Food';
 
   async sendResetPasswordEmail(
     email: string,
@@ -34,6 +47,74 @@ export default class MailService {
       resetPasswordUrl: `${this.configService.get('EMAIL_RESET_PASSWORD_URL')}?token=${resetPasswordToken}`,
     }).getEmail();
     await this.sendMail(email, this.RESET_PASSWORD_SUBJECT, message);
+  }
+
+  async sendPaidOrderEmail(
+    email: string,
+    username: string,
+    orderId: number,
+    totalPayment: number,
+    currency: string,
+    createdDate: Date,
+    contactPhoneNumber: string,
+    deliveryLocation: string,
+    statement: string,
+  ){
+    const message = new PaidOrderTemplate({
+      contactPhoneNumber,
+      orderId,
+      deliveryLocation,
+      statement,
+      createdDate,
+      currency,
+      supportTeam: this.SUPPORT_TEAM,
+      supportPhone: this.SUPPORT_PHONE,
+      supportEmail: this.SUPPORT_EMAIL,
+      totalPayment,
+      username,
+    }).getEmail();
+    await this.sendMail(email, this.PAID_ORDER, message);
+  }
+
+  async sendCancelledOrderEmail(
+    email: string,
+    username: string,
+    orderId: number,
+    cancellationReason: string,
+  ){
+    const message = new CancelledOrderTemplate({
+      orderId,
+      cancellationReason,
+      supportTeam: this.SUPPORT_TEAM,
+      supportPhone: this.SUPPORT_PHONE,
+      supportEmail: this.SUPPORT_EMAIL,
+      username,
+    }).getEmail();
+
+    await this.sendMail(email, this.CANCELLED_EXPIRED_ORDER, message);
+  }
+
+  async sendPendingOrderEmail(
+    email: string,
+    username: string,
+    orderId: number,
+    totalPayment: number,
+    currency: string,
+    expirationHours: number,
+    createdDate: Date,
+  ): Promise<void> {
+    const message = new PendingOrderTemplate({
+      username,
+      supportTeam: this.SUPPORT_TEAM,
+      supportPhone: this.SUPPORT_PHONE,
+      supportEmail: this.SUPPORT_EMAIL,
+      orderId,
+      expirationHours,
+      currency,
+      totalPayment,
+      createdDate,
+    }).getEmail();
+    await this.sendMail(email, this.PENDING_ORDER, message);
   }
 
   async sendConfirmAccountEmail(

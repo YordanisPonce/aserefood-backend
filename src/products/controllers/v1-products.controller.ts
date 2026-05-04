@@ -1,40 +1,41 @@
 import {
   Body,
-  Controller, Delete,
+  Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
   Patch,
   Post,
-  Query,
+  Query, UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
-  ApiBearerAuth, ApiConflictResponse, ApiCreatedResponse, ApiForbiddenResponse,
+  ApiBearerAuth,
+  ApiConflictResponse, ApiConsumes,
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
-  ApiTags, ApiUnauthorizedResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { CacheInterceptor } from '@nestjs/cache-manager';
-import ZonesService from '../../zones/services/zones.service';
 import ProductsService from '../services/products.service';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
-import ZoneOutDto from '../../zones/dto/out/zone.out.dto';
-import ZoneSearchInDto from '../../zones/dto/in/zone.search.in.dto';
 import ProductOutDto from '../dto/out/product.out.dto';
 import ProductSearchInDto from '../dto/in/product.search.in.dto';
-import ZoneWithMunicipalitiesOutDto from '../../zones/dto/out/zone-with-municipalities.out.dto';
 import ProductWithProvidersOutDto from '../dto/out/product-with-providers.out.dto';
 import { Role, Roles } from '../../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
-import ZoneInDto from '../../zones/dto/in/zone.in.dto';
 import ProductInDto from '../dto/in/product.in.dto';
-import ZoneUpdateInDto from '../../zones/dto/in/zone.update.in.dto';
 import ProductUpdateInDto from '../dto/in/product.update.in.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ImageFileValidationPipe } from '../../utils/pipes/image-file-validation.pipe';
 
 @Controller('v1/products')
 @ApiTags('products')
@@ -70,6 +71,8 @@ export default class V1ProductsController {
   }
 
   @Post('')
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('image'))
   @Roles(Role.Admin)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
@@ -79,12 +82,15 @@ export default class V1ProductsController {
   @ApiForbiddenResponse({ description: 'Forbidden' })
   @ApiConflictResponse({ description: 'Conflict (Other product with Name)' })
   @ApiOperation({ summary: 'Create a new Product if does not exist' })
-  async post(@Body() dto: ProductInDto) {
+  async post(@Body() dto: ProductInDto, @UploadedFile(new ImageFileValidationPipe()) image: Express.Multer.File) {
+    dto.image = image;
     return this.productsService.post(dto);
   }
 
   @Patch('/:id')
   @Roles(Role.Admin)
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('image'))
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Ok' })
@@ -97,7 +103,9 @@ export default class V1ProductsController {
   async put(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: ProductUpdateInDto,
+    @UploadedFile(new ImageFileValidationPipe()) image: Express.Multer.File
   ) {
+    dto.image = image;
     return this.productsService.patch(id, dto);
   }
 
@@ -107,7 +115,8 @@ export default class V1ProductsController {
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Ok' })
   @ApiConflictResponse({
-    description: 'Conflict (Product with Inventory Entries or Product Combo Items or Promotions or Shopping Cart Items or Order Items Associated)',
+    description:
+      'Conflict (Product with Inventory Entries or Product Combo Items or Promotions or Shopping Cart Items or Order Items Associated)',
   })
   @ApiNotFoundResponse({ description: 'Not Found' })
   @ApiBadRequestResponse({ description: 'Bad Request' })
@@ -117,5 +126,4 @@ export default class V1ProductsController {
   async delete(@Param('id', ParseIntPipe) id: number) {
     return this.productsService.delete(id);
   }
-
 }

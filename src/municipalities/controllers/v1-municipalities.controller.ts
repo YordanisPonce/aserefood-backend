@@ -1,6 +1,7 @@
 import {
   Body,
-  Controller, Delete,
+  Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -12,28 +13,27 @@ import {
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
-  ApiBearerAuth, ApiConflictResponse, ApiCreatedResponse, ApiForbiddenResponse,
+  ApiBearerAuth,
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
-  ApiTags, ApiUnauthorizedResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import MunicipalitiesService from '../services/municipalities.service';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
-import ProvinceOutDto from '../../provinces/dto/out/province.out.dto';
-import ProvinceSearchInDto from '../../provinces/dto/in/province.search.in.dto';
 import MunicipalityOutDto from '../dto/out/municipality.out.dto';
 import MunicipalityInDto from '../dto/in/municipality.in.dto';
 import MunicipalitySearchInDto from '../dto/in/municipality.search.in.dto';
-import ProvinceWithMunicipalitiesOutDto from '../../provinces/dto/out/province-with-municipalities.out.dto';
 import { Role, Roles } from '../../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
-import CategoryInDto from '../../categories/dto/in/category.in.dto';
-import ProvinceInDto from '../../provinces/dto/in/province.in.dto';
-import ProvinceUpdateInDto from '../../provinces/dto/in/province.update.in.dto';
 import MunicipalityUpdateInDto from '../dto/in/municipality.update.in.dto';
+import MunicipalityAvailableSearchInDto from '../dto/in/municipality-available.search.in.dto';
 
 @Controller('v1/municipalities')
 @ApiTags('municipalities')
@@ -41,8 +41,23 @@ import MunicipalityUpdateInDto from '../dto/in/municipality.update.in.dto';
 export default class V1MunicipalitiesController {
   constructor(private readonly municipalitiesService: MunicipalitiesService) {}
 
+  @Get('/available')
+  @Roles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({ description: 'Ok', type: [MunicipalityOutDto] })
+  @ApiOperation({
+    summary: 'Get all Available Municipalities for Zone Creation',
+  })
+  async getAllAvailable(@Query() dto: MunicipalityAvailableSearchInDto) {
+    return this.municipalitiesService.getAvailableMunicipalities(dto);
+  }
+
   @Get('')
-  @ApiOkResponse({ description: 'Ok', type: PaginatedOutDto<MunicipalityOutDto> })
+  @ApiOkResponse({
+    description: 'Ok',
+    type: PaginatedOutDto<MunicipalityOutDto>,
+  })
   @ApiOperation({
     summary: 'Get Municipalities with Filtering, Ordering and Pagination',
   })
@@ -76,7 +91,9 @@ export default class V1MunicipalitiesController {
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  @ApiConflictResponse({ description: 'Conflict (Other municipality with Name)' })
+  @ApiConflictResponse({
+    description: 'Conflict (Other municipality with Name)',
+  })
   @ApiOperation({ summary: 'Create a new Municipality if does not exist' })
   async post(@Body() dto: MunicipalityInDto) {
     return this.municipalitiesService.post(dto);
@@ -91,7 +108,9 @@ export default class V1MunicipalitiesController {
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  @ApiConflictResponse({ description: 'Conflict (Other municipality with Name)' })
+  @ApiConflictResponse({
+    description: 'Conflict (Other municipality with Name)',
+  })
   @ApiOperation({ summary: 'Update a Municipality by its id' })
   async put(
     @Param('id', ParseIntPipe) id: number,
@@ -106,7 +125,8 @@ export default class V1MunicipalitiesController {
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Ok' })
   @ApiConflictResponse({
-    description: 'Conflict (Municipality with Zones or Contact Infos Associated)',
+    description:
+      'Conflict (Municipality with Zone or Contact Infos Associated)',
   })
   @ApiNotFoundResponse({ description: 'Not Found' })
   @ApiBadRequestResponse({ description: 'Bad Request' })

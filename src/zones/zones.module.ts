@@ -5,10 +5,7 @@ import V1ZonesController from './controllers/v1-zones.controller';
 import ZonesService from './services/zones.service';
 
 @Module({
-  imports: [
-    AuthModule,
-    DatabaseModule,
-  ],
+  imports: [AuthModule, DatabaseModule],
   controllers: [V1ZonesController],
   providers: [ZonesService],
   exports: [ZonesService],

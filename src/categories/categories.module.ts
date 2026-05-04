@@ -5,10 +5,7 @@ import CategoriesService from './services/categories.service';
 import AuthModule from '../auth/auth.module';
 
 @Module({
-  imports: [
-    DatabaseModule,
-    AuthModule
-  ],
+  imports: [DatabaseModule, AuthModule],
   controllers: [V1CategoriesController],
   providers: [CategoriesService],
   exports: [CategoriesService],

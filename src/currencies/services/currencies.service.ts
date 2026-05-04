@@ -1,20 +1,20 @@
-import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import PgService from '../../database/services/pg.service';
-import Language from '../../database/entities/language.entity';
-import LanguageOutDto from '../../languages/dto/out/language.out.dto';
 import CurrencyOutDto from '../dto/out/currency.out.dto';
 import Currency from '../../database/entities/currency.entity';
-import LanguageUpdateInDto from '../../languages/dto/in/language.update.in.dto';
 import createPatchFields from '../../utils/dto/patch-fields.util';
 import CurrencyUpdateInDto from '../dto/in/currency.update.in.dto';
-import LanguageInDto from '../../languages/dto/in/language.in.dto';
 import CurrencyInDto from '../dto/in/currency.in.dto';
-import LanguageSearchInDto from '../../languages/dto/in/language.search.in.dto';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
 import CurrencySearchInDto from '../dto/in/currency.search.in.dto';
 
 @Injectable()
-export default class CurrenciesService{
+export default class CurrenciesService {
   private readonly logger = new Logger(CurrenciesService.name);
 
   constructor(private readonly pgService: PgService) {}
@@ -22,12 +22,12 @@ export default class CurrenciesService{
   async search(
     dto: CurrencySearchInDto,
   ): Promise<PaginatedOutDto<CurrencyOutDto>> {
-    const queryBuilder = this.pgService.currencies
-      .createQueryBuilder('currency');
+    const queryBuilder =
+      this.pgService.currencies.createQueryBuilder('currency');
 
     if (dto.search) {
       queryBuilder.where(
-        'currency.name ILIKE :search OR currency.code ILIKE :search',
+        'unaccent(currency.name) ILIKE unaccent(:search) OR unaccent(currency.code) ILIKE unaccent(:search)',
         {
           search: `%${dto.search}%`,
         },
@@ -65,17 +65,17 @@ export default class CurrenciesService{
     };
   }
 
-  async getAll(): Promise<CurrencyOutDto[]>{
+  async getAll(): Promise<CurrencyOutDto[]> {
     const currencies = await this.pgService.currencies.find({
-      where: {isActive: true}
+      where: { isActive: true },
     });
 
-    return currencies.map(x => this.toOutDto(x));
+    return currencies.map((x) => this.toOutDto(x));
   }
 
   async getById(id: number): Promise<CurrencyOutDto> {
     const currency = await this.pgService.currencies.findOne({
-      where: { id }
+      where: { id },
     });
     if (!currency) {
       throw new NotFoundException(`Currency with ID ${id} not found`);
@@ -94,13 +94,13 @@ export default class CurrenciesService{
       );
     }
 
-    if(dto.isBaseCurrency){
-      if(await this.pgService.currencies.findOne({
-        where: { isBaseCurrency: true },
-      })){
-        throw new ConflictException(
-          `Base currency already exists`,
-        );
+    if (dto.isBaseCurrency) {
+      if (
+        await this.pgService.currencies.findOne({
+          where: { isBaseCurrency: true },
+        })
+      ) {
+        throw new ConflictException(`Base currency already exists`);
       }
     }
 
@@ -131,14 +131,12 @@ export default class CurrenciesService{
       }
     }
 
-    if(dto.isBaseCurrency){
+    if (dto.isBaseCurrency) {
       const currency = await this.pgService.currencies.findOne({
         where: { isBaseCurrency: true },
-      })
-      if(currency && currency.id !== id){
-        throw new ConflictException(
-          `Base currency already exists`,
-        );
+      });
+      if (currency && currency.id !== id) {
+        throw new ConflictException(`Base currency already exists`);
       }
     }
 

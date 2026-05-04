@@ -3,16 +3,28 @@ import ProductCombo from './product-combo.entity';
 import Product from './product.entity';
 
 @Entity({ name: 'product_combo_items' })
-export default class ProductComboItem{
+export default class ProductComboItem {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => ProductCombo, productCombo => productCombo.productComboItems, {onDelete: 'CASCADE'})
+  @ManyToOne(
+    () => ProductCombo,
+    (productCombo) => productCombo.productComboItems,
+    { onDelete: 'CASCADE' },
+  )
   productCombo: ProductCombo;
+
+  @Column()
+  productComboId: number;
 
   @Column('int')
   amount: number;
 
-  @ManyToOne(() => Product, (product) => product.productComboItems, {onDelete: 'CASCADE'})
+  @ManyToOne(() => Product, (product) => product.productComboItems, {
+    onDelete: 'CASCADE',
+  })
   product: Product;
+
+  @Column()
+  productId: number;
 }

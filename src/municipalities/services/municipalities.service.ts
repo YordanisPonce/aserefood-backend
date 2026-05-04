@@ -5,19 +5,15 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import PgService from '../../database/services/pg.service';
-import Province from '../../database/entities/province.entity';
-import ProvinceOutDto from '../../provinces/dto/out/province.out.dto';
 import Municipality from '../../database/entities/municipality.entity';
 import MunicipalityOutDto from '../dto/out/municipality.out.dto';
-import ProvinceSearchInDto from '../../provinces/dto/in/province.search.in.dto';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
 import MunicipalitySearchInDto from '../dto/in/municipality.search.in.dto';
-import ProvinceWithMunicipalitiesOutDto from '../../provinces/dto/out/province-with-municipalities.out.dto';
-import ProvinceInDto from '../../provinces/dto/in/province.in.dto';
 import MunicipalityInDto from '../dto/in/municipality.in.dto';
-import ProvinceUpdateInDto from '../../provinces/dto/in/province.update.in.dto';
 import createPatchFields from '../../utils/dto/patch-fields.util';
 import MunicipalityUpdateInDto from '../dto/in/municipality.update.in.dto';
+import { IsNull, Not } from 'typeorm';
+import MunicipalityAvailableSearchInDto from '../dto/in/municipality-available.search.in.dto';
 
 @Injectable()
 export default class MunicipalitiesService {
@@ -34,13 +30,13 @@ export default class MunicipalitiesService {
 
     // Filtering
     if (dto.search) {
-      queryBuilder.where('municipality.name ILIKE :search', {
+      queryBuilder.where('unaccent(municipality.name) ILIKE unaccent(:search)', {
         search: `%${dto.search}%`,
       });
     }
 
     if (dto.provinceId) {
-      queryBuilder.andWhere('category.province.id = :provinceId', {
+      queryBuilder.andWhere('province.id = :provinceId', {
         provinceId: dto.provinceId,
       });
     }
@@ -74,7 +70,7 @@ export default class MunicipalitiesService {
       relations: ['province'],
     });
 
-    return municipalities.map(x => this.toOutDto(x));
+    return municipalities.map((x) => this.toOutDto(x));
   }
 
   async getById(id: number): Promise<MunicipalityOutDto> {
@@ -134,7 +130,7 @@ export default class MunicipalitiesService {
       }
     }
 
-    if(dto.provinceId){
+    if (dto.provinceId) {
       const province = await this.pgService.provinces.findOne({
         where: { id: dto.provinceId },
       });
@@ -154,25 +150,32 @@ export default class MunicipalitiesService {
       throw new NotFoundException(`Municipality with ID ${id} not found`);
     }
 
-    let patchDto = createPatchFields(dto);
+    const patchDto = createPatchFields(dto);
 
     await this.pgService.municipalities.update(id, patchDto);
     this.logger.log(`Updated municipality with ID ${id}`);
     this.logger.log({ ...patchDto });
   }
 
-  async delete(id: number): Promise<void>{
+  async delete(id: number): Promise<void> {
     const municipalityToDelete = await this.pgService.municipalities.findOne({
       where: { id },
-      relations: ['zones', 'contactInfos'],
+      relations: ['zone', 'contactInfos'],
     });
 
-    if(municipalityToDelete) {
-      if(municipalityToDelete.zones && municipalityToDelete.zones.length > 0) {
-        throw new ConflictException(`Municipality with ID ${id} has Associated Zones`);
+    if (municipalityToDelete) {
+      if (municipalityToDelete.zone) {
+        throw new ConflictException(
+          `Municipality with ID ${id} has Associated Zone`,
+        );
       }
-      if(municipalityToDelete.contactInfos && municipalityToDelete.contactInfos.length > 0){
-        throw new ConflictException(`Municipality with ID ${id} has Associated Contact Infos`);
+      if (
+        municipalityToDelete.contactInfos &&
+        municipalityToDelete.contactInfos.length > 0
+      ) {
+        throw new ConflictException(
+          `Municipality with ID ${id} has Associated Contact Infos`,
+        );
       }
     }
 
@@ -183,12 +186,26 @@ export default class MunicipalitiesService {
     this.logger.log(`Deleted municipality with ID ${id}`);
   }
 
+  async getAvailableMunicipalities(dto: MunicipalityAvailableSearchInDto): Promise<MunicipalityOutDto[]> {
+    let data = await this.pgService.municipalities.find({
+      where: { zone: { id: IsNull() } },
+      relations: ['zone', 'province'],
+      order: { id: 'ASC' },
+    });
+
+    if(dto.provinceId){
+      data = data.filter(x => x.provinceId === dto.provinceId);
+    }
+
+    return data.map((x) => this.toOutDto(x));
+  }
+
   private toOutDto(municipality: Municipality): MunicipalityOutDto {
     const dto = new MunicipalityOutDto();
     dto.id = municipality.id;
     dto.name = municipality.name;
     dto.provinceId = municipality.provinceId;
-    dto.provinceName = municipality.province?.name ?? "";
+    dto.provinceName = municipality.province?.name ?? '';
 
     return dto;
   }

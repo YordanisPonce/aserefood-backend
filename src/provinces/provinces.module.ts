@@ -5,10 +5,7 @@ import V1ProvincesController from './controllers/v1-provinces.controller';
 import ProvincesService from './services/provinces.service';
 
 @Module({
-  imports: [
-    DatabaseModule,
-    AuthModule
-  ],
+  imports: [DatabaseModule, AuthModule],
   controllers: [V1ProvincesController],
   providers: [ProvincesService],
   exports: [ProvincesService],

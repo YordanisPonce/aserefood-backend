@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Role } from '../../../auth/decorators/roles.decorator';
 
-export default class UserOutDto{
+export default class UserOutDto {
   @ApiProperty()
   id: number;
 
@@ -28,4 +28,7 @@ export default class UserOutDto{
 
   @ApiProperty()
   phoneNumber: string;
+
+  @ApiProperty({nullable: true})
+  image?: string;
 }

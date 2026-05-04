@@ -1,19 +1,20 @@
-import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import PgService from '../../database/services/pg.service';
-import Category from '../../database/entities/category.entity';
-import CategoryOutDto from '../../categories/dto/out/category.out.dto';
 import Language from '../../database/entities/language.entity';
 import LanguageOutDto from '../dto/out/language.out.dto';
-import CategoryInDto from '../../categories/dto/in/category.in.dto';
 import createPatchFields from '../../utils/dto/patch-fields.util';
 import LanguageUpdateInDto from '../dto/in/language.update.in.dto';
 import LanguageInDto from '../dto/in/language.in.dto';
-import CategorySearchInDto from '../../categories/dto/in/category.search.in.dto';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
 import LanguageSearchInDto from '../dto/in/language.search.in.dto';
 
 @Injectable()
-export default class LanguagesService{
+export default class LanguagesService {
   private readonly logger = new Logger(LanguagesService.name);
 
   constructor(private readonly pgService: PgService) {}
@@ -21,8 +22,8 @@ export default class LanguagesService{
   async search(
     dto: LanguageSearchInDto,
   ): Promise<PaginatedOutDto<LanguageOutDto>> {
-    const queryBuilder = this.pgService.languages
-      .createQueryBuilder('language');
+    const queryBuilder =
+      this.pgService.languages.createQueryBuilder('language');
 
     if (dto.search) {
       queryBuilder.where(
@@ -66,15 +67,15 @@ export default class LanguagesService{
 
   async getAll(): Promise<LanguageOutDto[]> {
     const languages = await this.pgService.languages.find({
-      where: {isActive: true}
+      where: { isActive: true },
     });
 
-    return languages.map(x => this.toOutDto(x));
+    return languages.map((x) => this.toOutDto(x));
   }
 
   async getById(id: number): Promise<LanguageOutDto> {
     const language = await this.pgService.languages.findOne({
-      where: { id }
+      where: { id },
     });
     if (!language) {
       throw new NotFoundException(`Language with ID ${id} not found`);

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import User from '../entities/user.entity';
@@ -22,32 +22,56 @@ import CartProduct from '../entities/cart-product.entity';
 import TransferPayment from '../entities/transfer-payment.entity';
 import OnlinePayment from '../entities/online-payment.entity';
 import Order from '../entities/order.entity';
+import ZelleConf from '../entities/zelle-conf.entity';
 
 @Injectable()
-export default class PgService {
+export default class PgService implements OnModuleInit {
   constructor(
     @InjectEntityManager() public readonly em: EntityManager,
     @InjectRepository(User) public readonly users: Repository<User>,
-    @InjectRepository(RefreshToken) public readonly refreshTokens: Repository<RefreshToken>,
-    @InjectRepository(Municipality) public readonly municipalities: Repository<Municipality>,
+    @InjectRepository(RefreshToken)
+    public readonly refreshTokens: Repository<RefreshToken>,
+    @InjectRepository(Municipality)
+    public readonly municipalities: Repository<Municipality>,
     @InjectRepository(Province) public readonly provinces: Repository<Province>,
     @InjectRepository(Zone) public readonly zones: Repository<Zone>,
     @InjectRepository(Provider) public readonly providers: Repository<Provider>,
-    @InjectRepository(Category) public readonly categories: Repository<Category>,
+    @InjectRepository(Category)
+    public readonly categories: Repository<Category>,
     @InjectRepository(Product) public readonly products: Repository<Product>,
-    @InjectRepository(ConfirmationToken) public readonly confirmationTokens: Repository<ConfirmationToken>,
-    @InjectRepository(InventoryEntry) public readonly inventoryEntries: Repository<InventoryEntry>,
-    @InjectRepository(ProductCombo) public readonly productCombos: Repository<ProductCombo>,
-    @InjectRepository(ProductComboItem) public readonly productComboItems: Repository<ProductComboItem>,
-    @InjectRepository(DeliveryMethod) public readonly deliveryMethods: Repository<DeliveryMethod>,
-    @InjectRepository(Promotion) public readonly promotions: Repository<Promotion>,
-    @InjectRepository(Currency) public readonly currencies: Repository<Currency>,
+    @InjectRepository(ConfirmationToken)
+    public readonly confirmationTokens: Repository<ConfirmationToken>,
+    @InjectRepository(InventoryEntry)
+    public readonly inventoryEntries: Repository<InventoryEntry>,
+    @InjectRepository(ProductCombo)
+    public readonly productCombos: Repository<ProductCombo>,
+    @InjectRepository(ProductComboItem)
+    public readonly productComboItems: Repository<ProductComboItem>,
+    @InjectRepository(DeliveryMethod)
+    public readonly deliveryMethods: Repository<DeliveryMethod>,
+    @InjectRepository(Promotion)
+    public readonly promotions: Repository<Promotion>,
+    @InjectRepository(Currency)
+    public readonly currencies: Repository<Currency>,
     @InjectRepository(Language) public readonly languages: Repository<Language>,
-    @InjectRepository(ContactInfo) public readonly contactInfos: Repository<ContactInfo>,
-    @InjectRepository(CartProduct) public readonly shoppingCarts: Repository<CartProduct>,
-    @InjectRepository(TransferPayment) public readonly transferPayments: Repository<TransferPayment>,
-    @InjectRepository(OnlinePayment) public readonly onlinePayments: Repository<OnlinePayment>,
+    @InjectRepository(ContactInfo)
+    public readonly contactInfos: Repository<ContactInfo>,
+    @InjectRepository(CartProduct)
+    public readonly shoppingCarts: Repository<CartProduct>,
+    @InjectRepository(TransferPayment)
+    public readonly transferPayments: Repository<TransferPayment>,
+    @InjectRepository(OnlinePayment)
+    public readonly onlinePayments: Repository<OnlinePayment>,
     @InjectRepository(Order) public readonly orders: Repository<Order>,
-  ) {
+    @InjectRepository(ZelleConf) public readonly zelleConfs: Repository<ZelleConf>,
+  ) {}
+
+  async onModuleInit() {
+    try {
+      await this.em.query(`CREATE EXTENSION IF NOT EXISTS unaccent;`);
+      console.log('Extension unaccent creada o ya existe.');
+    } catch (error) {
+      console.error('Error creando extensión unaccent:', error);
+    }
   }
 }

@@ -1,18 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  IsBoolean,
   IsEmail,
   IsEnum,
-  IsInt,
-  IsNotEmpty,
+  IsNotEmpty, IsOptional,
   IsString,
-  Length,
   Matches,
   MaxLength,
-  Min,
   MinLength,
 } from 'class-validator';
 import { Role } from '../../../auth/decorators/roles.decorator';
+import { Transform } from 'class-transformer';
 
 export default class UserInDto {
   @ApiProperty()
@@ -36,6 +33,7 @@ export default class UserInDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsEnum(Role)
+  @Transform(({ value }) => value as Role)
   role: Role;
 
   @ApiProperty()
@@ -63,4 +61,8 @@ export default class UserInDto {
     message: 'password must contain at least one uppercase letter.',
   })
   password: string;
+
+  @ApiProperty({type: 'string', format: 'binary', required: false })
+  @IsOptional()
+  image?: Express.Multer.File;
 }

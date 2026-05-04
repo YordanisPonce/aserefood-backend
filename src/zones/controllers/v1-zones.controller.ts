@@ -1,6 +1,7 @@
 import {
   Body,
-  Controller, Delete,
+  Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -12,27 +13,26 @@ import {
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
-  ApiBearerAuth, ApiConflictResponse, ApiCreatedResponse, ApiForbiddenResponse,
+  ApiBearerAuth,
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
-  ApiTags, ApiUnauthorizedResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { CacheInterceptor } from '@nestjs/cache-manager';
-import MunicipalitiesService from '../../municipalities/services/municipalities.service';
 import ZonesService from '../services/zones.service';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
-import MunicipalityOutDto from '../../municipalities/dto/out/municipality.out.dto';
-import MunicipalitySearchInDto from '../../municipalities/dto/in/municipality.search.in.dto';
 import ZoneOutDto from '../dto/out/zone.out.dto';
 import ZoneSearchInDto from '../dto/in/zone.search.in.dto';
 import ZoneWithMunicipalitiesOutDto from '../dto/out/zone-with-municipalities.out.dto';
 import { Role, Roles } from '../../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
-import MunicipalityInDto from '../../municipalities/dto/in/municipality.in.dto';
 import ZoneInDto from '../dto/in/zone.in.dto';
-import MunicipalityUpdateInDto from '../../municipalities/dto/in/municipality.update.in.dto';
 import ZoneUpdateInDto from '../dto/in/zone.update.in.dto';
 
 @Controller('v1/zones')
@@ -106,13 +106,14 @@ export default class V1ZonesController {
   @ApiBearerAuth()
   @ApiOkResponse({ description: 'Ok' })
   @ApiConflictResponse({
-    description: 'Conflict (Zone with Inventory Entries or Product Combos Associated)',
+    description:
+      'Conflict (Zone with Inventory Entries or Product Combos Associated)',
   })
   @ApiNotFoundResponse({ description: 'Not Found' })
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  @ApiOperation({ summary: 'Delete PERMANENTLY a Zone by its id.' })
+  @ApiOperation({ summary: 'Delete PERMANENTLY a Zone by its id. For better integrity change isActive in PATCH' })
   async delete(@Param('id', ParseIntPipe) id: number) {
     return this.zonesService.delete(id);
   }

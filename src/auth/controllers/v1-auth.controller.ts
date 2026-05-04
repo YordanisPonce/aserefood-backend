@@ -2,15 +2,17 @@ import {
   Body,
   Controller,
   Post,
+  Request, UploadedFile,
   UseGuards,
   UseInterceptors,
-  Request,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
-  ApiBearerAuth, ApiConflictResponse,
+  ApiBearerAuth,
+  ApiConflictResponse, ApiConsumes,
   ApiCreatedResponse,
-  ApiForbiddenResponse, ApiNotFoundResponse,
+  ApiForbiddenResponse,
+  ApiNotFoundResponse,
   ApiOperation,
   ApiTags,
   ApiUnauthorizedResponse,
@@ -30,6 +32,8 @@ import ConfirmAccountInDto from '../dto/in/confirm-account.in.dto';
 import ForgotPasswordInDto from '../dto/in/forgot-password.in.dto';
 import ResetPasswordInDto from '../dto/in/reset-password.in.dto';
 import CustomerOutDto from '../dto/out/customer.out.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ImageFileValidationPipe } from '../../utils/pipes/image-file-validation.pipe';
 
 @Controller('v1/auth')
 @ApiTags('auth')
@@ -108,16 +112,19 @@ export default class AuthController {
   }
 
   @Post('register')
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('image'))
   @ApiCreatedResponse({
     description: 'Register Customer Successful',
     type: CustomerOutDto,
   })
   @ApiConflictResponse({
-    description: 'Conflict with Username or Email'
+    description: 'Conflict with Username or Email',
   })
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiOperation({ summary: 'Register Customer' })
-  async register(@Body() dto: RegisterInDto): Promise<CustomerOutDto> {
+  async register(@Body() dto: RegisterInDto, @UploadedFile(new ImageFileValidationPipe()) image: Express.Multer.File): Promise<CustomerOutDto> {
+    dto.image = image;
     return this.authService.register(dto);
   }
 

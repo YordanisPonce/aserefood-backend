@@ -1,17 +1,32 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { json, urlencoded } from 'express';
 import helmet from 'helmet';
 import AdminSeederService from './users/seeders/admin-seeder.service';
+import * as basicAuth from "express-basic-auth";
 
 async function bootstrap() {
   const logger = new Logger('AppBootstrap');
   const app = await NestFactory.create(AppModule);
   const config = app.get<ConfigService>(ConfigService);
   const port = config.get<number>('APP_PORT');
+
+  const swaggerPassword = app.get(ConfigService).get('SWAGGER_PASSWORD');
+  const nodeEnv = app.get(ConfigService).get('NODE_ENV');
+  if (nodeEnv !== 'development' && nodeEnv !== 'staging') {
+    app.use(
+      ['/swagger', '/swagger-json'],
+      basicAuth({
+        challenge: true,
+        users: {
+          admin: swaggerPassword,
+        },
+      }),
+    );
+  } 
 
   const options = new DocumentBuilder()
     .setTitle('Asere Food API')
@@ -37,7 +52,7 @@ async function bootstrap() {
   });
   doc.components.schemas = sortedSchemas;
 
-  SwaggerModule.setup('swagger', app, doc);
+  SwaggerModule.setup('/swagger', app, doc);
 
   app.enableCors();
   app.enableShutdownHooks();

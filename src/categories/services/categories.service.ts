@@ -12,6 +12,7 @@ import CategoryInDto from '../dto/in/category.in.dto';
 import Category from '../../database/entities/category.entity';
 import createPatchFields from '../../utils/dto/patch-fields.util';
 import CategoryUpdateInDto from '../dto/in/category.update.in.dto';
+import { Brackets } from 'typeorm';
 
 @Injectable()
 export default class CategoriesService {
@@ -24,11 +25,30 @@ export default class CategoriesService {
   ): Promise<PaginatedOutDto<CategoryOutDto>> {
     const queryBuilder = this.pgService.categories
       .createQueryBuilder('category')
-      .leftJoinAndSelect('category.children', 'children');
+      .leftJoinAndSelect('category.parent', 'parent1')
+      .leftJoinAndSelect('parent1.parent', 'parent2')
+      .leftJoinAndSelect('parent2.parent', 'parent3')
+      .leftJoinAndSelect('parent3.parent', 'parent4')
+      .leftJoinAndSelect('parent4.parent', 'parent5')
+      .leftJoinAndSelect('category.children', 'children1')
+      .leftJoinAndSelect('children1.children', 'children2')
+      .leftJoinAndSelect('children2.children', 'children3')
+      .leftJoinAndSelect('children3.children', 'children4')
+      .leftJoinAndSelect('children4.children', 'children5')
+      .leftJoinAndSelect('category.products', 'product')
+      .leftJoinAndSelect('parent1.products', 'productP1')
+      .leftJoinAndSelect('parent2.products', 'productP2')
+      .leftJoinAndSelect('parent3.products', 'productP3')
+      .leftJoinAndSelect('parent4.products', 'productP4')
+      .leftJoinAndSelect('children1.products', 'productC1')
+      .leftJoinAndSelect('children2.products', 'productC2')
+      .leftJoinAndSelect('children3.products', 'productC3')
+      .leftJoinAndSelect('children4.products', 'productC4');
 
     if (dto.search) {
       queryBuilder.where(
-        'category.name ILIKE :search OR category.description ILIKE :search',
+        `unaccent(category.name) ILIKE unaccent(:search) 
+     OR unaccent(category.description) ILIKE unaccent(:search)`,
         {
           search: `%${dto.search}%`,
         },
@@ -46,6 +66,22 @@ export default class CategoriesService {
 
     if (dto.isFlat.valueOf()) {
       queryBuilder.andWhere('category.parentId IS NULL');
+    }
+
+    if (dto.isService !== undefined && dto.isService !== null) {
+      queryBuilder.andWhere(
+        new Brackets(qb => {
+          qb.where('product.isService = :isService', { isService: dto.isService })
+            .orWhere('productP1.isService = :isService', { isService: dto.isService })
+            .orWhere('productP2.isService = :isService', { isService: dto.isService })
+            .orWhere('productP3.isService = :isService', { isService: dto.isService })
+            .orWhere('productP4.isService = :isService', { isService: dto.isService })
+            .orWhere('productC1.isService = :isService', { isService: dto.isService })
+            .orWhere('productC2.isService = :isService', { isService: dto.isService })
+            .orWhere('productC3.isService = :isService', { isService: dto.isService })
+            .orWhere('productC4.isService = :isService', { isService: dto.isService });
+        }),
+      );
     }
 
     // Ordering
@@ -73,9 +109,12 @@ export default class CategoriesService {
     };
   }
 
-  async getAll(): Promise<CategoryOutDto[]>{
+  async getAll(): Promise<CategoryOutDto[]> {
     const categories = await this.pgService.categories.find({
-      relations: ['children'],
+      relations: [
+        'children.children.children.children.children',
+        'parent.parent.parent.parent.parent',
+      ],
     });
 
     return categories.map((category) => this.toOutDto(category));
@@ -84,12 +123,31 @@ export default class CategoriesService {
   async getById(id: number): Promise<CategoryOutDto> {
     const category = await this.pgService.categories.findOne({
       where: { id },
-      relations: ['children'],
+      relations: [
+        'children.children.children.children.children',
+        'parent.parent.parent.parent.parent',
+      ],
     });
     if (!category) {
       throw new NotFoundException(`Category with ID ${id} not found`);
     }
     return this.toOutDto(category);
+  }
+
+  async getAncestors(id: number): Promise<CategoryOutDto[]> {
+    const ancestors: CategoryOutDto[] = [];
+
+    let currentCategory = await this.pgService.categories.findOne({
+      where: { id },
+      relations: ['parent.parent.parent.parent.parent'],
+    });
+
+    while (currentCategory) {
+      ancestors.unshift(this.toOutDto(currentCategory));
+      currentCategory = currentCategory.parent;
+    }
+
+    return ancestors;
   }
 
   async post(dto: CategoryInDto): Promise<CategoryOutDto> {
@@ -136,7 +194,7 @@ export default class CategoriesService {
       throw new NotFoundException(`Category with ID ${id} not found`);
     }
 
-    let patchDto = createPatchFields(dto);
+    const patchDto = createPatchFields(dto);
 
     await this.pgService.categories.update(id, patchDto);
     this.logger.log(`Updated category with ID ${id}`);
@@ -172,6 +230,7 @@ export default class CategoriesService {
     dto.name = category.name;
     dto.description = category.description;
     dto.parentId = category.parentId;
+    dto.parentName = category.parent?.name ?? '';
 
     if (category.children && category.children.length > 0) {
       dto.children = category.children.map((child) => this.toOutDto(child));
@@ -181,5 +240,4 @@ export default class CategoriesService {
 
     return dto;
   }
-  
 }

@@ -1,15 +1,15 @@
 import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity({ name: 'currencies' })
-export default class Currency{
+export default class Currency {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column('character varying', {length: 255})
-  @Index({unique: true})
+  @Column('character varying', { length: 255 })
+  @Index({ unique: true })
   code: string;
 
-  @Column('character varying', {length: 255})
+  @Column('character varying', { length: 255 })
   name: string;
 
   @Column('boolean')

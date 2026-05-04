@@ -13,6 +13,7 @@ import RegisterInDto from '../dto/in/register.in.dto';
 import ResetPasswordInDto from '../dto/in/reset-password.in.dto';
 import MailService from '../../mail/services/mail.service';
 import CustomerOutDto from '../dto/out/customer.out.dto';
+import MinioService from '../../minio/services/minio.service';
 
 @Injectable()
 export default class AuthService {
@@ -22,6 +23,7 @@ export default class AuthService {
     private readonly jwtService: JwtService,
     private readonly pgService: PgService,
     private readonly mailService: MailService,
+    private readonly minioService: MinioService,
   ) {}
 
   async login(email: string, password: string) {
@@ -33,7 +35,7 @@ export default class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    if(!user.isConfirmed){
+    if (!user.isConfirmed) {
       throw new UnauthorizedException('Non confirmed account');
     }
 
@@ -48,7 +50,7 @@ export default class AuthService {
     const accessToken = this.jwtService.sign(payload);
     const refreshToken = this.jwtService.sign(
       { sub: user.id },
-      { expiresIn: '30d' },
+      { expiresIn: '400y' },
     );
 
     const rt = await this.pgService.refreshTokens.findOne({
@@ -106,7 +108,7 @@ export default class AuthService {
       const accessToken = this.jwtService.sign(newPayload);
       const refreshToken = this.jwtService.sign(
         { sub: user.id },
-        { expiresIn: '30d' },
+        { expiresIn: '400y' },
       );
 
       if (!rt) {
@@ -238,6 +240,16 @@ export default class AuthService {
       );
     }
 
+    let image = null;
+    if(dto.image){
+      image = await this.minioService.uploadFile(
+        undefined,
+        dto.image.buffer,
+        dto.image.originalname.split('.').pop(),
+        dto.image.mimetype,
+      );
+    }
+
     const newUser = this.pgService.users.create({
       username: dto.username,
       email: dto.email,
@@ -248,6 +260,7 @@ export default class AuthService {
       isConfirmed: false,
       lastnames: dto.lastnames,
       phoneNumber: dto.phoneNumber,
+      image: image,
     });
 
     await this.pgService.users.save(newUser);

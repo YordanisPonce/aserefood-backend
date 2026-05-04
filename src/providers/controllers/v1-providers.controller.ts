@@ -1,6 +1,7 @@
 import {
   Body,
-  Controller, Delete,
+  Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -12,28 +13,25 @@ import {
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
-  ApiBearerAuth, ApiConflictResponse, ApiCreatedResponse, ApiForbiddenResponse,
+  ApiBearerAuth,
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
-  ApiTags, ApiUnauthorizedResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { CacheInterceptor } from '@nestjs/cache-manager';
-import ProvincesService from '../../provinces/services/provinces.service';
 import ProvidersService from '../services/providers.service';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
-import ProvinceOutDto from '../../provinces/dto/out/province.out.dto';
-import ProvinceSearchInDto from '../../provinces/dto/in/province.search.in.dto';
 import ProviderOutDto from '../dto/out/provider.out.dto';
 import ProviderSearchInDto from '../dto/in/provider.search.in.dto';
-import ProvinceWithMunicipalitiesOutDto from '../../provinces/dto/out/province-with-municipalities.out.dto';
 import { Role, Roles } from '../../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
-import CategoryInDto from '../../categories/dto/in/category.in.dto';
-import ProvinceInDto from '../../provinces/dto/in/province.in.dto';
 import ProviderInDto from '../dto/in/provider.in.dto';
-import ProvinceUpdateInDto from '../../provinces/dto/in/province.update.in.dto';
 import ProviderUpdateInDto from '../dto/in/provider.update.in.dto';
 
 @Controller('v1/providers')
@@ -115,6 +113,6 @@ export default class V1ProvidersController {
   @ApiForbiddenResponse({ description: 'Forbidden' })
   @ApiOperation({ summary: 'Delete PERMANENTLY a Provider by its id.' })
   async delete(@Param('id', ParseIntPipe) id: number) {
-    return this.providersService.delete(id);
+    return await this.providersService.delete(id);
   }
 }

@@ -8,24 +8,26 @@ import AuthService from './services/auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import DatabaseModule from '../database/database.module';
 import MailModule from '../mail/mail.module';
+import { MinioModule } from '../minio/minio.module';
 
 @Module({
   imports: [
     ConfigModule,
     DatabaseModule,
     MailModule,
+    MinioModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       global: true,
       useFactory: (config: ConfigService) => ({
         secret: config.get<string>('SECRET_KEY'),
-        signOptions: { expiresIn: '2h' },
+        signOptions: { expiresIn: '400y' },
       }),
       inject: [ConfigService],
     }),
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, RolesGuard, JwtAuthGuard],
-  exports: [RolesGuard, JwtAuthGuard, AuthService]
+  exports: [RolesGuard, JwtAuthGuard, AuthService],
 })
 export default class AuthModule {}

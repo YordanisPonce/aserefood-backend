@@ -1,28 +1,60 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import TransferPayment from './transfer-payment.entity';
 import OnlinePayment from './online-payment.entity';
 import User from './user.entity';
 import ContactInfo from './contact-info.entity';
 import { OrderStatus } from './constants';
-import OrderProducts from './order-product.entity';
+import OrderItems from './order-item.entity';
+import { DeliveryMethod } from './delivery-method.entity';
+import Municipality from './municipality.entity';
 
 @Entity({ name: 'orders' })
-export default class Order{
+export default class Order {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @OneToOne(() => TransferPayment, transferPayment => transferPayment.order, { onDelete: 'SET NULL', nullable: true })
+  @Column({ nullable: true })
+  transferPaymentId?: number;
+
+  @OneToOne(() => TransferPayment, (transferPayment) => transferPayment.order, {
+    onDelete: 'SET NULL',
+    nullable: true,
+  })
   @JoinColumn()
   transferPayment?: TransferPayment;
 
-  @OneToOne(() => OnlinePayment, onlinePayment => onlinePayment.order, { onDelete: 'SET NULL', nullable: true })
+  @Column({ nullable: true })
+  onlinePaymentId?: number;
+
+  @OneToOne(() => OnlinePayment, (onlinePayment) => onlinePayment.order, {
+    onDelete: 'SET NULL',
+    nullable: true,
+  })
   @JoinColumn()
   onlinePayment?: OnlinePayment;
 
-  @ManyToOne(() => User, (user) => user.orders, {onDelete: 'CASCADE' })
+  @Column()
+  userId: number;
+
+  @ManyToOne(() => User, (user) => user.orders, { onDelete: 'CASCADE' })
   user: User;
 
-  @ManyToOne(() => ContactInfo, (contactInfo) => contactInfo.orders, {onDelete: 'CASCADE' })
+  @Column()
+  contactInfoId: number;
+
+  @ManyToOne(() => ContactInfo, (contactInfo) => contactInfo.orders, {
+    onDelete: 'CASCADE',
+  })
   contactInfo: ContactInfo;
 
   @Column({
@@ -31,12 +63,32 @@ export default class Order{
   })
   status: OrderStatus;
 
-  @Column({ type: 'timestamp' })
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdDate: Date;
 
-  @OneToMany(() => OrderProducts, (orderItem) => orderItem.order)
-  orderItems: OrderProducts[];
+  @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  updatedDate: Date;
+
+  @OneToMany(() => OrderItems, (orderItem) => orderItem.order, {
+    cascade: true,
+  })
+  orderItems: OrderItems[];
 
   @Column('decimal', { precision: 10, scale: 2, nullable: true })
   totalAmount?: number;
+
+  @Column()
+  deliveryMethodId: number;
+
+  @ManyToOne(() => DeliveryMethod, (deliveryMethod) => deliveryMethod.orders)
+  deliveryMethod: DeliveryMethod;
+
+  @ManyToOne(() => Municipality, (municipality) => municipality.orders, {
+    onDelete: 'CASCADE',
+    nullable: true
+  })
+  municipality?: Municipality;
+
+  @Column({nullable: true})
+  municipalityId: number;
 }

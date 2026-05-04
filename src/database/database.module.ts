@@ -23,7 +23,8 @@ import CartProduct from './entities/cart-product.entity';
 import OnlinePayment from './entities/online-payment.entity';
 import TransferPayment from './entities/transfer-payment.entity';
 import Order from './entities/order.entity';
-import OrderProducts from './entities/order-product.entity';
+import OrderItems from './entities/order-item.entity';
+import ZelleConf from './entities/zelle-conf.entity';
 
 @Module({
   imports: [
@@ -60,9 +61,10 @@ import OrderProducts from './entities/order-product.entity';
           OnlinePayment,
           TransferPayment,
           Order,
-          OrderProducts,
-        ]
-      })
+          OrderItems,
+          ZelleConf
+        ],
+      }),
     }),
     TypeOrmModule.forFeature([
       User,
@@ -86,8 +88,9 @@ import OrderProducts from './entities/order-product.entity';
       OnlinePayment,
       TransferPayment,
       Order,
-      OrderProducts,
-    ])
+      OrderItems,
+      ZelleConf
+    ]),
   ],
   exports: [PgService],
   providers: [PgService],

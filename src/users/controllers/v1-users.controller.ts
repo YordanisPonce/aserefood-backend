@@ -7,16 +7,20 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
+  Request, UploadedFile,
   UseGuards,
   UseInterceptors,
-  Request, Query,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import {
   ApiBadRequestResponse,
-  ApiBearerAuth, ApiConflictResponse, ApiCreatedResponse,
-  ApiForbiddenResponse, ApiNotFoundResponse,
+  ApiBearerAuth,
+  ApiConflictResponse, ApiConsumes,
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -30,6 +34,9 @@ import UserInDto from '../dto/in/user.in.dto';
 import UserUpdateInDto from '../dto/in/user.update.in.dto';
 import UserSearchInDto from '../dto/in/user.search.in.dto';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ImageFileValidationPipe } from '../../utils/pipes/image-file-validation.pipe';
+import UserMeUpdateInDto from '../dto/in/user-me.update.in.dto';
 
 @Controller('v1/users')
 @ApiTags('users')
@@ -44,73 +51,115 @@ export default class V1UsersController {
   @Get('')
   @Roles(Role.Admin)
   @ApiOkResponse({ description: 'Ok', type: PaginatedOutDto<UserOutDto> })
-  @ApiOperation({ summary: 'Get Users with Filtering, Ordering and Pagination' })
-  async get(@Query() dto: UserSearchInDto): Promise<PaginatedOutDto<UserOutDto>> {
+  @ApiOperation({
+    summary: 'Get Users with Filtering, Ordering and Pagination',
+  })
+  async get(
+    @Query() dto: UserSearchInDto,
+  ): Promise<PaginatedOutDto<UserOutDto>> {
     return this.usersService.search(dto);
   }
 
   @Get('/all')
   @Roles(Role.Admin)
-  @ApiOkResponse({description: "Ok", type: [UserOutDto]})
-  @ApiOperation({summary: 'Get all Users'})
-  async getAll(){
+  @ApiOkResponse({ description: 'Ok', type: [UserOutDto] })
+  @ApiOperation({ summary: 'Get all Users' })
+  async getAll() {
     return this.usersService.getAll();
+  }
+
+  @Post('/me')
+  @Roles(Role.Admin, Role.Customer)
+  @ApiCreatedResponse({ description: 'Current user', type: UserOutDto })
+  @ApiNotFoundResponse({ description: 'Not Found' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiOperation({ summary: 'Get the current user by username from JWT' })
+  async getMe(@Request() req): Promise<UserOutDto> {
+    const username = req.user.username;
+    return this.usersService.getByUsername(username);
+  }
+
+  @Patch('/me')
+  @Roles(Role.Admin, Role.Customer)
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiOkResponse({ description: 'Ok' })
+  @ApiNotFoundResponse({ description: 'Not Found' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiConflictResponse({
+    description: 'Conflict (Other user with Username or Email)',
+  })
+  @ApiOperation({ summary: 'Update current User' })
+  async putMe(
+    @Request() req,
+    @Body() dto: UserMeUpdateInDto,
+    @UploadedFile(new ImageFileValidationPipe()) image: Express.Multer.File
+  ) {
+    const userId = req.user.userId;
+    dto.image = image;
+    return this.usersService.patch(userId, dto);
   }
 
   @Get('/:id')
   @Roles(Role.Admin)
-  @ApiOkResponse({description: "Ok", type: UserOutDto})
-  @ApiNotFoundResponse({description: "Not Found"})
-  @ApiBadRequestResponse({description: "Bad Request"})
-  @ApiOperation({summary: 'Get a User by its id'})
-  async getById(@Param('id', ParseIntPipe) id: number){
+  @ApiOkResponse({ description: 'Ok', type: UserOutDto })
+  @ApiNotFoundResponse({ description: 'Not Found' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiOperation({ summary: 'Get a User by its id' })
+  async getById(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.getById(id);
   }
 
   @Post('')
   @Roles(Role.Admin)
-  @ApiCreatedResponse({description: "Ok", type: UserOutDto})
-  @ApiBadRequestResponse({description: "Bad Request"})
-  @ApiConflictResponse({description: 'Conflict (Other user with Username or Email)'})
-  @ApiOperation({summary: 'Create a new User if does not exist'})
-  async post(@Body() dto: UserInDto){
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiCreatedResponse({ description: 'Ok', type: UserOutDto })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiConflictResponse({
+    description: 'Conflict (Other user with Username or Email)',
+  })
+  @ApiOperation({ summary: 'Create a new User if does not exist' })
+  async post(@Body() dto: UserInDto, @UploadedFile(new ImageFileValidationPipe()) image: Express.Multer.File) {
+    dto.image = image;
     return this.usersService.post(dto);
   }
 
   @Patch('/:id')
   @Roles(Role.Admin)
-  @ApiOkResponse({description: "Ok"})
-  @ApiNotFoundResponse({description: "Not Found"})
-  @ApiBadRequestResponse({description: "Bad Request"})
-  @ApiConflictResponse({description: "Conflict (Other user with Username or Email)"})
-  @ApiOperation({summary: 'Update a User by its id'})
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiOkResponse({ description: 'Ok' })
+  @ApiNotFoundResponse({ description: 'Not Found' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiConflictResponse({
+    description: 'Conflict (Other user with Username or Email)',
+  })
+  @ApiOperation({ summary: 'Update a User by its id' })
   async put(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UserUpdateInDto,
-  ){
+    @UploadedFile(new ImageFileValidationPipe()) image: Express.Multer.File
+  ) {
+    dto.image = image;
     return this.usersService.patch(id, dto);
   }
 
   @Delete('/:id')
   @Roles(Role.Admin)
-  @ApiOkResponse({description: "Ok"})
-  @ApiConflictResponse({description: "Conflict (Current user cannot be deleted or User with Pending Orders)"})
-  @ApiNotFoundResponse({description: "Not Found"})
-  @ApiBadRequestResponse({description: "Bad Request"})
-  @ApiOperation({summary: 'Delete PERMANENTLY a User by its id. For better integrity change isActive in PATCH'})
-  async delete(@Param('id', ParseIntPipe) id: number, @Request() req){
+  @ApiOkResponse({ description: 'Ok' })
+  @ApiConflictResponse({
+    description:
+      'Conflict (Current user cannot be deleted or User with Pending Orders)',
+  })
+  @ApiNotFoundResponse({ description: 'Not Found' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiOperation({
+    summary:
+      'Delete PERMANENTLY a User by its id. For better integrity change isActive in PATCH',
+  })
+  async delete(@Param('id', ParseIntPipe) id: number, @Request() req) {
     const username = req.user.username;
     return this.usersService.delete(id, username);
-  }
-
-  @Post('/me')
-  @Roles(Role.Admin, Role.Customer)
-  @ApiCreatedResponse({description: "Current user", type: UserOutDto})
-  @ApiNotFoundResponse({description: "Not Found"})
-  @ApiBadRequestResponse({description: "Bad Request"})
-  @ApiOperation({summary: 'Get the current user by username from JWT'})
-  async getMe(@Request() req): Promise<UserOutDto> {
-    const username = req.user.username;
-    return this.usersService.getByUsername(username);
   }
 }

@@ -8,7 +8,6 @@ import {
   Patch,
   Post,
   Query,
-  Request,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -29,12 +28,9 @@ import { RolesGuard } from '../../auth/guards/roles.guard';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import { Role, Roles } from '../../auth/decorators/roles.decorator';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
-import UserOutDto from '../../users/dto/out/user.out.dto';
-import UserSearchInDto from '../../users/dto/in/user.search.in.dto';
 import CategoryOutDto from '../dto/out/category.out.dto';
 import CategorySearchInDto from '../dto/in/category.search.in.dto';
 import CategoriesService from '../services/categories.service';
-import UserInDto from '../../users/dto/in/user.in.dto';
 import CategoryInDto from '../dto/in/category.in.dto';
 import CategoryUpdateInDto from '../dto/in/category.update.in.dto';
 
@@ -60,6 +56,15 @@ export default class V1CategoriesController {
   @ApiOperation({ summary: 'Get all Categories' })
   async getAll() {
     return this.categoriesService.getAll();
+  }
+
+  @Get('/ancestors/:id')
+  @ApiOkResponse({ description: 'Ok', type: [CategoryOutDto] })
+  @ApiNotFoundResponse({ description: 'Not Found' })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  @ApiOperation({ summary: 'Get ancestor categories of an specific category' })
+  async getAncestors(@Param('id', ParseIntPipe) id: number) {
+    return this.categoriesService.getAncestors(id);
   }
 
   @Get('/:id')

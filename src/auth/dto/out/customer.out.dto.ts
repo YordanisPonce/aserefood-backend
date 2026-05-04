@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Role } from '../../decorators/roles.decorator';
 
-export default class CustomerOutDto{
+export default class CustomerOutDto {
   @ApiProperty()
   id: number;
 
@@ -28,4 +28,7 @@ export default class CustomerOutDto{
 
   @ApiProperty()
   isConfirmed: boolean;
+
+  @ApiProperty({nullable: true})
+  image?: string;
 }

@@ -7,26 +7,24 @@ import {
 } from '@nestjs/common';
 import PgService from '../../database/services/pg.service';
 import ProvidersService from '../../providers/services/providers.service';
-import Zone from '../../database/entities/zone.entity';
-import ZoneOutDto from '../../zones/dto/out/zone.out.dto';
-import ZoneWithMunicipalitiesOutDto from '../../zones/dto/out/zone-with-municipalities.out.dto';
 import Product from '../../database/entities/product.entity';
 import ProductOutDto from '../dto/out/product.out.dto';
 import ProductWithProvidersOutDto from '../dto/out/product-with-providers.out.dto';
-import ZoneUpdateInDto from '../../zones/dto/in/zone.update.in.dto';
 import { In } from 'typeorm';
 import ProductUpdateInDto from '../dto/in/product.update.in.dto';
-import ZoneInDto from '../../zones/dto/in/zone.in.dto';
 import ProductInDto from '../dto/in/product.in.dto';
-import ZoneSearchInDto from '../../zones/dto/in/zone.search.in.dto';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
 import ProductSearchInDto from '../dto/in/product.search.in.dto';
+import MinioService from '../../minio/services/minio.service';
 
 @Injectable()
 export default class ProductsService {
   private readonly logger = new Logger(ProvidersService.name);
 
-  constructor(private readonly pgService: PgService) {}
+  constructor(
+    private readonly pgService: PgService,
+    private readonly minioService: MinioService,
+  ) {}
 
   async search(
     dto: ProductSearchInDto,
@@ -34,21 +32,21 @@ export default class ProductsService {
     const queryBuilder = this.pgService.products
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.providers', 'provider')
-      .leftJoinAndSelect('product.category', 'category');
+      .leftJoinAndSelect('product.categories', 'category');
 
     // Filtering
     if (dto.search) {
       queryBuilder.where(
-        'product.name ILIKE :search OR product.description ILIKE :search OR product.shortDescription ILIKE :search',
+        'unaccent(product.name) ILIKE unaccent(:search) OR unaccent(product.description) ILIKE unaccent(:search) OR unaccent(product.shortDescription) ILIKE unaccent(:search)',
         {
           search: `%${dto.search}%`,
         },
       );
     }
 
-    if (dto.categoryId) {
-      queryBuilder.andWhere('category.id = :categoryId', {
-        categoryId: dto.categoryId,
+    if (dto.categoryIds && dto.categoryIds.length > 0) {
+      queryBuilder.andWhere('category.id IN (:...categoryIds)', {
+        categoryIds: dto.categoryIds,
       });
     }
 
@@ -59,7 +57,7 @@ export default class ProductsService {
     }
 
     if (dto.isService !== undefined && dto.isService !== null) {
-      queryBuilder.andWhere('provider.isService = :isService', {
+      queryBuilder.andWhere('product.isService = :isService', {
         isService: dto.isService,
       });
     }
@@ -76,8 +74,13 @@ export default class ProductsService {
       .take(dto.pageSize)
       .getManyAndCount();
 
+    const data: ProductOutDto[] = []
+    for (const item of result) {
+      data.push(await this.toOutDto(item));
+    }
+
     return {
-      data: result.map((m) => this.toOutDto(m)),
+      data: data,
       total,
       page: dto.page,
       pageSize: dto.pageSize,
@@ -90,17 +93,22 @@ export default class ProductsService {
     const products = await this.pgService.products
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.providers', 'provider')
-      .leftJoinAndSelect('product.category', 'category')
+      .leftJoinAndSelect('product.categories', 'category')
       .getMany();
 
-    return products.map(x => this.toOutWithProvidersDto(x));
+    const data: ProductWithProvidersOutDto[] = []
+    for (const item of products) {
+      data.push(await this.toOutWithProvidersDto(item));
+    }
+
+    return data;
   }
 
   async getById(id: number): Promise<ProductWithProvidersOutDto> {
     const product = await this.pgService.products
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.providers', 'provider')
-      .leftJoinAndSelect('product.category', 'category')
+      .leftJoinAndSelect('product.categories', 'category')
       .where('product.id = :id', { id })
       .getOne();
 
@@ -130,13 +138,29 @@ export default class ProductsService {
       throw new BadRequestException('Non Valid Associated Providers');
     }
 
+    const categories = await this.pgService.categories.findBy({
+      id: In(dto.categoryIds),
+    });
+
+    if(categories.length === 0) {
+      throw new BadRequestException('Non Valid Associated Categories');
+    }
+
+    const image = await this.minioService.uploadFile(
+      undefined,
+      dto.image.buffer,
+      dto.image.originalname.split('.').pop(),
+      dto.image.mimetype,
+    );
+
     const newProduct = this.pgService.products.create({
       name: dto.name,
       description: dto.description,
       shortDescription: dto.shortDescription,
       isService: dto.isService,
-      categoryId: dto.categoryId,
+      categories: categories,
       providers: providers,
+      image: image
     });
     await this.pgService.products.save(newProduct);
 
@@ -183,13 +207,29 @@ export default class ProductsService {
     };
     patchDto = {
       ...patchDto,
-      ...(dto.categoryId ? { categoryId: dto.categoryId } : {}),
+      ...((dto.isService !== undefined && dto.isService !== null) ? { isService: dto.isService } : {}),
     };
+
+    let image = undefined;
+    if (dto.image) {
+      image = await this.minioService.uploadFile(
+        product.image ?? undefined,
+        dto.image.buffer,
+        undefined,
+        dto.image.mimetype,
+      );
+    }
     patchDto = {
       ...patchDto,
-      ...(dto.isService ? { isService: dto.isService } : {}),
-    };
+      ...(image && { image: image }),
+    }
+    await this.pgService.products.update(id, patchDto);
+
     if (dto.providerIds) {
+      const product = await this.pgService.products.findOne({
+        where: { id },
+      });
+
       const providers = await this.pgService.providers.findBy({
         id: In(dto.providerIds),
       });
@@ -198,16 +238,29 @@ export default class ProductsService {
         throw new BadRequestException('Non Valid Associated Providers');
       }
 
-      patchDto = {
-        ...patchDto,
-        ...{
-          providers: providers,
-        },
-      };
+      product.providers = providers;
+      await this.pgService.products.save(product);
     }
-    await this.pgService.products.update(id, patchDto);
+
+    if (dto.categoryIds) {
+      const product = await this.pgService.products.findOne({
+        where: { id },
+      });
+
+      const categories = await this.pgService.categories.findBy({
+        id: In(dto.categoryIds),
+      });
+
+      if (categories.length === 0) {
+        throw new BadRequestException('Non Valid Associated Categories');
+      }
+
+      product.categories = categories;
+      await this.pgService.products.save(product);
+    }
+
     this.logger.log(`Updated product with ID ${id}`);
-    this.logger.log({ ...patchDto });
+    this.logger.log({ ...dto });
   }
 
   async delete(id: number): Promise<void> {
@@ -244,18 +297,18 @@ export default class ProductsService {
           `Product with ID ${id} has Associated Product Combo Items`,
         );
       }
-      if (
-        productToDelete.shoppingCartItems &&
-        productToDelete.shoppingCartItems.length > 0
-      ) {
-        throw new ConflictException(
-          `Product with ID ${id} has Associated Shopping Cart Items`,
-        );
-      }
       if (productToDelete.orderItems && productToDelete.orderItems.length > 0) {
         throw new ConflictException(
           `Product with ID ${id} has Associated Order Items`,
         );
+      }
+      if (
+        productToDelete.shoppingCartItems &&
+        productToDelete.shoppingCartItems.length > 0
+      ) {
+        await this.pgService.shoppingCarts.delete({
+          productId: productToDelete.id
+        });
       }
     }
 
@@ -263,35 +316,47 @@ export default class ProductsService {
     if (result.affected === 0) {
       throw new NotFoundException(`Product with ID ${id} not found`);
     }
+
+    try {
+      await this.minioService.deleteFile(productToDelete?.image);
+    } catch (e) {
+      this.logger.error(e);
+    }
     this.logger.log(`Deleted Product with ID ${id}`);
   }
 
-  private toOutDto(product: Product): ProductOutDto {
+  private async toOutDto(product: Product): Promise<ProductOutDto> {
     const dto = new ProductOutDto();
     dto.id = product.id;
     dto.name = product.name;
     dto.description = product.description;
     dto.shortDescription = product.shortDescription;
     dto.isService = product.isService;
-    dto.categoryId = product.categoryId;
-    dto.categoryName = product.category?.name ?? '';
+    dto.categories = product.categories?.map(x => ({
+      id: x.id,
+      name: x.name,
+    })) ?? [];
+    dto.image = product.image ? await this.minioService.getPresignedUrl(product.image) : null;
 
     return dto;
   }
 
-  private toOutWithProvidersDto(product: Product): ProductWithProvidersOutDto {
+  private async toOutWithProvidersDto(product: Product): Promise<ProductWithProvidersOutDto> {
     const dto = new ProductWithProvidersOutDto();
     dto.id = product.id;
     dto.name = product.name;
     dto.description = product.description;
     dto.shortDescription = product.shortDescription;
     dto.isService = product.isService;
-    dto.categoryId = product.categoryId;
-    dto.categoryName = product.category.name;
+    dto.categories = product.categories?.map(x => ({
+      id: x.id,
+      name: x.name,
+    })) ?? [];
     dto.providers = product.providers.map((x) => ({
       id: x.id,
       name: x.name,
     }));
+    dto.image = product.image ? await this.minioService.getPresignedUrl(product.image) : null;
 
     return dto;
   }

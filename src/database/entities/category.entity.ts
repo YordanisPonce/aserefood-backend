@@ -2,9 +2,7 @@ import {
   Column,
   Entity,
   Index,
-  JoinColumn,
-  JoinTable,
-  ManyToMany,
+  JoinColumn, ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -12,24 +10,28 @@ import {
 import Product from './product.entity';
 
 @Entity({ name: 'categories' })
-export default class Category{
+export default class Category {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column('character varying', {length: 255})
-  @Index({unique: true})
+  @Column('character varying', { length: 255 })
+  @Index({ unique: true })
   name: string;
 
-  @Column('character varying', {length: 255, nullable: true})
-  description?: string
+  @Column('character varying', { length: 255, nullable: true })
+  description?: string;
 
-  @OneToMany(() => Product, (product) => product.category)
+  @ManyToMany(() => Product, (product) => product.categories)
   products: Product[];
 
   @Column({ name: 'parentId', nullable: true })
   parentId?: number;
 
-  @ManyToOne(() => Category, (category) => category.children, { nullable: true, onDelete: 'SET NULL' })
+  @ManyToOne(() => Category, (category) => category.children, {
+    cascade: true,
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
   @JoinColumn({ name: 'parentId' })
   parent?: Category;
 

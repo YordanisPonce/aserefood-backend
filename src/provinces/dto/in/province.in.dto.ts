@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
 
-export default class ProvinceInDto{
+export default class ProvinceInDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()

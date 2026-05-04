@@ -13,8 +13,9 @@ import UserSearchInDto from '../dto/in/user.search.in.dto';
 import PaginatedOutDto from '../../utils/dto/out/paginated.out.dto';
 import MailService from '../../mail/services/mail.service';
 import { JwtService } from '@nestjs/jwt';
-import createPatchFields from '../../utils/dto/patch-fields.util';
 import { OrderStatus } from '../../database/entities/constants';
+import MinioService from '../../minio/services/minio.service';
+import UserUpdateInternalInDto from '../dto/in/user.update.internal.in.dto';
 
 @Injectable()
 export default class UsersService {
@@ -24,6 +25,7 @@ export default class UsersService {
     private readonly jwtService: JwtService,
     private readonly pgService: PgService,
     private readonly mailService: MailService,
+    private readonly minioService: MinioService,
   ) {}
 
   public async search(
@@ -34,7 +36,7 @@ export default class UsersService {
     // Filtering
     if (dto.search) {
       queryBuilder.where(
-        'user.username ILIKE :search OR user.email ILIKE :search OR user.lastnames ILIKE :search OR user.name ILIKE :search',
+        'unaccent(user.username) ILIKE unaccent(:search) OR unaccent(user.email) ILIKE unaccent(:search) OR unaccent(user.lastnames) ILIKE unaccent(:search) OR unaccent(user.name) ILIKE unaccent(:search)',
         {
           search: `%${dto.search}%`,
         },
@@ -66,10 +68,13 @@ export default class UsersService {
       .take(dto.pageSize)
       .getManyAndCount();
 
-    const usersOut = result.map((user) => this.toOutDto(user));
+    const data: UserOutDto[] = []
+    for (const item of result) {
+      data.push(await this.toOutDto(item));
+    }
 
     return {
-      data: usersOut,
+      data: data,
       total,
       page: dto.page,
       pageSize: dto.pageSize,
@@ -79,10 +84,14 @@ export default class UsersService {
   }
 
   public async getAll(): Promise<UserOutDto[]> {
-    const users = await this.pgService.users.find({
-    });
+    const users = await this.pgService.users.find({});
 
-    return users.map((user) => this.toOutDto(user));
+    const data: UserOutDto[] = []
+    for (const user of users) {
+      data.push(await this.toOutDto(user));
+    }
+
+    return data;
   }
 
   public async getById(id: number): Promise<UserOutDto> {
@@ -134,6 +143,16 @@ export default class UsersService {
       );
     }
 
+    let image = null;
+    if(dto.image){
+      image = await this.minioService.uploadFile(
+        undefined,
+        dto.image.buffer,
+        dto.image.originalname.split('.').pop(),
+        dto.image.mimetype,
+      );
+    }
+
     const newUser = this.pgService.users.create({
       username: dto.username,
       email: dto.email,
@@ -144,6 +163,7 @@ export default class UsersService {
       isConfirmed: false,
       lastnames: dto.lastnames,
       phoneNumber: dto.phoneNumber,
+      image: image,
     });
     await this.pgService.users.save(newUser);
 
@@ -203,11 +223,31 @@ export default class UsersService {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
-    let patchDto = createPatchFields(dto);
+    let image = undefined;
+    if (dto.image) {
+      image = await this.minioService.uploadFile(
+        user.image ?? undefined,
+        dto.image.buffer,
+        undefined,
+        dto.image.mimetype,
+      );
+    }
 
-    await this.pgService.users.update(id, patchDto);
+    const patchDtoInternal: Partial<UserUpdateInternalInDto> = {
+      ...(dto.email && { email: dto.email }),
+      ...(dto.username && { username: dto.username }),
+      ...(image && { image: image }),
+      ...(dto.isActive !== undefined && { isActive: dto.isActive }),
+      ...(dto.isConfirmed !== undefined && { isConfirmed: dto.isConfirmed }),
+      ...(dto.name && { name: dto.name }),
+      ...(dto.role && { role: dto.role }),
+      ...(dto.phoneNumber && { phoneNumber: dto.phoneNumber }),
+      ...(dto.lastnames && { lastnames: dto.lastnames }),
+    };
+
+    await this.pgService.users.update(id, patchDtoInternal);
     this.logger.log(`Updated user with ID ${id}`);
-    this.logger.log({ ...patchDto });
+    this.logger.log({ ...patchDtoInternal });
   }
 
   public async delete(id: number, username: string): Promise<void> {
@@ -239,10 +279,17 @@ export default class UsersService {
     if (result.affected === 0) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
+
+    try {
+      await this.minioService.deleteFile(userToDelete?.image);
+    } catch (e) {
+      this.logger.error(e);
+    }
+
     this.logger.log(`Deleted user with ID ${id}`);
   }
 
-  private toOutDto(user: User): UserOutDto {
+  private async toOutDto(user: User): Promise<UserOutDto> {
     return {
       id: user.id,
       username: user.username,
@@ -253,6 +300,7 @@ export default class UsersService {
       isConfirmed: user.isConfirmed,
       lastnames: user.lastnames,
       phoneNumber: user.phoneNumber,
+      image: user.image ? await this.minioService.getPresignedUrl(user.image) : null,
     };
   }
 }
