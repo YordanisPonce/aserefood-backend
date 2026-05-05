@@ -47,8 +47,8 @@ export default class CategoriesService {
 
     if (dto.search) {
       queryBuilder.where(
-        `unaccent(category.name) ILIKE unaccent(:search) 
-     OR unaccent(category.description) ILIKE unaccent(:search)`,
+        `category.name LIKE :search
+     OR category.description LIKE :search`,
         {
           search: `%${dto.search}%`,
         },

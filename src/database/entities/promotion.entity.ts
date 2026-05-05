@@ -15,14 +15,14 @@ export default class Promotion {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column('character varying', { length: 255 })
+  @Column('varchar', { length: 255 })
   @Index({ unique: true })
   code: string;
 
-  @Column('character varying', { length: 255 })
+  @Column('varchar', { length: 255 })
   name: string;
 
-  @Column('character varying', { length: 255 })
+  @Column('varchar', { length: 255 })
   description: string;
 
   @Column({
@@ -40,10 +40,10 @@ export default class Promotion {
   @Column('boolean')
   isActive: boolean;
 
-  @Column({ type: 'timestamp' })
+  @Column({ type: 'datetime' })
   startDate: Date;
 
-  @Column({ type: 'timestamp' })
+  @Column({ type: 'datetime' })
   endDate: Date;
 
   @ManyToMany(() => Product, (product) => product.promotions)

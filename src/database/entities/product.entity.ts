@@ -21,11 +21,11 @@ export default class Product {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column('character varying', { length: 255 })
+  @Column('varchar', { length: 255 })
   @Index({ unique: true })
   name: string;
 
-  @Column('character varying', { length: 255 })
+  @Column('varchar', { length: 255 })
   shortDescription: string;
 
   @Column({ nullable: true })

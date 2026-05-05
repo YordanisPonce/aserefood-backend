@@ -21,23 +21,23 @@ export default class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column('character varying', { length: 255 })
+  @Column('varchar', { length: 255 })
   name: string;
 
-  @Column('character varying', { length: 255 })
+  @Column('varchar', { length: 255 })
   lastnames: string;
 
-  @Column('character varying', { length: 255 })
+  @Column('varchar', { length: 255 })
   username: string;
 
-  @Column('character varying', { length: 255 })
+  @Column('varchar', { length: 255 })
   @Index({ unique: true })
   email: string;
 
   @Column({nullable: true})
   image?: string;
 
-  @Column('character varying', { length: 255 })
+  @Column('varchar', { length: 255 })
   phoneNumber: string;
 
   @Column()

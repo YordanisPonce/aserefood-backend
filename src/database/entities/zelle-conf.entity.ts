@@ -5,7 +5,7 @@ export default class ZelleConf {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column('character varying', { length: 255 })
+  @Column('varchar', { length: 255 })
   phoneNumber: string;
 
   @Column()

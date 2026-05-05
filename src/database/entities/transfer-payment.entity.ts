@@ -6,7 +6,7 @@ export default class TransferPayment {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column('character varying', { length: 255, nullable: true })
+  @Column('varchar', { length: 255, nullable: true })
   referencePayment?: string;
 
   @OneToOne(() => Order, (order) => order.transferPayment, {

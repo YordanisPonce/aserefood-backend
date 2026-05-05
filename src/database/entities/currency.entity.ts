@@ -5,11 +5,11 @@ export default class Currency {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column('character varying', { length: 255 })
+  @Column('varchar', { length: 255 })
   @Index({ unique: true })
   code: string;
 
-  @Column('character varying', { length: 255 })
+  @Column('varchar', { length: 255 })
   name: string;
 
   @Column('boolean')

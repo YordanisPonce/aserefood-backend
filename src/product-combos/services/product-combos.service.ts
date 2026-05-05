@@ -37,7 +37,7 @@ export default class ProductCombosService {
     // Filtering
     if (dto.search) {
       queryBuilder.where(
-        'unaccent(productCombo.name) ILIKE unaccent(:search) OR unaccent(productCombo.description) ILIKE unaccent(:search) OR unaccent(productCombo.shortDescription) ILIKE unaccent(:search)',
+        'productCombo.name LIKE :search OR productCombo.description LIKE :search OR productCombo.shortDescription LIKE :search',
         {
           search: `%${dto.search}%`,
         },

@@ -14,13 +14,13 @@ export default class ContactInfo {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column('character varying', { length: 255 })
+  @Column('varchar', { length: 255 })
   name: string;
 
-  @Column('character varying', { length: 255 })
+  @Column('varchar', { length: 255 })
   phoneNumber: string;
 
-  @Column('character varying', { length: 255, nullable: true })
+  @Column('varchar', { length: 255, nullable: true })
   identificationNumber?: string;
 
   @Column()
@@ -31,7 +31,7 @@ export default class ContactInfo {
   })
   municipality: Municipality;
 
-  @Column('character varying', { length: 255 })
+  @Column('varchar', { length: 255 })
   address: string;
 
   @Column('text', { nullable: true })

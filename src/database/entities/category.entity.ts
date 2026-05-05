@@ -14,11 +14,11 @@ export default class Category {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column('character varying', { length: 255 })
+  @Column('varchar', { length: 255 })
   @Index({ unique: true })
   name: string;
 
-  @Column('character varying', { length: 255, nullable: true })
+  @Column('varchar', { length: 255, nullable: true })
   description?: string;
 
   @ManyToMany(() => Product, (product) => product.categories)

@@ -28,7 +28,7 @@ export default class ProvincesService {
 
     // Filtering
     if (dto.search) {
-      queryBuilder.where('unaccent(province.name) ILIKE unaccent(:search)', {
+      queryBuilder.where('province.name LIKE :search', {
         search: `%${dto.search}%`,
       });
     }

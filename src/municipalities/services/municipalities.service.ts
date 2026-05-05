@@ -30,7 +30,7 @@ export default class MunicipalitiesService {
 
     // Filtering
     if (dto.search) {
-      queryBuilder.where('unaccent(municipality.name) ILIKE unaccent(:search)', {
+      queryBuilder.where('municipality.name LIKE :search', {
         search: `%${dto.search}%`,
       });
     }

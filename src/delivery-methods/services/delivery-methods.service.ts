@@ -32,7 +32,7 @@ export default class DeliveryMethodsService {
     // Filtering
     if (dto.search) {
       queryBuilder.where(
-        'unaccent(deliveryMethod.name) ILIKE unaccent(:search) OR unaccent(deliveryMethod.estimatedArrivalTime) ILIKE unaccent(:search) OR unaccent(deliveryMethod.pickUpDirection) ILIKE unaccent(:search)',
+        'deliveryMethod.name LIKE :search OR deliveryMethod.estimatedArrivalTime LIKE :search OR deliveryMethod.pickUpDirection LIKE :search',
         {
           search: `%${dto.search}%`,
         },

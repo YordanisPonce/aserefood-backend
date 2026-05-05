@@ -27,7 +27,7 @@ export default class LanguagesService {
 
     if (dto.search) {
       queryBuilder.where(
-        'language.name ILIKE :search OR language.code ILIKE :search',
+        'language.name LIKE :search OR language.code LIKE :search',
         {
           search: `%${dto.search}%`,
         },

@@ -148,9 +148,9 @@ export default class AvailabilityService {
     // Filtering
     if (dto.search) {
       queryBuilder.andWhere(
-        `unaccent(product.name) ILIKE unaccent(:search) 
-     OR unaccent(product.description) ILIKE unaccent(:search) 
-     OR unaccent(product.shortDescription) ILIKE unaccent(:search)`,
+        `product.name LIKE :search
+     OR product.description LIKE :search
+     OR product.shortDescription LIKE :search`,
         {
           search: `%${dto.search}%`,
         },
@@ -258,9 +258,9 @@ export default class AvailabilityService {
     // Filtering
     if (dto.search) {
       queryBuilder.where(
-        `unaccent(productCombo.name) ILIKE unaccent(:search) 
-     OR unaccent(productCombo.description) ILIKE unaccent(:search) 
-     OR unaccent(productCombo.shortDescription) ILIKE unaccent(:search)`,
+        `productCombo.name LIKE :search
+     OR productCombo.description LIKE :search
+     OR productCombo.shortDescription LIKE :search`,
         {
           search: `%${dto.search}%`,
         },

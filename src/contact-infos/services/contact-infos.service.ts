@@ -38,7 +38,7 @@ export default class ContactInfosService {
     // Filtering
     if (dto.search) {
       queryBuilder.andWhere(
-        'unaccent(contactInfo.name) ILIKE unaccent(:search) OR unaccent(contactInfo.phoneNumber) ILIKE unaccent(:search) OR unaccent(contactInfo.identificationNumber) ILIKE unaccent(:search)  OR unaccent(contactInfo.address) ILIKE unaccent(:search) OR unaccent(contactInfo.observations) ILIKE unaccent(:search)',
+        'contactInfo.name LIKE :search OR contactInfo.phoneNumber LIKE :search OR contactInfo.identificationNumber LIKE :search OR contactInfo.address LIKE :search OR contactInfo.observations LIKE :search',
         {
           search: `%${dto.search}%`,
         },

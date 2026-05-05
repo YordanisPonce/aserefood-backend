@@ -32,12 +32,13 @@ import ZelleConf from './entities/zelle-conf.entity';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        type: 'postgres',
+        type: 'mariadb',
         host: config.get<string>('DB_HOST'),
         port: config.get<number>('DB_PORT'),
         username: config.get<string>('DB_USERNAME'),
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_DATABASE'),
+        charset: 'utf8mb4',
         synchronize: true,
         entities: [
           User,

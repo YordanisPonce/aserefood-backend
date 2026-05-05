@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(pnpm build)",
+      "PowerShell(npm run build)",
+      "PowerShell(Get-Command npx -ErrorAction SilentlyContinue)",
+      "PowerShell($paths = @\\('C:\\\\xampp\\\\mysql\\\\bin\\\\mysql.exe','C:\\\\wamp64\\\\bin\\\\mysql','C:\\\\laragon\\\\bin\\\\mysql','C:\\\\Program Files\\\\MySQL','C:\\\\Program Files \\(x86\\)\\\\MySQL','C:\\\\ProgramData\\\\MySQL'\\); foreach \\($p in $paths\\) { if \\(Test-Path $p\\) { Write-Output \"FOUND: $p\" } }; Write-Output '---'; Get-ChildItem 'C:\\\\Program Files' -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -match 'mysql|mariadb|laragon|xampp|wamp' } | Select-Object FullName)",
+      "PowerShell(Start-Process -FilePath 'C:\\\\xampp\\\\mysql\\\\bin\\\\mysqld.exe' -ArgumentList '--defaults-file=C:\\\\xampp\\\\mysql\\\\bin\\\\my.ini','--standalone' -WindowStyle Hidden)",
+      "PowerShell(Get-NetTCPConnection -LocalPort 3306 -ErrorAction SilentlyContinue)",
+      "PowerShell(& 'C:\\\\xampp\\\\mysql\\\\bin\\\\mysql.exe' -u root -e 'SELECT VERSION\\(\\);' 2>&1)",
+      "PowerShell(& 'C:\\\\xampp\\\\mysql\\\\bin\\\\mysql.exe' -u root -e \"SHOW COLLATION WHERE Charset='utf8mb4' AND Collation LIKE '%ai%';\" 2>&1)",
+      "PowerShell(& 'C:\\\\xampp\\\\mysql\\\\bin\\\\mysql.exe' -u root -e \"DROP DATABASE IF EXISTS aserefood_db; CREATE DATABASE aserefood_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; SHOW DATABASES LIKE 'aserefood%';\" 2>&1)",
+      "PowerShell(Get-Process | Where-Object { $_.Name -eq 'node' } | Select-Object Id, StartTime, CPU; Write-Output '---'; Get-NetTCPConnection -LocalPort 3000 -ErrorAction SilentlyContinue | Select-Object State, OwningProcess)",
+      "PowerShell(netstat -an)",
+      "PowerShell(taskkill /F /IM node.exe 2>&1)",
+      "PowerShell(& 'C:\\\\xampp\\\\mysql\\\\bin\\\\mysql.exe' -u root -e \"REPAIR TABLE mysql.global_priv;\" 2>&1)",
+      "PowerShell(& 'C:\\\\xampp\\\\mysql\\\\bin\\\\mysql.exe' -u aserefood_user -paserefood_pass -e \"SELECT 'OK' AS connection_test;\" 2>&1)",
+      "PowerShell(& 'C:\\\\xampp\\\\mysql\\\\bin\\\\mysql.exe' -u root -e \"REPAIR TABLE mysql.db; REPAIR TABLE mysql.user; REPAIR TABLE mysql.tables_priv; REPAIR TABLE mysql.columns_priv;\" 2>&1)",
+      "PowerShell(& 'C:\\\\xampp\\\\mysql\\\\bin\\\\mysql.exe' -u root -e \"SHOW GRANTS FOR 'aserefood_user'@'localhost';\" 2>&1)",
+      "PowerShell(& 'C:\\\\xampp\\\\mysql\\\\bin\\\\mysql.exe' -u aserefood_user -paserefood_pass aserefood_db -e \"SELECT 'connected to db' AS status;\" 2>&1)",
+      "PowerShell(npm run build 2>&1)",
+      "PowerShell(& 'C:\\\\xampp\\\\mysql\\\\bin\\\\mysql.exe' -u aserefood_user -paserefood_pass aserefood_db -e \"SHOW TABLES;\" 2>&1)",
+      "PowerShell(try { $r = Invoke-WebRequest -Uri 'http://localhost:3000/swagger' -UseBasicParsing -TimeoutSec 5 -MaximumRedirection 5; Write-Output \"STATUS: $\\($r.StatusCode\\)\" } catch { Write-Output \"STATUS: $\\($_.Exception.Response.StatusCode.value__\\) - $\\($_.Exception.Message\\)\" })"
+    ]
+  }
+}

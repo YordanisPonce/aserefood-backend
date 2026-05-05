@@ -28,7 +28,7 @@ export default class ProvidersService {
 
     // Filtering
     if (dto.search) {
-      queryBuilder.where('unaccent(provider.name) ILIKE unaccent(:search)', {
+      queryBuilder.where('provider.name LIKE :search', {
         search: `%${dto.search}%`,
       });
     }
