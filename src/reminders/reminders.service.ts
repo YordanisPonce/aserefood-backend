@@ -14,7 +14,7 @@ export class RemindersService {
     private orderRepository: Repository<Order>,
   ) {}
 
-  @Cron('45 11 * * *')
+  @Cron('00 11 * * *')
   async checkPendingOrders() {
     this.logger.log('🔍 Revisando órdenes pendientes...');
     

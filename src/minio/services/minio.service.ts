@@ -1,25 +1,29 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { Client } from 'minio';
-import { v4 as guid } from 'uuid';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { v4 as guid } from 'uuid';
+import { promises as fs } from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export default class MinioService {
-  private minioClient: Client;
-  private bucketName: string;
   private readonly logger = new Logger(MinioService.name);
+  private readonly uploadDirectory: string;
+  private readonly appUrl: string;
 
-  constructor(
-    private readonly configService: ConfigService
-  ) {
-    this.minioClient = new Client({
-      endPoint: this.configService.get('MINIO_ENDPOINT'),
-      port: Number(this.configService.get('MINIO_PORT')),
-      useSSL: this.configService.get('MINIO_USE_SSL') === 'true',
-      accessKey: this.configService.get('MINIO_ACCESS_KEY'),
-      secretKey: this.configService.get('MINIO_SECRET_KEY')
-    })
-    this.bucketName = this.configService.get('MINIO_BUCKET_NAME')
+  constructor(private readonly configService: ConfigService) {
+    const uploadsPath = this.configService.get<string>('UPLOADS_PATH');
+    this.uploadDirectory = uploadsPath
+      ? path.resolve(uploadsPath)
+      : path.resolve(process.cwd(), 'uploads');
+
+    const rawAppUrl =
+      this.configService.get<string>('APP_URL') ||
+      `http://localhost:${this.configService.get<number>('APP_PORT')}`;
+    this.appUrl = rawAppUrl.replace(/\/$/, '');
+  }
+
+  private async ensureUploadDirectory() {
+    await fs.mkdir(this.uploadDirectory, { recursive: true });
   }
 
   async uploadFile(
@@ -28,44 +32,38 @@ export default class MinioService {
     fileFormat?: string,
     mimeType?: string,
   ) {
-    if (fileFormat) {
+    await this.ensureUploadDirectory();
+
+    if (fileFormat && !fileName.endsWith(`.${fileFormat}`)) {
       fileName = fileName.concat(`.${fileFormat}`);
     }
 
-    const metaData = {
-      'Content-Type': mimeType || 'application/octet-stream',
-    };
-
-    await this.minioClient.putObject(this.bucketName, fileName, fileBuffer, undefined, metaData);
+    const targetPath = path.join(this.uploadDirectory, fileName);
+    await fs.writeFile(targetPath, fileBuffer);
 
     this.logger.log(`Uploaded file ${fileName} with MIME type ${mimeType}`);
     return fileName;
   }
 
-
   async getFile(fileName: string) {
-    return await this.minioClient.getObject(this.bucketName, fileName);
+    const targetPath = path.join(this.uploadDirectory, fileName);
+    return fs.readFile(targetPath);
   }
 
-  async getPresignedUrl(
-    objectName: string,
-  ): Promise<string> {
-    try {
-      const expiryTime = 10 * 60;
-      return await this.minioClient.presignedGetObject(
-        this.bucketName,
-        objectName,
-        expiryTime,
-      );
-    } catch (error) {
-      this.logger.error(error);
-      return null;
-    }
+  async getPresignedUrl(objectName: string): Promise<string> {
+    const url = `${this.appUrl}/files/${encodeURIComponent(objectName)}`;
+    this.logger.log(`Resolved file URL for ${objectName}: ${url}`);
+    return url;
   }
 
   async deleteFile(fileName: string) {
-    this.logger.log(`Deleted file ${fileName}`);
-    await this.minioClient.removeObject(this.bucketName, fileName);
+    const targetPath = path.join(this.uploadDirectory, fileName);
+    try {
+      await fs.unlink(targetPath);
+      this.logger.log(`Deleted file ${fileName}`);
+    } catch (error) {
+      this.logger.error(`Could not delete file ${fileName}: ${error.message}`);
+    }
   }
 
   isValidGuid(guid: string): boolean {

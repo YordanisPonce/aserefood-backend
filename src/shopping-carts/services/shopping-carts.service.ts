@@ -16,7 +16,6 @@ import ShoppingCartOutDto, {
   ShoppingCartProductOutDto,
 } from '../dto/out/shopping-cart.out.dto';
 import MunicipalityPOutDto from '../../provinces/dto/out/municipality-p.out.dto';
-import ItemIdOutDto from '../dto/out/item-id.out.dto';
 
 @Injectable()
 export default class ShoppingCartsService {
@@ -27,7 +26,10 @@ export default class ShoppingCartsService {
     private readonly availabilityService: AvailabilityService,
   ) {}
 
-  public async addToCart(userId: number, dto: AddToCartInDto): Promise<ItemIdOutDto> {
+  public async addToCart(
+    userId: number,
+    dto: AddToCartInDto,
+  ): Promise<ShoppingCartOutDto> {
     const user = await this.pgService.users.findOneBy({
       id: userId,
       isActive: true,
@@ -92,7 +94,6 @@ export default class ShoppingCartsService {
     if (existingCart) {
       existingCart.amount = dto.amount;
       await this.pgService.shoppingCarts.save(existingCart);
-      return {id: existingCart.id};
     } else {
       const cart = this.pgService.shoppingCarts.create({
         userId: userId,
@@ -103,8 +104,9 @@ export default class ShoppingCartsService {
         municipalityId: identityCart.municipalityId,
       });
       await this.pgService.shoppingCarts.save(cart);
-      return {id: cart.id};
     }
+
+    return this.getAllShoppingCart(userId);
   }
 
   public async initMunicipality(userId: number, municipalityId: number) {
@@ -284,6 +286,8 @@ export default class ShoppingCartsService {
       throw new NotFoundException(`Shopping Cart with ID ${id} not found`);
     }
     this.logger.log(`Deleted Shopping Cart with ID ${id}`);
+    
+    return this.getAllShoppingCart(userId);
   }
 
   public async deleteAll(userId: number, restoreInventory: boolean) {
