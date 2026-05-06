@@ -12,7 +12,4 @@ export default class ZellePaymentOutDto {
 
   @ApiProperty()
   transferAmount: number
-
-  @ApiProperty()
-  qr: string
 }

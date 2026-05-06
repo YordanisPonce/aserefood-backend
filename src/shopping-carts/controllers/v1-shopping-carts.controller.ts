@@ -9,7 +9,6 @@ import {
   Put,
   Request,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -23,7 +22,6 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { CacheInterceptor } from '@nestjs/cache-manager';
 import ShoppingCartsService from '../services/shopping-carts.service';
 import ShoppingCartOutDto from '../dto/out/shopping-cart.out.dto';
 import AddToCartInDto from '../dto/in/add-to-cart.in.dto';
@@ -32,11 +30,9 @@ import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Role, Roles } from '../../auth/decorators/roles.decorator';
 import MunicipalityPOutDto from '../../provinces/dto/out/municipality-p.out.dto';
 import AutoDeleteShoppingCartsJob from '../jobs/auto-delete-shopping-carts.job';
-import ItemIdOutDto from '../dto/out/item-id.out.dto';
 
 @Controller('v1/shopping-carts')
 @ApiTags('shopping-carts')
-@UseInterceptors(CacheInterceptor)
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiBearerAuth()
 @ApiUnauthorizedResponse({ description: 'Unauthorized' })
@@ -79,7 +75,7 @@ export default class V1ShoppingCartsController {
 
   @Post('')
   @Roles(Role.Customer, Role.Admin)
-  @ApiCreatedResponse({ description: 'Ok', type: ItemIdOutDto })
+  @ApiOkResponse({ description: 'Ok', type: ShoppingCartOutDto })
   @ApiNotFoundResponse({ description: 'Not Found User' })
   @ApiConflictResponse({ description: 'Municipality not selected' })
   @ApiBadRequestResponse({ description: 'Bad Request' })
@@ -143,6 +139,7 @@ export default class V1ShoppingCartsController {
   @Roles(Role.Customer, Role.Admin)
   @ApiOkResponse({
     description: 'Ok',
+    type: ShoppingCartOutDto
   })
   @ApiNotFoundResponse({ description: 'Not Found User' })
   @ApiBadRequestResponse({ description: 'Bad Request' })

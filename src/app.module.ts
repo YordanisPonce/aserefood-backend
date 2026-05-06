@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { ScheduleModule } from '@nestjs/schedule'; // 👈 AGREGAR ESTA LÍNEA
+import { ScheduleModule } from '@nestjs/schedule';
 import { configSchema } from './utils/schemas/config.schema';
 import AuthModule from './auth/auth.module';
 import DatabaseModule from './database/database.module';
@@ -25,6 +25,7 @@ import { ShoppingCartsModule } from './shopping-carts/shopping-carts.module';
 import { OrdersModule } from './orders/orders.module';
 import { PaymentsModule } from './payments/payments.module';
 import { RemindersModule } from './reminders/reminders.module';
+import { WhatsAppConfModule } from './whatsapp-conf/whatsapp-conf.module'; 
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { RemindersModule } from './reminders/reminders.module';
     OrdersModule,
     PaymentsModule,
     RemindersModule,
+    WhatsAppConfModule, 
   ],
   controllers: [],
   providers: [],

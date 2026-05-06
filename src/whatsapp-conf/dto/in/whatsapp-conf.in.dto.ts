@@ -1,13 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
 
-export default class ZelleConfInDto {
+export default class WhatsAppConfInDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
   @MaxLength(50)
   phoneNumber: string;
-
-  @ApiProperty({type: 'string', format: 'binary' })
-  qr: Express.Multer.File;
 }

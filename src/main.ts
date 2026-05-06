@@ -3,10 +3,11 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { json, urlencoded } from 'express';
+import { json, urlencoded, static as expressStatic } from 'express';
 import helmet from 'helmet';
 import AdminSeederService from './users/seeders/admin-seeder.service';
 import * as basicAuth from "express-basic-auth";
+import * as path from 'path';
 
 async function bootstrap() {
   const logger = new Logger('AppBootstrap');
@@ -16,6 +17,7 @@ async function bootstrap() {
 
   const swaggerPassword = app.get(ConfigService).get('SWAGGER_PASSWORD');
   const nodeEnv = app.get(ConfigService).get('NODE_ENV');
+  
   if (nodeEnv !== 'development' && nodeEnv !== 'staging') {
     app.use(
       ['/swagger', '/swagger-json'],
@@ -26,7 +28,7 @@ async function bootstrap() {
         },
       }),
     );
-  } 
+  }
 
   const options = new DocumentBuilder()
     .setTitle('Asere Food API')
@@ -54,7 +56,14 @@ async function bootstrap() {
 
   SwaggerModule.setup('/swagger', app, doc);
 
-  app.enableCors();
+  app.enableCors({
+    origin: ['http://localhost:3000','http://localhost:3001', 'http://localhost:3002'], // Tus dominios frontend
+    credentials: true,
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    exposedHeaders: ['Content-Disposition'],
+  });
+  
   app.enableShutdownHooks();
   app.useGlobalPipes(
     new ValidationPipe({
@@ -62,9 +71,36 @@ async function bootstrap() {
       enableDebugMessages: true,
     }),
   );
-  app.use(helmet());
+  
+  app.use(helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" }, // Permitir recursos cross-origin
+    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", "data:", "http://localhost:3000",'http://localhost:3001', "http://localhost:3002"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+      },
+    },
+  }));
+  
   app.use(json({ limit: '50mb' }));
   app.use(urlencoded({ extended: true, limit: '50mb' }));
+  
+  app.use(
+    '/files',
+    (req, res, next) => {
+      res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      next();
+    },
+    expressStatic(path.join(process.cwd(), 'uploads'), {
+      maxAge: '1d',
+      index: false,
+    }),
+  );
 
   await app.listen(port);
 

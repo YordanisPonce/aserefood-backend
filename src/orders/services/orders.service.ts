@@ -9,7 +9,7 @@ import Order from '../../database/entities/order.entity';
 import OrderOutDto from '../dto/out/order.out.dto';
 import idFormatter from '../../utils/formatters/id.formatter';
 import MailService from '../../mail/services/mail.service';
-import OrderInDto, { PaymentSelection } from '../dto/in/order.in.dto';
+import OrderInDto from '../dto/in/order.in.dto';
 import ShoppingCartsService from '../../shopping-carts/services/shopping-carts.service';
 import { OrderStatus } from '../../database/entities/constants';
 import createPatchFields from '../../utils/dto/patch-fields.util';
@@ -22,11 +22,8 @@ import Product from '../../database/entities/product.entity';
 import ProductOutDto from '../../products/dto/out/product.out.dto';
 import ProductCombo from '../../database/entities/product-combo.entity';
 import ProductComboOutDto from '../../product-combos/dto/out/product-combo.out.dto';
-import generateUniqueCode from '../../utils/generators/unique-code.generator';
-import ZellePaymentOutDto from '../dto/out/zelle-payment.out.dto';
 import { IsNull, Not } from 'typeorm';
 import MinioService from '../../minio/services/minio.service';
-import ZelleScreenshotInDto from '../dto/in/zelle-screenshot.in.dto';
 
 @Injectable()
 export default class OrdersService {
@@ -220,75 +217,6 @@ export default class OrdersService {
     return this.toOutDto(order);
   }
 
-  async updateOrderZelle(
-    id: number,
-    userId: number,
-    dto: ZelleScreenshotInDto,
-  ) {
-    const order = await this.pgService.orders.findOne({
-      where: { id, userId, onlinePayment: Not(IsNull()) },
-      relations: ['onlinePayment'],
-    });
-
-    if (!order) {
-      throw new NotFoundException(
-        `Order with ID ${id} and User ${userId} not found`,
-      );
-    }
-
-    if (order.status == OrderStatus.PAYMENT_PENDING) {
-      order.status = OrderStatus.PROCESSING_PAYMENT;
-      await this.pgService.orders.save(order);
-
-      if (dto.screenshot) {
-        const onlinePayment = await this.pgService.onlinePayments.findOne({
-          where: { orderId: order.id },
-        });
-        const fileExtension = dto.screenshot.originalname.split('.').pop();
-        const mimeType = dto.screenshot.mimetype;
-        onlinePayment.screenshot = await this.minioService.uploadFile(
-          order.onlinePayment.screenshot
-            ? order.onlinePayment.screenshot
-            : undefined,
-          dto.screenshot.buffer,
-          order.onlinePayment.screenshot ? undefined : fileExtension,
-          mimeType,
-        );
-        await this.pgService.onlinePayments.save(onlinePayment);
-      }
-    }
-  }
-
-  async getZellePayment(
-    id: number,
-    userId: number,
-  ): Promise<ZellePaymentOutDto> {
-    const order = await this.pgService.orders.findOne({
-      where: { id, userId, onlinePayment: Not(IsNull()) },
-      relations: ['onlinePayment', 'deliveryMethod'],
-    });
-
-    if (!order) {
-      throw new NotFoundException(
-        `Order with ID ${id} and User ${userId} not found`,
-      );
-    }
-
-    const delivery = order.deliveryMethod.isFree ? 0 : order.deliveryMethod.cost;
-
-    const zelleList = await this.pgService.zelleConfs.find({ take: 1 });
-    const zelle = zelleList[0];
-    const qrUrl = await this.minioService.getPresignedUrl(zelle.qr);
-
-    return {
-      transferAmount: Number(Number(order.totalAmount) + Number(delivery)),
-      orderNumber: idFormatter(order.id),
-      paymentCode: order.onlinePayment.paymentCode,
-      phoneNumber: zelle?.phoneNumber ?? '',
-      qr: qrUrl,
-    };
-  }
-
   public async post(userId: number, dto: OrderInDto): Promise<OrderOutDto> {
     const user = await this.pgService.users.findOneBy({
       id: userId,
@@ -324,7 +252,7 @@ export default class OrdersService {
     });
     if (!deliveryMethod) {
       throw new NotFoundException(
-        `Delivery Method with id ${userId} does not exist`,
+        `Delivery Method with id ${dto.deliveryMethodId} does not exist`,
       );
     }
 
@@ -335,13 +263,14 @@ export default class OrdersService {
     });
     if (!contactInfo) {
       throw new NotFoundException(
-        `Contact Info with id ${userId} does not exist`,
+        `Contact Info with id ${dto.contactInfoId} does not exist`,
       );
     }
 
+    // Crear orden SIN lógica de pagos online/transferencia
     const newOrder = this.pgService.orders.create({
       userId: userId,
-      status: OrderStatus.PAYMENT_PENDING,
+      status: OrderStatus.PAYMENT_PENDING, // Estado pendiente (esperando pago por WhatsApp)
       deliveryMethodId: dto.deliveryMethodId,
       contactInfoId: dto.contactInfoId,
       totalAmount: shoppingCart.totalPrice,
@@ -367,50 +296,7 @@ export default class OrdersService {
 
     await this.pgService.orders.save(newOrder);
 
-    if (dto.paymentSelection === PaymentSelection.Online) {
-      const onlinePayment = this.pgService.onlinePayments.create({
-        orderId: newOrder.id,
-        address1: dto.onlinePaymentDto.address1,
-        address2: dto.onlinePaymentDto.address2,
-        city: dto.onlinePaymentDto.city,
-        country: dto.onlinePaymentDto.country,
-        email: dto.onlinePaymentDto.email,
-        firstName: dto.onlinePaymentDto.firstName,
-        lastName: dto.onlinePaymentDto.lastName,
-        phoneNumber: dto.onlinePaymentDto.phoneNumber,
-        postalCode: dto.onlinePaymentDto.postalCode,
-        state: dto.onlinePaymentDto.state,
-        paymentCode: generateUniqueCode(6),
-      });
-
-      await this.pgService.onlinePayments.save(onlinePayment);
-      newOrder.onlinePaymentId = onlinePayment.id;
-      newOrder.status = OrderStatus.PAYMENT_PENDING;
-
-      await this.mailService.sendPaidOrderEmail(
-        user.email,
-        user.username,
-        newOrder.id,
-        shoppingCart.totalPrice,
-        'USD',
-        newOrder.createdDate,
-        contactInfo.phoneNumber,
-        deliveryMethod.pickUpDirection,
-        'Pago Creado',
-      );
-    } else {
-      const transferPayment = this.pgService.transferPayments.create({
-        orderId: newOrder.id,
-        referencePayment: generateUniqueCode(6),
-      });
-      await this.pgService.transferPayments.save(transferPayment);
-      newOrder.transferPaymentId = transferPayment.id;
-    }
-
-    await this.pgService.orders.save(newOrder);
-
-    await this.shoppingCartService.deleteAll(userId, false);
-
+    // Enviar email de orden pendiente (cliente debe pagar por WhatsApp)
     await this.mailService.sendPendingOrderEmail(
       user.email,
       user.username,
@@ -421,8 +307,14 @@ export default class OrdersService {
       newOrder.createdDate,
     );
 
+    // Enviar notificación al admin (opcional)
+    // await this.mailService.sendNewOrderNotificationToAdmin(newOrder.id);
+
+    // Limpiar carrito
+    await this.shoppingCartService.deleteAll(userId, false);
+
     this.logger.log(
-      `Created new Order with id ${newOrder.id} for user ${user.id}`,
+      `Created new Order with id ${newOrder.id} for user ${user.id} (pending WhatsApp payment)`,
     );
 
     return this.toOutDto(newOrder);
@@ -476,6 +368,7 @@ export default class OrdersService {
             'Cancelación Manual',
           );
         } else if (dto.status === OrderStatus.PAYED) {
+          // Estado CONFIRMADO = pago verificado por WhatsApp
           await this.mailService.sendPaidOrderEmail(
             order.user.email,
             order.user.username,
@@ -485,7 +378,7 @@ export default class OrdersService {
             order.createdDate,
             order.contactInfo.phoneNumber,
             order.deliveryMethod.pickUpDirection,
-            'STATEMENT',
+            'Pago por WhatsApp confirmado',
           );
         }
       }
@@ -517,14 +410,8 @@ export default class OrdersService {
     dto.totalAmount = Number(Number(order.totalAmount) + delivery);
     dto.municipalityId = order.municipalityId;
     dto.municipalityName = order.municipality?.name ?? '';
-    dto.paymentSelection =
-      order.onlinePayment !== null
-        ? PaymentSelection.Online
-        : PaymentSelection.Transfer;
-    dto.paymentId =
-      order.onlinePayment !== null
-        ? order.onlinePaymentId
-        : order.transferPaymentId;
+    dto.paymentSelection = null; // Ya no hay selección de pago
+    dto.paymentId = null; // Ya no hay ID de pago
     dto.deliveryMethodId = order.deliveryMethodId;
 
     const data: OrderItemMeOutDto[] = [];
@@ -557,14 +444,8 @@ export default class OrdersService {
     dto.totalAmount = order.totalAmount;
     dto.municipalityId = order.municipalityId;
     dto.municipalityName = order.municipality?.name ?? '';
-    dto.paymentSelection =
-      order.onlinePayment !== null
-        ? PaymentSelection.Online
-        : PaymentSelection.Transfer;
-    dto.paymentId =
-      order.onlinePayment !== null
-        ? order.onlinePaymentId
-        : order.transferPaymentId;
+    dto.paymentSelection = null;
+    dto.paymentId = null;
     dto.orderItems =
       order.orderItems?.map((x) => ({
         id: x.id,
